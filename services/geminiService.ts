@@ -2,7 +2,7 @@ import { GoogleGenAI, GenerateContentResponse, Chat } from '@google/genai';
 import { getActiveInstructionProfile } from './instructionService'; // New import
 
 let ai: GoogleGenAI | null = null;
-const MODEL_NAME_TEXT = 'gemini-2.5-flash-preview-04-17';
+const MODEL_NAME_TEXT = 'gemini-2.5-flash-preview-05-20';
 const MODEL_NAME_IMAGE = 'imagen-3.0-generate-002';
 const MODEL_NAME_FALLBACK = 'gemini-1.5-flash-latest'; // Define fallback model
 
@@ -450,8 +450,7 @@ export const sendMessageToChatStream = async (
         const fallbackStream = await sendMessageToChatStream(fallbackChatSession, message, true); // Set useFallback to true
         return fallbackStream;
       } catch (fallbackError: any) {
-        console.error('Error sending message with fallback model:', fallbackError);
-        // If fallback also fails, throw the original error or a new one
+        console.error('Fallback model attempt failed:', fallbackError);
         if (
           fallbackError.message.includes('API key not valid') ||
           fallbackError.message.includes('invalid api key')
@@ -460,7 +459,10 @@ export const sendMessageToChatStream = async (
             'Invalid or unauthorized Gemini API key. Please check your key and permissions.',
           );
         }
-        throw new Error(`Failed to send message with fallback model: ${fallbackError.message}`);
+        // Re-throw the original error if the fallback also failed, or a more specific fallback error
+        throw new Error(
+          `Original request failed with ${errorMessage}. Fallback attempt also failed: ${fallbackError.message}`,
+        );
       }
     } else if (error instanceof Error) {
       if (

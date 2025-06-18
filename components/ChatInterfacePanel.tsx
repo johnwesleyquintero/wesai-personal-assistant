@@ -19,6 +19,7 @@ interface ChatInterfacePanelProps {
   copiedMessageId: string | null;
   error: string | null;
   onNewChat: () => void; // Add new chat prop
+  onRetryChat: () => void; // New prop for retrying chat with fallback
 }
 
 export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = ({
@@ -35,6 +36,7 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = ({
   copiedMessageId,
   error,
   onNewChat, // Destructure new chat prop
+  onRetryChat, // Destructure new retry prop
 }) => {
   const chatMessagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -77,8 +79,18 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = ({
         </button>
       </div>
       {error && (
-        <div className="p-3 border-b border-red-300 dark:border-red-600 bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-200 text-sm">
-          <strong>Chat Error:</strong> {error}
+        <div className="p-3 border-b border-red-300 dark:border-red-600 bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-200 text-sm flex items-center justify-between">
+          <div>
+            <strong>Chat Error:</strong> {error}
+          </div>
+          {error && (
+            <button
+              onClick={onRetryChat}
+              className="ml-4 px-3 py-1 bg-red-700 text-white text-xs rounded-md hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500"
+            >
+              Retry with Fallback
+            </button>
+          )}
         </div>
       )}
       <div className="flex-grow p-4 space-y-4 overflow-y-auto">

@@ -395,6 +395,92 @@ const App: React.FC = () => {
     setChatError(null); // Clear any previous chat errors
   }, []);
 
+  const handleRetryChat = useCallback(async () => {
+    // Find the last user message to retry
+    const lastUserMessage = chatMessages.findLast((msg) => msg.role === 'user');
+
+    if (!lastUserMessage) {
+      setChatError('No previous message to retry.');
+      return;
+    }
+
+    // Remove the last model message (which was likely the error message)
+    setChatMessages((prev) => prev.filter((msg) => msg.id !== prev[prev.length - 1]?.id));
+
+    setIsLoading(true);
+    setChatError(null); // Clear the error before retrying
+
+    const modelMessageId = `model-${Date.now() + 1}`;
+    setChatMessages((prev) => [
+      ...prev,
+      { id: modelMessageId, role: 'model', content: '', componentCode: null, showPreview: false },
+    ]);
+
+    try {
+      if (!activeChatSession) throw new Error('Chat session not active for retry.');
+      // Send the last user message again, explicitly using the fallback model
+      const stream = await sendMessageToChatStream(activeChatSession, lastUserMessage.content, true);
+      let currentModelContent = '';
+      for await (const chunk of stream) {
+        const chunkText = chunk.text;
+        const finishReason = chunk.candidates?.[0]?.finishReason;
+        const safetyRatings = chunk.candidates?.[0]?.safetyRatings;
+
+        if (chunkText) {
+          currentModelContent += chunkText;
+          const componentCode = extractComponentCode(currentModelContent);
+          setChatMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === modelMessageId
+                ? { ...msg, content: currentModelContent, componentCode: componentCode }
+                : msg,
+            ),
+          );
+        }
+        if (finishReason) {
+          console.log('Chat stream finished (retry):', finishReason, safetyRatings);
+          const finalComponentCode = extractComponentCode(currentModelContent);
+          if (finishReason !== 'STOP' && finishReason !== 'MAX_TOKENS') {
+            setChatMessages((prev) =>
+              prev.map((msg) =>
+                msg.id === modelMessageId
+                  ? {
+                      ...msg,
+                      content: msg.content + `\n\n*(Stream finished: ${finishReason})*`,
+                      componentCode: finalComponentCode,
+                    }
+                  : msg,
+              ),
+            );
+            if (finishReason === 'SAFETY') {
+              setChatError('The response was blocked due to safety settings during retry.');
+            }
+          } else {
+            setChatMessages((prev) =>
+              prev.map((msg) =>
+                msg.id === modelMessageId ? { ...msg, componentCode: finalComponentCode } : msg,
+              ),
+            );
+          }
+          break;
+        }
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+      setChatError(`Retry chat error: ${errorMessage}`);
+      console.error('Retry chat submit error:', err);
+      setChatMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === modelMessageId
+            ? { ...msg, content: `*(Error: ${errorMessage})*`, componentCode: null }
+            : msg,
+        ),
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  }, [activeChatSession, chatMessages]);
+
   const handleCopyChatMessage = useCallback((content: string, messageId: string) => {
     navigator.clipboard
       .writeText(content)
@@ -499,6 +585,7 @@ const App: React.FC = () => {
               copiedMessageId={copiedMessageId}
               error={chatError}
               onNewChat={handleNewChat} // Pass the new chat handler
+              onRetryChat={handleRetryChat} // Pass the retry chat handler
             />
           )}
 
