@@ -10,6 +10,8 @@ This documentation describes the WesAI Personal Assistant version of WesAI.
 
 **Note:** You can also view this documentation directly within the WesAI application under the "Documentation" tab.
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/2ec1707c-0c5a-49a4-821e-ee7d82bdd95d/deploy-status)](https://app.netlify.com/projects/wesai-pa/deploys)
+
 ## Key Features
 
 - **Login Page:** Provides a basic client-side login to protect API key usage.

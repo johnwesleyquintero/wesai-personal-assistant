@@ -205,8 +205,7 @@ const App: React.FC = () => {
           setChatError(null);
           try {
             const activeProfile = getActiveInstructionProfile();
-            const defaultSystemInstruction =
-              "You are WesAI Personal Assistant, an AI pair programmer specializing in TypeScript and React. You can help answer follow-up questions about code reviews, refactoring, component explanations, code generation, or general coding queries related to these technologies. Please provide your responses in Markdown format. When providing React component code, ensure it is a self-contained, runnable snippet, preferably as a default export or a component named 'PreviewComponent' to facilitate in-app previewing. Wrap the component code in a ```tsx ... ``` or ```jsx ... ``` block.";
+            const defaultSystemInstruction = 'Hey there! 👋 How can I help you today?';
             const systemInstruction = activeProfile
               ? activeProfile.instructions
               : defaultSystemInstruction;

@@ -49,7 +49,6 @@ export default tseslint.config(
       prettier: pluginPrettier,
     },
     rules: {
-
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
       // Adjusted rule for TypeScript
       '@typescript-eslint/no-unused-vars': [
