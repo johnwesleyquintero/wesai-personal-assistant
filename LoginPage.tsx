@@ -6,19 +6,21 @@ interface LoginPageProps {
   currentTheme: Theme;
 }
 
-const HARDCODED_PASSWORD = 'wesai_rocks';
+const DEMO_USERNAME = import.meta.env.VITE_DEMO_USERNAME || 'demo';
+const DEMO_PASSWORD = import.meta.env.VITE_DEMO_PASSWORD || 'password';
 
 export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === HARDCODED_PASSWORD) {
+    if (password === DEMO_PASSWORD && username === DEMO_USERNAME) {
       setError('');
       onLoginSuccess();
     } else {
-      setError('Incorrect password. Please try again.');
+      setError('Incorrect username or password. Please try again.');
       setPassword('');
     }
   };
@@ -34,6 +36,26 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
           <p className="text-gray-500 dark:text-gray-400 mt-1">Please log in to continue</p>
         </header>
         <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label
+              htmlFor="username"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              Username
+            </label>
+            <div className="mt-1">
+              <input
+                id="username"
+                name="username"
+                type="text"
+                autoComplete="username"
+                required
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="appearance-none block w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 sm:text-sm bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              />
+            </div>
+          </div>
           <div>
             <label
               htmlFor="password"

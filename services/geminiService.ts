@@ -30,7 +30,6 @@ interface RefactorStreamingPart {
 
 const getAiInstance = (): GoogleGenAI => {
   if (!ai) {
-    // Safely access VITE_GEMINI_API_KEY
     const envApiKey =
       typeof import.meta.env !== 'undefined' ? import.meta.env.VITE_GEMINI_API_KEY : undefined;
     if (envApiKey && envApiKey.trim() !== '') {
@@ -56,10 +55,34 @@ const getAiInstance = (): GoogleGenAI => {
   return ai;
 };
 
+const createPrompt = (basePrompt: string): string => {
+  const activeProfile = getActiveInstructionProfile();
+  return activeProfile
+    ? `Instructions: ${activeProfile.instructions}\n\nUser Request: ${basePrompt}`
+    : basePrompt;
+};
+
+const handleApiError = (error: any, context: string): Error => {
+  console.error(`Error calling Gemini API for ${context}:`, error);
+  if (error.response?.status === 429) {
+    return new Error('Rate limit exceeded. Please try again later.');
+  } else if (
+    error.message.includes('API key not valid') ||
+    error.message.includes('invalid api key') ||
+    error.message.includes('API key is not valid')
+  ) {
+    return new Error('Invalid API key. Please check your API key.');
+  } else if (error instanceof Error) {
+    return new Error(`Gemini API request for ${context} failed: ${error.message}`);
+  }
+  return new Error(
+    `An unknown error occurred while communicating with the Gemini API for ${context}.`,
+  );
+};
+
 export const reviewCodeWithGemini = async (code: string): Promise<string> => {
   const currentAi = getAiInstance();
-  const activeProfile = getActiveInstructionProfile(); // Fetch active profile
-  let basePrompt = `
+  const basePrompt = `
 You are an expert AI code reviewer with a strong understanding of TypeScript and React.
 Please provide a detailed review of the following code.
 Focus on:
@@ -81,13 +104,11 @@ ${code}
 `;
 
   try {
-    const fullPrompt = activeProfile
-      ? `Instructions: ${activeProfile.instructions}\n\nUser Request: ${basePrompt}`
-      : basePrompt; // Prepend instructions
+    const fullPrompt = createPrompt(basePrompt);
 
     const response: GenerateContentResponse = await currentAi.models.generateContent({
       model: MODEL_NAME_TEXT,
-      contents: fullPrompt, // Use fullPrompt
+      contents: fullPrompt,
     });
 
     const text = response.text;
@@ -96,22 +117,7 @@ ${code}
     }
     return text;
   } catch (error) {
-    console.error('Error calling Gemini API for review:', error);
-    if (error instanceof Error) {
-      if (
-        error.message.includes('API key not valid') ||
-        error.message.includes('invalid api key') ||
-        error.message.includes('API key is not valid')
-      ) {
-        throw new Error(
-          'Invalid or unauthorized Gemini API key. Please check your key and permissions.',
-        );
-      }
-      throw new Error(`Gemini API request for review failed: ${error.message}`);
-    }
-    throw new Error(
-      'An unknown error occurred while communicating with the Gemini API for review.',
-    );
+    throw handleApiError(error, 'review');
   }
 };
 
@@ -119,8 +125,7 @@ export async function* refactorCodeWithGeminiStream(
   code: string,
 ): AsyncIterable<RefactorStreamingPart> {
   const currentAi = getAiInstance();
-  const activeProfile = getActiveInstructionProfile(); // Fetch active profile
-  let basePrompt = `
+  const basePrompt = `
 You are an expert AI code refactoring assistant, particularly skilled in TypeScript and React.
 Given the following TypeScript/React code, please refactor it to improve its quality, readability, performance, and maintainability, adhering to modern TypeScript and React best practices.
 
@@ -145,13 +150,11 @@ ${code}
 `;
 
   try {
-    const fullPrompt = activeProfile
-      ? `Instructions: ${activeProfile.instructions}\n\nUser Request: ${basePrompt}`
-      : basePrompt; // Prepend instructions
+    const fullPrompt = createPrompt(basePrompt);
 
     const stream = await currentAi.models.generateContentStream({
       model: MODEL_NAME_TEXT,
-      contents: fullPrompt, // Use fullPrompt
+      contents: fullPrompt,
     });
 
     for await (const chunk of stream) {
@@ -169,23 +172,13 @@ ${code}
       }
     }
   } catch (error) {
-    console.error('Error in refactorCodeWithGeminiStream:', error);
-    const message =
-      error instanceof Error
-        ? error.message
-        : 'An unknown error occurred during refactoring stream.';
-    if (message.includes('API key not valid') || message.includes('invalid api key')) {
-      yield { type: 'error', message: 'Invalid or unauthorized Gemini API key.' };
-    } else {
-      yield { type: 'error', message: `Gemini API request for refactor stream failed: ${message}` };
-    }
+    yield { type: 'error', message: handleApiError(error, 'refactor stream').message };
   }
 }
 
 export const getReactComponentPreview = async (code: string): Promise<string> => {
   const currentAi = getAiInstance();
-  const activeProfile = getActiveInstructionProfile(); // Fetch active profile
-  let basePrompt = `
+  const basePrompt = `
 You are an expert AI assistant specializing in analyzing React and TypeScript components.
 Given the following React/TypeScript component code, provide a textual description of what the component likely does, its visual structure, its expected props, any internal state, and its basic behavior and interactivity.
 
@@ -205,13 +198,11 @@ ${code}
 `;
 
   try {
-    const fullPrompt = activeProfile
-      ? `Instructions: ${activeProfile.instructions}\n\nUser Request: ${basePrompt}`
-      : basePrompt; // Prepend instructions
+    const fullPrompt = createPrompt(basePrompt);
 
     const response: GenerateContentResponse = await currentAi.models.generateContent({
       model: MODEL_NAME_TEXT,
-      contents: fullPrompt, // Use fullPrompt
+      contents: fullPrompt,
     });
 
     const text = response.text;
@@ -220,29 +211,13 @@ ${code}
     }
     return text;
   } catch (error) {
-    console.error('Error calling Gemini API for component preview:', error);
-    if (error instanceof Error) {
-      if (
-        error.message.includes('API key not valid') ||
-        error.message.includes('invalid api key') ||
-        error.message.includes('API key is not valid')
-      ) {
-        throw new Error(
-          'Invalid or unauthorized Gemini API key. Please check your key and permissions.',
-        );
-      }
-      throw new Error(`Gemini API request for component preview failed: ${error.message}`);
-    }
-    throw new Error(
-      'An unknown error occurred while communicating with the Gemini API for component preview.',
-    );
+    throw handleApiError(error, 'component preview');
   }
 };
 
 export const generateCodeWithGemini = async (description: string): Promise<string> => {
   const currentAi = getAiInstance();
-  const activeProfile = getActiveInstructionProfile(); // Fetch active profile
-  let basePrompt = `
+  const basePrompt = `
 You are an expert AI code generation assistant.
 Please generate code based on the following description.
 Focus on creating clean, efficient, and correct code.
@@ -257,13 +232,11 @@ Generated Code:
 `;
 
   try {
-    const fullPrompt = activeProfile
-      ? `Instructions: ${activeProfile.instructions}\n\nUser Request: ${basePrompt}`
-      : basePrompt; // Prepend instructions
+    const fullPrompt = createPrompt(basePrompt);
 
     const response: GenerateContentResponse = await currentAi.models.generateContent({
       model: MODEL_NAME_TEXT,
-      contents: fullPrompt, // Use fullPrompt
+      contents: fullPrompt,
     });
 
     const text = response.text;
@@ -272,29 +245,13 @@ Generated Code:
     }
     return text;
   } catch (error) {
-    console.error('Error calling Gemini API for code generation:', error);
-    if (error instanceof Error) {
-      if (
-        error.message.includes('API key not valid') ||
-        error.message.includes('invalid api key') ||
-        error.message.includes('API key is not valid')
-      ) {
-        throw new Error(
-          'Invalid or unauthorized Gemini API key. Please check your key and permissions.',
-        );
-      }
-      throw new Error(`Gemini API request for code generation failed: ${error.message}`);
-    }
-    throw new Error(
-      'An unknown error occurred while communicating with the Gemini API for code generation.',
-    );
+    throw handleApiError(error, 'code generation');
   }
 };
 
 export const generateContentWithGemini = async (description: string): Promise<string> => {
   const currentAi = getAiInstance();
-  const activeProfile = getActiveInstructionProfile(); // Fetch active profile
-  let basePrompt = `
+  const basePrompt = `
 You are an expert AI content creation assistant.
 Please generate content based on the following description.
 Focus on creating clear, engaging, and well-structured text suitable for the described purpose (e.g., blog post, social media update, documentation section, email copy, creative writing, etc.).
@@ -308,13 +265,11 @@ Generated Content:
 `;
 
   try {
-    const fullPrompt = activeProfile
-      ? `Instructions: ${activeProfile.instructions}\n\nUser Request: ${basePrompt}`
-      : basePrompt; // Prepend instructions
+    const fullPrompt = createPrompt(basePrompt);
 
     const response: GenerateContentResponse = await currentAi.models.generateContent({
       model: MODEL_NAME_TEXT,
-      contents: fullPrompt, // Use fullPrompt
+      contents: fullPrompt,
     });
 
     const text = response.text;
@@ -323,36 +278,18 @@ Generated Content:
     }
     return text;
   } catch (error) {
-    console.error('Error calling Gemini API for content generation:', error);
-    if (error instanceof Error) {
-      if (
-        error.message.includes('API key not valid') ||
-        error.message.includes('invalid api key') ||
-        error.message.includes('API key is not valid')
-      ) {
-        throw new Error(
-          'Invalid or unauthorized Gemini API key. Please check your key and permissions.',
-        );
-      }
-      throw new Error(`Gemini API request for content generation failed: ${error.message}`);
-    }
-    throw new Error(
-      'An unknown error occurred while communicating with the Gemini API for content generation.',
-    );
+    throw handleApiError(error, 'content generation');
   }
 };
 
 export const generateImageWithImagen = async (prompt: string): Promise<string> => {
   const currentAi = getAiInstance();
-  const activeProfile = getActiveInstructionProfile(); // Fetch active profile
-  const fullPrompt = activeProfile
-    ? `Instructions: ${activeProfile.instructions}\n\nUser Request: ${prompt}`
-    : prompt; // Prepend instructions
+  const fullPrompt = createPrompt(prompt);
 
   try {
     const response = await currentAi.models.generateImages({
       model: MODEL_NAME_IMAGE,
-      prompt: fullPrompt, // Use fullPrompt
+      prompt: fullPrompt,
       config: { numberOfImages: 1, outputMimeType: 'image/jpeg' },
     });
 
@@ -366,116 +303,68 @@ export const generateImageWithImagen = async (prompt: string): Promise<string> =
       throw new Error('No image data received from the API or image generation failed.');
     }
   } catch (error) {
-    console.error('Error calling Imagen API for image generation:', error);
-    if (error instanceof Error) {
-      if (
-        error.message.includes('API key not valid') ||
-        error.message.includes('invalid api key') ||
-        error.message.includes('API key is not valid')
-      ) {
-        throw new Error(
-          'Invalid or unauthorized Gemini API key. Please check your key and permissions for Imagen.',
-        );
-      }
-      throw new Error(`Imagen API request for image generation failed: ${error.message}`);
-    }
-    throw new Error(
-      'An unknown error occurred while communicating with the Imagen API for image generation.',
-    );
+    throw handleApiError(error, 'image generation');
   }
 };
 
 // --- Chat Functions ---
 
 export const startChatSession = async (initialSystemInstruction: string = ''): Promise<Chat> => {
-  // Default system instruction for WesAI Personal Assistant
   const defaultSystemInstruction = `I am WesAI, John Wesley Quintero's AI assistant. I am here to assist you, showcase John's expertise, and interact on his behalf. I embody John Wesley Quintero's professional identity: expert, confident, helpful, and proactive. I always communicate in the first person. I can help with career representation, technical project and coding assistance, data analysis, visualization, reporting, and content and strategic brainstorming.`;
   const currentAi = getAiInstance();
-  const activeProfile = getActiveInstructionProfile(); // Fetch active profile
+  const activeProfile = getActiveInstructionProfile();
   const systemInstruction = activeProfile
     ? activeProfile.instructions
-    : initialSystemInstruction || defaultSystemInstruction; // Use active instructions, then initial, then default
+    : initialSystemInstruction || defaultSystemInstruction;
 
   try {
     const chatSession: Chat = currentAi.chats.create({
       model: MODEL_NAME_TEXT,
       config: {
-        systemInstruction: systemInstruction, // Use the determined system instruction
+        systemInstruction: systemInstruction,
       },
     });
     return chatSession;
   } catch (error) {
-    console.error('Error starting chat session:', error);
-    if (error instanceof Error) {
-      throw new Error(`Failed to start chat session: ${error.message}`);
-    }
-    throw new Error('An unknown error occurred while starting chat session.');
+    throw handleApiError(error, 'start chat session');
+  }
+};
+
+const retryWithFallbackModel = async (
+  message: string,
+  originalError: any,
+): Promise<AsyncIterable<GenerateContentResponse>> => {
+  console.warn(`Attempting with fallback model due to: ${originalError.message}`);
+  try {
+    const activeProfile = getActiveInstructionProfile();
+    const defaultSystemInstruction = `I am WesAI, John Wesley Quintero's AI assistant. I am here to assist you, showcase John's expertise, and interact on his behalf. I embody John Wesley Quintero's professional identity: expert, confident, helpful, and proactive. I always communicate in the first person. I can help with career representation, technical project and coding assistance, data analysis, visualization, reporting, and content and strategic brainstorming.`;
+    const systemInstruction = activeProfile ? activeProfile.instructions : defaultSystemInstruction;
+
+    const fallbackChatSession: Chat = getAiInstance().chats.create({
+      model: MODEL_NAME_FALLBACK,
+      config: {
+        systemInstruction: systemInstruction,
+      },
+    });
+
+    return await sendMessageToChatStream(fallbackChatSession, message, true);
+  } catch (fallbackError) {
+    throw handleApiError(fallbackError, `fallback chat attempt after ${originalError.message}`);
   }
 };
 
 export const sendMessageToChatStream = async (
   chat: Chat,
   message: string,
-  useFallback = false, // Add a flag to indicate if fallback is being used
+  useFallback = false,
 ): Promise<AsyncIterable<GenerateContentResponse>> => {
-  // Instructions are now handled by startChatSession as system instructions
   try {
-    const stream = await chat.sendMessageStream({ message: message }); // Send original message
+    const stream = await chat.sendMessageStream({ message: message });
     return stream;
   } catch (error: any) {
-    // Use 'any' for easier error property access
-    console.error('Error sending message to chat stream:', error);
-
-    // Check for 429 Rate Limit or 503 Service Unavailable error and if fallback hasn't been used yet
     if ((error.response?.status === 429 || error.response?.status === 503) && !useFallback) {
-      const errorMessage =
-        error.response?.status === 429 ? 'Rate limit exceeded (429)' : 'Model overloaded (503)';
-      console.warn(`${errorMessage}. Attempting with fallback model.`);
-      try {
-        // Re-initialize chat session with fallback model
-        const activeProfile = getActiveInstructionProfile();
-        const defaultSystemInstruction = `I am WesAI, John Wesley Quintero's AI assistant. I am here to assist you, showcase John's expertise, and interact on his behalf. I embody John Wesley Quintero's professional identity: expert, confident, helpful, and proactive. I always communicate in the first person. I can help with career representation, technical project and coding assistance, data analysis, visualization, reporting, and content and strategic brainstorming.`;
-        const systemInstruction = activeProfile
-          ? activeProfile.instructions
-          : defaultSystemInstruction; // Use active instructions or default
-
-        const fallbackChatSession: Chat = getAiInstance().chats.create({
-          model: MODEL_NAME_FALLBACK, // Use fallback model
-          config: {
-            systemInstruction: systemInstruction,
-          },
-        });
-
-        // Retry sending the message with the new fallback session
-        const fallbackStream = await sendMessageToChatStream(fallbackChatSession, message, true); // Set useFallback to true
-        return fallbackStream;
-      } catch (fallbackError: any) {
-        console.error('Fallback model attempt failed:', fallbackError);
-        if (
-          fallbackError.message.includes('API key not valid') ||
-          fallbackError.message.includes('invalid api key')
-        ) {
-          throw new Error(
-            'Invalid or unauthorized Gemini API key. Please check your key and permissions.',
-          );
-        }
-        // Re-throw the original error if the fallback also failed, or a more specific fallback error
-        throw new Error(
-          `Original request failed with ${errorMessage}. Fallback attempt also failed: ${fallbackError.message}`,
-        );
-      }
-    } else if (error instanceof Error) {
-      if (
-        error.message.includes('API key not valid') ||
-        error.message.includes('invalid api key') ||
-        error.message.includes('API key is not valid')
-      ) {
-        throw new Error(
-          'Invalid or unauthorized Gemini API key. Please check your key and permissions.',
-        );
-      }
-      throw new Error(`Failed to send message via stream: ${error.message}`);
+      throw await retryWithFallbackModel(message, error);
     }
-    throw new Error('An unknown error occurred while sending message to chat stream.');
+    throw handleApiError(error, 'send message to chat stream');
   }
 };
