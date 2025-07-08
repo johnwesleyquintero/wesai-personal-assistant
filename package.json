@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && copy README.md dist\\README.md",
+    "build": "vite build && cp README.md dist/README.md",
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
