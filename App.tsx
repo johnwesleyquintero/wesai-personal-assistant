@@ -11,6 +11,7 @@ import { ChatInterfacePanel } from './components/ChatInterfacePanel.tsx';
 import { DocumentationViewerPanel } from './components/DocumentationViewerPanel.tsx';
 import { ImageGenerationPanel } from './components/ImageGenerationPanel.tsx';
 import CustomInstructionsPanel from './components/CustomInstructionsPanel.tsx';
+import { CodebaseAnalysisPanel } from './components/CodebaseAnalysisPanel.tsx';
 
 const App: React.FC = () => {
   const {
@@ -51,21 +52,6 @@ const App: React.FC = () => {
     handleCopyChatMessage,
     handleTogglePreview,
     setError,
-    // setCode,
-    // setFeedback,
-    // setIsLoading,
-    // setActiveApiKey,
-    // setApiKeySource,
-    // setIsLoggedIn,
-    // setActiveTab,
-    // setTheme,
-    // setChatMessages,
-    // setChatInput,
-    // setActiveChatSession,
-    // setCopiedMessageId,
-    // setChatError,
-    // setImagePrompt,
-    // setGeneratedImageData,
   } = useAppStore();
 
   useEffect(() => {
@@ -122,6 +108,7 @@ const App: React.FC = () => {
             { id: 'chat', label: 'Chat' },
             { id: 'content', label: 'Generate Content' },
             { id: 'image', label: 'Image Generation' },
+            { id: 'codebase-analysis', label: 'Codebase Analysis' },
             { id: 'custom-instructions', label: 'Custom Instructions' },
             { id: 'documentation', label: 'Documentation' },
           ]}
@@ -156,6 +143,8 @@ const App: React.FC = () => {
               setError={setError}
             />
           )}
+
+          {activeTab === 'codebase-analysis' && <CodebaseAnalysisPanel />}
 
           {activeTab === 'custom-instructions' && <CustomInstructionsPanel />}
 
