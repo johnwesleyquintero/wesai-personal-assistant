@@ -1,4 +1,11 @@
-import { FileMetrics, CodebaseMetrics, TechnicalDebtItem, Recommendation, AnalysisReport, DependencyNode } from '../types';
+import {
+  FileMetrics,
+  CodebaseMetrics,
+  TechnicalDebtItem,
+  Recommendation,
+  AnalysisReport,
+  DependencyNode,
+} from '../types';
 
 // Mock file system data - in a real implementation, this would read from the actual file system
 const mockProjectFiles = [
@@ -31,14 +38,14 @@ const mockProjectFiles = [
   'tailwind.config.js',
   'eslint.config.js',
   'index.css',
-  'index.html'
+  'index.html',
 ];
 
 export const analyzeFile = async (filePath: string): Promise<FileMetrics> => {
   // Simulate file analysis - in a real implementation, this would parse actual files
   const name = filePath.split('/').pop() || '';
   const extension = name.split('.').pop() || '';
-  
+
   // Mock complexity calculation based on file type and size
   const getComplexity = (path: string): number => {
     if (path.includes('store.ts')) return 8.5;
@@ -62,9 +69,11 @@ export const analyzeFile = async (filePath: string): Promise<FileMetrics> => {
   };
 
   const getDependencies = (path: string): string[] => {
-    if (path.includes('App.tsx')) return ['react', 'store.ts', 'LoginPage.tsx', 'components/Header.tsx'];
+    if (path.includes('App.tsx'))
+      return ['react', 'store.ts', 'LoginPage.tsx', 'components/Header.tsx'];
     if (path.includes('store.ts')) return ['zustand', 'services/geminiService.ts', 'types.ts'];
-    if (path.includes('geminiService.ts')) return ['@google/genai', 'services/instructionService.ts'];
+    if (path.includes('geminiService.ts'))
+      return ['@google/genai', 'services/instructionService.ts'];
     if (path.includes('components/')) return ['react', 'types.ts'];
     return [];
   };
@@ -87,30 +96,30 @@ export const analyzeFile = async (filePath: string): Promise<FileMetrics> => {
     complexity: getComplexity(filePath),
     dependencies: getDependencies(filePath),
     exports: ['default', 'named'],
-    type: getFileType(filePath)
+    type: getFileType(filePath),
   };
 };
 
 export const analyzeCodebase = async (): Promise<CodebaseMetrics> => {
   const fileMetrics = await Promise.all(mockProjectFiles.map(analyzeFile));
-  
+
   const totalFiles = fileMetrics.length;
   const totalLines = fileMetrics.reduce((sum, file) => sum + file.lines, 0);
   const totalSize = fileMetrics.reduce((sum, file) => sum + file.size, 0);
-  const averageComplexity = fileMetrics.reduce((sum, file) => sum + file.complexity, 0) / totalFiles;
+  const averageComplexity =
+    fileMetrics.reduce((sum, file) => sum + file.complexity, 0) / totalFiles;
 
-  const filesByType = fileMetrics.reduce((acc, file) => {
-    acc[file.type] = (acc[file.type] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const filesByType = fileMetrics.reduce(
+    (acc, file) => {
+      acc[file.type] = (acc[file.type] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
 
-  const largestFiles = [...fileMetrics]
-    .sort((a, b) => b.lines - a.lines)
-    .slice(0, 5);
+  const largestFiles = [...fileMetrics].sort((a, b) => b.lines - a.lines).slice(0, 5);
 
-  const mostComplexFiles = [...fileMetrics]
-    .sort((a, b) => b.complexity - a.complexity)
-    .slice(0, 5);
+  const mostComplexFiles = [...fileMetrics].sort((a, b) => b.complexity - a.complexity).slice(0, 5);
 
   const dependencyGraph = buildDependencyGraph(fileMetrics);
   const technicalDebt = identifyTechnicalDebt(fileMetrics);
@@ -126,42 +135,48 @@ export const analyzeCodebase = async (): Promise<CodebaseMetrics> => {
     mostComplexFiles,
     dependencyGraph,
     technicalDebt,
-    codeQuality
+    codeQuality,
   };
 };
 
 const buildDependencyGraph = (files: FileMetrics[]): DependencyNode[] => {
   const nodes: DependencyNode[] = [];
-  
-  files.forEach(file => {
-    const isExternal = (dep: string) => !dep.includes('.ts') && !dep.includes('.tsx') && !dep.includes('./') && !dep.includes('../');
-    
+
+  files.forEach((file) => {
+    const isExternal = (dep: string) =>
+      !dep.includes('.ts') && !dep.includes('.tsx') && !dep.includes('./') && !dep.includes('../');
+
     nodes.push({
       id: file.path,
       name: file.name,
       type: 'internal',
-      dependencies: file.dependencies.filter(dep => !isExternal(dep)),
-      dependents: files.filter(f => f.dependencies.includes(file.path)).map(f => f.path)
+      dependencies: file.dependencies.filter((dep) => !isExternal(dep)),
+      dependents: files.filter((f) => f.dependencies.includes(file.path)).map((f) => f.path),
     });
   });
 
   // Add external dependencies
   const externalDeps = new Set<string>();
-  files.forEach(file => {
-    file.dependencies.forEach(dep => {
-      if (!dep.includes('.ts') && !dep.includes('.tsx') && !dep.includes('./') && !dep.includes('../')) {
+  files.forEach((file) => {
+    file.dependencies.forEach((dep) => {
+      if (
+        !dep.includes('.ts') &&
+        !dep.includes('.tsx') &&
+        !dep.includes('./') &&
+        !dep.includes('../')
+      ) {
         externalDeps.add(dep);
       }
     });
   });
 
-  externalDeps.forEach(dep => {
+  externalDeps.forEach((dep) => {
     nodes.push({
       id: dep,
       name: dep,
       type: 'external',
       dependencies: [],
-      dependents: files.filter(f => f.dependencies.includes(dep)).map(f => f.path)
+      dependents: files.filter((f) => f.dependencies.includes(dep)).map((f) => f.path),
     });
   });
 
@@ -171,7 +186,7 @@ const buildDependencyGraph = (files: FileMetrics[]): DependencyNode[] => {
 const identifyTechnicalDebt = (files: FileMetrics[]): TechnicalDebtItem[] => {
   const debt: TechnicalDebtItem[] = [];
 
-  files.forEach(file => {
+  files.forEach((file) => {
     // Large file debt
     if (file.lines > 300) {
       debt.push({
@@ -180,7 +195,7 @@ const identifyTechnicalDebt = (files: FileMetrics[]): TechnicalDebtItem[] => {
         severity: file.lines > 500 ? 'high' : 'medium',
         description: `File is too large (${file.lines} lines)`,
         suggestion: 'Consider breaking this file into smaller, more focused modules',
-        effort: file.lines > 500 ? 'high' : 'medium'
+        effort: file.lines > 500 ? 'high' : 'medium',
       });
     }
 
@@ -192,7 +207,7 @@ const identifyTechnicalDebt = (files: FileMetrics[]): TechnicalDebtItem[] => {
         severity: file.complexity > 9 ? 'critical' : 'high',
         description: `High cyclomatic complexity (${file.complexity.toFixed(1)})`,
         suggestion: 'Refactor complex functions into smaller, single-purpose functions',
-        effort: 'medium'
+        effort: 'medium',
       });
     }
 
@@ -204,7 +219,7 @@ const identifyTechnicalDebt = (files: FileMetrics[]): TechnicalDebtItem[] => {
         severity: 'medium',
         description: `Too many dependencies (${file.dependencies.length})`,
         suggestion: 'Consider dependency injection or breaking into smaller modules',
-        effort: 'medium'
+        effort: 'medium',
       });
     }
   });
@@ -215,26 +230,28 @@ const identifyTechnicalDebt = (files: FileMetrics[]): TechnicalDebtItem[] => {
 const calculateCodeQuality = (files: FileMetrics[], debt: TechnicalDebtItem[]) => {
   const totalComplexity = files.reduce((sum, file) => sum + file.complexity, 0);
   const avgComplexity = totalComplexity / files.length;
-  
+
   // Maintainability Index (0-100, higher is better)
-  const maintainabilityIndex = Math.max(0, 100 - (avgComplexity * 5) - (debt.length * 2));
-  
+  const maintainabilityIndex = Math.max(0, 100 - avgComplexity * 5 - debt.length * 2);
+
   return {
     maintainabilityIndex: Math.round(maintainabilityIndex),
     testCoverage: 0, // Would need actual test analysis
     duplicatedLines: Math.floor(files.reduce((sum, file) => sum + file.lines, 0) * 0.05),
-    codeSmells: debt.filter(d => d.severity === 'medium' || d.severity === 'high').length,
-    securityHotspots: debt.filter(d => d.type === 'dependency').length,
+    codeSmells: debt.filter((d) => d.severity === 'medium' || d.severity === 'high').length,
+    securityHotspots: debt.filter((d) => d.type === 'dependency').length,
     bugs: 0, // Would need static analysis
-    vulnerabilities: 0 // Would need security analysis
+    vulnerabilities: 0, // Would need security analysis
   };
 };
 
-export const generateRecommendations = async (metrics: CodebaseMetrics): Promise<Recommendation[]> => {
+export const generateRecommendations = async (
+  metrics: CodebaseMetrics,
+): Promise<Recommendation[]> => {
   const recommendations: Recommendation[] = [];
 
   // Large file recommendations
-  metrics.largestFiles.forEach(file => {
+  metrics.largestFiles.forEach((file) => {
     if (file.lines > 300) {
       recommendations.push({
         id: `large-file-${file.path}`,
@@ -251,14 +268,14 @@ export const generateRecommendations = async (metrics: CodebaseMetrics): Promise
 // ${file.name.replace('.tsx', '')}Utils.ts`,
         resources: [
           'https://refactoring.guru/extract-class',
-          'https://martinfowler.com/bliki/FunctionLength.html'
-        ]
+          'https://martinfowler.com/bliki/FunctionLength.html',
+        ],
       });
     }
   });
 
   // Complexity recommendations
-  metrics.mostComplexFiles.forEach(file => {
+  metrics.mostComplexFiles.forEach((file) => {
     if (file.complexity > 7) {
       recommendations.push({
         id: `complex-file-${file.path}`,
@@ -277,8 +294,8 @@ const processData = (data) => {
 };`,
         resources: [
           'https://refactoring.guru/extract-method',
-          'https://en.wikipedia.org/wiki/Cyclomatic_complexity'
-        ]
+          'https://en.wikipedia.org/wiki/Cyclomatic_complexity',
+        ],
       });
     }
   });
@@ -290,10 +307,11 @@ const processData = (data) => {
       category: 'architecture',
       priority: 'high',
       title: 'Implement better separation of concerns',
-      description: 'Overall codebase complexity is high. Consider implementing cleaner architecture patterns.',
+      description:
+        'Overall codebase complexity is high. Consider implementing cleaner architecture patterns.',
       impact: 'Better maintainability, easier testing, improved team productivity',
       effort: 'high',
-      files: metrics.mostComplexFiles.map(f => f.path),
+      files: metrics.mostComplexFiles.map((f) => f.path),
       codeExample: `// Consider implementing:
 // - Custom hooks for business logic
 // - Service layer for API calls
@@ -301,13 +319,15 @@ const processData = (data) => {
 // - Context providers for state management`,
       resources: [
         'https://kentcdodds.com/blog/application-state-management-with-react',
-        'https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html'
-      ]
+        'https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html',
+      ],
     });
   }
 
   // Performance recommendations
-  const largeComponents = metrics.largestFiles.filter(f => f.type === 'component' && f.lines > 200);
+  const largeComponents = metrics.largestFiles.filter(
+    (f) => f.type === 'component' && f.lines > 200,
+  );
   if (largeComponents.length > 0) {
     recommendations.push({
       id: 'component-performance',
@@ -317,7 +337,7 @@ const processData = (data) => {
       description: 'Large components may cause performance issues and should be optimized.',
       impact: 'Better rendering performance, improved user experience',
       effort: 'medium',
-      files: largeComponents.map(c => c.path),
+      files: largeComponents.map((c) => c.path),
       codeExample: `// Consider using:
 import { memo, useMemo, useCallback } from 'react';
 
@@ -334,8 +354,8 @@ const OptimizedComponent = memo(({ data, onAction }) => {
 });`,
       resources: [
         'https://react.dev/reference/react/memo',
-        'https://react.dev/reference/react/useMemo'
-      ]
+        'https://react.dev/reference/react/useMemo',
+      ],
     });
   }
 
@@ -345,11 +365,11 @@ const OptimizedComponent = memo(({ data, onAction }) => {
 export const generateAnalysisReport = async (): Promise<AnalysisReport> => {
   const metrics = await analyzeCodebase();
   const recommendations = await generateRecommendations(metrics);
-  
+
   return {
     timestamp: new Date(),
     metrics,
     recommendations,
-    trends: [] // Would be populated with historical data
+    trends: [], // Would be populated with historical data
   };
 };

@@ -104,22 +104,22 @@ export const useAppStore = create<AppState>((set, get) => ({
   generatedImageData: null,
 
   // Actions
-  setCode: (code) => set({ code }),
-  setFeedback: (feedback) => set({ feedback }),
-  setIsLoading: (isLoading) => set({ isLoading }),
-  setError: (error) => set({ error }),
-  setActiveApiKey: (key) => set({ activeApiKey: key }),
-  setApiKeySource: (source) => set({ apiKeySource: source }),
-  setIsLoggedIn: (isLoggedIn) => set({ isLoggedIn }),
-  setActiveTab: (tab) => set({ activeTab: tab }),
-  setTheme: (theme) => set({ theme }),
-  setChatMessages: (messages) => set({ chatMessages: messages }),
-  setChatInput: (input) => set({ chatInput: input }),
-  setActiveChatSession: (session) => set({ activeChatSession: session }),
-  setCopiedMessageId: (id) => set({ copiedMessageId: id }),
-  setChatError: (error) => set({ chatError: error }),
-  setImagePrompt: (prompt) => set({ imagePrompt: prompt }),
-  setGeneratedImageData: (data) => set({ generatedImageData: data }),
+  setCode: (code: string) => set({ code }),
+  setFeedback: (feedback: string) => set({ feedback }),
+  setIsLoading: (isLoading: boolean) => set({ isLoading }),
+  setError: (error: string | null) => set({ error }),
+  setActiveApiKey: (key: string | null) => set({ activeApiKey: key }),
+  setApiKeySource: (source: ApiKeySource) => set({ apiKeySource: source }),
+  setIsLoggedIn: (isLoggedIn: boolean) => set({ isLoggedIn }),
+  setActiveTab: (tab: ActiveTab) => set({ activeTab: tab }),
+  setTheme: (theme: Theme) => set({ theme }),
+  setChatMessages: (messages: ChatMessage[]) => set({ chatMessages: messages }),
+  setChatInput: (input: string) => set({ chatInput: input }),
+  setActiveChatSession: (session: Chat | null) => set({ activeChatSession: session }),
+  setCopiedMessageId: (id: string | null) => set({ copiedMessageId: id }),
+  setChatError: (error: string | null) => set({ chatError: error }),
+  setImagePrompt: (prompt: string) => set({ imagePrompt: prompt }),
+  setGeneratedImageData: (data: string | null) => set({ generatedImageData: data }),
   toggleTheme: () => set((state) => ({ theme: state.theme === 'light' ? 'dark' : 'light' })),
 
   initializeActiveApiKey: () => {
@@ -264,7 +264,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         set({ feedback: fullRefactorText });
         for await (const part of refactorCodeWithGeminiStream(code)) {
           if (part.type === 'chunk' && part.data) {
-            set((state) => ({ feedback: state.feedback + (part.data || '') }));
+            set((state: AppState) => ({ feedback: state.feedback + (part.data || '') }));
           } else if (part.type === 'error' && part.message) {
             set({ error: `Refactoring error: ${part.message}` });
             break;
@@ -332,7 +332,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     const userMessageId = `user-${Date.now()}`;
     const modelMessageId = `model-${Date.now() + 1}`;
 
-    set((state) => ({
+    set((state: AppState) => ({
       chatMessages: [
         ...state.chatMessages,
         { id: userMessageId, role: 'user', content: chatInput },
@@ -341,7 +341,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     const currentInput = chatInput;
     set({ chatInput: '', isLoading: true, chatError: null });
 
-    set((state) => ({
+    set((state: AppState) => ({
       chatMessages: [
         ...state.chatMessages,
         { id: modelMessageId, role: 'model', content: '', componentCode: null, showPreview: false },
@@ -360,8 +360,8 @@ export const useAppStore = create<AppState>((set, get) => ({
         if (chunkText) {
           currentModelContent += chunkText;
           const componentCode = extractCode(currentModelContent);
-          set((state) => ({
-            chatMessages: state.chatMessages.map((msg) =>
+          set((state: AppState) => ({
+            chatMessages: state.chatMessages.map((msg: ChatMessage) =>
               msg.id === modelMessageId
                 ? { ...msg, content: currentModelContent, componentCode: componentCode }
                 : msg,
@@ -372,8 +372,8 @@ export const useAppStore = create<AppState>((set, get) => ({
           console.log('Chat stream finished:', finishReason, safetyRatings);
           const finalComponentCode = extractCode(currentModelContent);
           if (finishReason !== 'STOP' && finishReason !== 'MAX_TOKENS') {
-            set((state) => ({
-              chatMessages: state.chatMessages.map((msg) =>
+            set((state: AppState) => ({
+              chatMessages: state.chatMessages.map((msg: ChatMessage) =>
                 msg.id === modelMessageId
                   ? {
                       ...msg,
@@ -387,8 +387,8 @@ export const useAppStore = create<AppState>((set, get) => ({
               set({ chatError: 'The response was blocked due to safety settings.' });
             }
           } else {
-            set((state) => ({
-              chatMessages: state.chatMessages.map((msg) =>
+            set((state: AppState) => ({
+              chatMessages: state.chatMessages.map((msg: ChatMessage) =>
                 msg.id === modelMessageId ? { ...msg, componentCode: finalComponentCode } : msg,
               ),
             }));
@@ -400,8 +400,8 @@ export const useAppStore = create<AppState>((set, get) => ({
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
       set({ chatError: `Chat error: ${errorMessage}` });
       console.error('Chat submit error:', err);
-      set((state) => ({
-        chatMessages: state.chatMessages.map((msg) =>
+      set((state: AppState) => ({
+        chatMessages: state.chatMessages.map((msg: ChatMessage) =>
           msg.id === modelMessageId
             ? { ...msg, content: `*(Error: ${errorMessage})*`, componentCode: null }
             : msg,
@@ -425,16 +425,16 @@ export const useAppStore = create<AppState>((set, get) => ({
       return;
     }
 
-    set((state) => ({
+    set((state: AppState) => ({
       chatMessages: state.chatMessages.filter(
-        (msg) => msg.id !== state.chatMessages[state.chatMessages.length - 1]?.id,
+        (msg: ChatMessage) => msg.id !== state.chatMessages[state.chatMessages.length - 1]?.id,
       ),
     }));
 
     set({ isLoading: true, chatError: null });
 
     const modelMessageId = `model-${Date.now() + 1}`;
-    set((state) => ({
+    set((state: AppState) => ({
       chatMessages: [
         ...state.chatMessages,
         { id: modelMessageId, role: 'model', content: '', componentCode: null, showPreview: false },
@@ -457,8 +457,8 @@ export const useAppStore = create<AppState>((set, get) => ({
         if (chunkText) {
           currentModelContent += chunkText;
           const componentCode = extractCode(currentModelContent);
-          set((state) => ({
-            chatMessages: state.chatMessages.map((msg) =>
+          set((state: AppState) => ({
+            chatMessages: state.chatMessages.map((msg: ChatMessage) =>
               msg.id === modelMessageId
                 ? { ...msg, content: currentModelContent, componentCode: componentCode }
                 : msg,
@@ -469,8 +469,8 @@ export const useAppStore = create<AppState>((set, get) => ({
           console.log('Chat stream finished (retry):', finishReason, safetyRatings);
           const finalComponentCode = extractCode(currentModelContent);
           if (finishReason !== 'STOP' && finishReason !== 'MAX_TOKENS') {
-            set((state) => ({
-              chatMessages: state.chatMessages.map((msg) =>
+            set((state: AppState) => ({
+              chatMessages: state.chatMessages.map((msg: ChatMessage) =>
                 msg.id === modelMessageId
                   ? {
                       ...msg,
@@ -484,8 +484,8 @@ export const useAppStore = create<AppState>((set, get) => ({
               set({ chatError: 'The response was blocked due to safety settings during retry.' });
             }
           } else {
-            set((state) => ({
-              chatMessages: state.chatMessages.map((msg) =>
+            set((state: AppState) => ({
+              chatMessages: state.chatMessages.map((msg: ChatMessage) =>
                 msg.id === modelMessageId ? { ...msg, componentCode: finalComponentCode } : msg,
               ),
             }));
@@ -497,8 +497,8 @@ export const useAppStore = create<AppState>((set, get) => ({
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
       set({ chatError: `Retry chat error: ${errorMessage}` });
       console.error('Retry chat submit error:', err);
-      set((state) => ({
-        chatMessages: state.chatMessages.map((msg) =>
+      set((state: AppState) => ({
+        chatMessages: state.chatMessages.map((msg: ChatMessage) =>
           msg.id === modelMessageId
             ? { ...msg, content: `*(Error: ${errorMessage})*`, componentCode: null }
             : msg,

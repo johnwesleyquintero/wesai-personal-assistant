@@ -94,7 +94,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         </form>
         <p className="mt-6 text-center text-xs text-gray-500 dark:text-gray-400">
           This is a simplified client-side login for demonstration and to protect API key usage.{' '}
-          <br /> 
+          <br />
         </p>
       </div>
     </div>

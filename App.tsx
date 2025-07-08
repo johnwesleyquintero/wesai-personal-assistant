@@ -11,7 +11,6 @@ import { ChatInterfacePanel } from './components/ChatInterfacePanel.tsx';
 import { DocumentationViewerPanel } from './components/DocumentationViewerPanel.tsx';
 import { ImageGenerationPanel } from './components/ImageGenerationPanel.tsx';
 import CustomInstructionsPanel from './components/CustomInstructionsPanel.tsx';
-import { CodebaseAnalysisPanel } from './components/CodebaseAnalysisPanel.tsx';
 
 const App: React.FC = () => {
   const {
@@ -143,8 +142,6 @@ const App: React.FC = () => {
               setError={setError}
             />
           )}
-
-          {activeTab === 'codebase-analysis' && <CodebaseAnalysisPanel />}
 
           {activeTab === 'custom-instructions' && <CustomInstructionsPanel />}
 

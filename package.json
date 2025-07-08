@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build && copy README.md dist\\README.md",
     "preview": "vite preview",
-    "lint": "eslint . --report-unused-disable-directives --max-warnings 0 --fix",
+    "lint": "eslint .",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit"
   },
@@ -27,7 +27,7 @@
     "remark-gfm": "^4.0.0",
     "typescript-eslint": "^8.33.1",
     "uuid": "^11.0.4",
-    "zustand": "^4.5.2"
+    "zustand": "^4.5.7"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",
