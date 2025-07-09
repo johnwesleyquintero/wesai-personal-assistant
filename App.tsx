@@ -107,7 +107,6 @@ const App: React.FC = () => {
             { id: 'chat', label: 'Chat' },
             { id: 'content', label: 'Generate Content' },
             { id: 'image', label: 'Image Generation' },
-            { id: 'codebase-analysis', label: 'Codebase Analysis' },
             { id: 'custom-instructions', label: 'Custom Instructions' },
             { id: 'documentation', label: 'Documentation' },
           ]}
