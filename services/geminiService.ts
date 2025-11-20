@@ -34,27 +34,9 @@ interface RefactorStreamingPart {
 
 const getAiInstance = (): GoogleGenAI => {
   if (!ai) {
-    const envApiKey =
-      typeof import.meta.env !== 'undefined' ? import.meta.env.VITE_GEMINI_API_KEY : undefined;
-    if (envApiKey && envApiKey.trim() !== '') {
-      console.warn(
-        'Attempting to initialize Gemini client from environment variable as it was not previously initialized.',
-      );
-      try {
-        initializeGeminiClient(envApiKey);
-      } catch (initError) {
-        console.error(
-          'Failed to initialize Gemini client from env var during getAiInstance:',
-          initError,
-        );
-      }
-    }
-
-    if (!ai) {
-      throw new Error(
-        "Gemini API client is not initialized. Please set your API key in the application settings. If using a Vite development environment, ensure VITE_GEMINI_API_KEY is set in your .env file and the app is served via 'npm run dev' or similar Vite command.",
-      );
-    }
+    throw new Error(
+      "Gemini API client is not initialized. Please set your API key in the application settings. If using a Vite development environment, ensure VITE_GEMINI_API_KEY is set in your .env file and the app is served via 'npm run dev' or similar Vite command.",
+    );
   }
   return ai;
 };
@@ -336,14 +318,7 @@ async function generateWithImagen(ai: GoogleGenAI, prompt: string, aspectRatio: 
           throw new Error("Gemini API (Imagen) did not return an image.");
         }
     } catch (error) {
-        console.error("Error calling Google Gemini API (Imagen):", error);
-        if (error instanceof Error && (error.message.includes('billed users') || error.message.includes('billing required'))) {
-            throw new Error("ASPECT_RATIO_BILLING_ERROR");
-        }
-        if (error instanceof Error && error.message.includes('API key not valid')) {
-            throw new Error("Your Google API Key is not valid. Please check it in the settings.");
-        }
-        throw new Error(`Gemini API Error: ${error instanceof Error ? error.message : 'An unknown error occurred'}`);
+        throw handleApiError(error, 'image generation (Imagen)');
     }
 }
 
@@ -376,11 +351,7 @@ async function generateWithFlash(ai: GoogleGenAI, prompt: string, negativePrompt
         
         throw new Error("Gemini API (Flash) did not return an image.");
     } catch (error) {
-        console.error("Error calling Google Gemini API (Flash):", error);
-        if (error instanceof Error && error.message.includes('API key not valid')) {
-            throw new Error("Your Google API Key is not valid. Please check it in the settings.");
-        }
-        throw new Error(`Gemini API Error: ${error instanceof Error ? error.message : 'An unknown error occurred'}`);
+        throw handleApiError(error, 'image generation (Flash)');
     }
 }
 
@@ -464,11 +435,7 @@ export async function editImageWithGemini(originalImageSrc: string, editPrompt: 
     throw new Error("Gemini API did not return an edited image.");
 
   } catch (error) {
-    console.error("Error calling Google Gemini API for image editing:", error);
-    if (error instanceof Error && error.message.includes('API key not valid')) {
-        throw new Error("Your Google API Key is not valid. Please check it in the settings.");
-    }
-    throw new Error(`Gemini API Error: ${error instanceof Error ? error.message : 'An unknown error occurred'}`);
+    throw handleApiError(error, 'image editing');
   }
 }
 

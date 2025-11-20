@@ -30,6 +30,8 @@ export const ImageGenerationPanel: React.FC<ImageGenerationPanelProps> = ({
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>('1:1'); // Default aspect ratio
   const [negativePrompt, setNegativePrompt] = useState<string>(''); // New state for negative prompt
 
+  const isInteractive = !isLoading && isApiKeyConfigured;
+
   const handleCopyImage = async () => {
     if (!imageData) return;
     try {
@@ -68,6 +70,16 @@ export const ImageGenerationPanel: React.FC<ImageGenerationPanelProps> = ({
     document.body.removeChild(link);
   };
 
+  const generateDownloadFileName = (basePrompt: string): string => {
+    const sanitizedPrompt = basePrompt
+      .substring(0, 50) // Limit length for filename
+      .replace(/[^a-z0-9\s-]/gi, '') // Remove invalid chars, allow spaces and hyphens
+      .trim()
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .toLowerCase();
+    return `${sanitizedPrompt || 'generated_image'}.jpg`;
+  };
+
   const handleSubmitClick = () => {
     if (!isApiKeyConfigured) {
       setError(
@@ -80,12 +92,7 @@ export const ImageGenerationPanel: React.FC<ImageGenerationPanelProps> = ({
       return;
     }
     setError(null);
-    const newDownloadName =
-      prompt
-        .substring(0, 30)
-        .replace(/[^a-z0-9]/gi, '_')
-        .toLowerCase() || 'generated_image';
-    setDownloadName(`${newDownloadName}.jpg`);
+    setDownloadName(generateDownloadFileName(prompt));
     onSubmit(aspectRatio, negativePrompt);
   };
 
@@ -102,10 +109,11 @@ export const ImageGenerationPanel: React.FC<ImageGenerationPanelProps> = ({
           id="imagePromptInput"
           value={prompt}
           onChange={onPromptChange}
-          disabled={isLoading || !isApiKeyConfigured}
+          disabled={!isInteractive}
           rows={3}
           className="w-full p-4 pr-10 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 font-mono text-sm transition-colors duration-150 ease-in-out disabled:opacity-70 disabled:cursor-not-allowed"
           placeholder="e.g., 'A hyperrealistic portrait of a majestic lion in a snowy forest', 'A vibrant abstract painting with geometric shapes and bold colors', 'A cute robot waving hello'"
+          aria-label="Image generation prompt input"
         />
         {prompt && !isLoading && (
           <button
@@ -140,8 +148,9 @@ export const ImageGenerationPanel: React.FC<ImageGenerationPanelProps> = ({
             id="aspectRatioSelect"
             value={aspectRatio}
             onChange={(e) => setAspectRatio(e.target.value as AspectRatio)}
-            disabled={isLoading || !isApiKeyConfigured}
+            disabled={!isInteractive}
             className="w-full p-2.5 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 font-mono text-sm transition-colors duration-150 ease-in-out disabled:opacity-70 disabled:cursor-not-allowed"
+            aria-label="Select image aspect ratio"
           >
             <option value="1:1">1:1 (Square)</option>
             <option value="16:9">16:9 (Landscape)</option>
@@ -164,9 +173,10 @@ export const ImageGenerationPanel: React.FC<ImageGenerationPanelProps> = ({
             id="negativePromptInput"
             value={negativePrompt}
             onChange={(e) => setNegativePrompt(e.target.value)}
-            disabled={isLoading || !isApiKeyConfigured}
+            disabled={!isInteractive}
             className="w-full p-2.5 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 font-mono text-sm transition-colors duration-150 ease-in-out disabled:opacity-70 disabled:cursor-not-allowed"
             placeholder="e.g., 'text, blurry, dark, dull colors'"
+            aria-label="Negative prompt input"
           />
         </div>
       </div>
@@ -175,6 +185,7 @@ export const ImageGenerationPanel: React.FC<ImageGenerationPanelProps> = ({
         onClick={handleSubmitClick}
         disabled={isLoading || !isApiKeyConfigured || !prompt.trim()}
         className="w-full flex items-center justify-center bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 px-4 rounded-lg shadow-md transition duration-150 ease-in-out disabled:opacity-60 disabled:cursor-not-allowed"
+        aria-label={isLoading ? 'Generating image, please wait' : 'Generate image'}
       >
         {isLoading && <LoadingSpinner />}
         {isLoading ? 'Generating Image...' : 'Generate Image'}
@@ -184,13 +195,17 @@ export const ImageGenerationPanel: React.FC<ImageGenerationPanelProps> = ({
         <div
           className="mt-4 p-4 bg-red-100 dark:bg-red-700/30 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-200 rounded-md shadow"
           role="alert"
+          aria-live="assertive"
         >
           <strong className="font-semibold">Error:</strong> {error}
         </div>
       )}
 
       {isLoading && !imageData && (
-        <div className="mt-6 flex flex-col items-center justify-center p-6 bg-gray-50 dark:bg-gray-800/30 rounded-lg shadow-md">
+        <div
+          className="mt-6 flex flex-col items-center justify-center p-6 bg-gray-50 dark:bg-gray-800/30 rounded-lg shadow-md"
+          aria-live="polite"
+        >
           <LoadingSpinner />
           <p className="mt-2 text-gray-600 dark:text-gray-300">
             Your image is being created by Imagen, please wait...
@@ -226,6 +241,7 @@ export const ImageGenerationPanel: React.FC<ImageGenerationPanelProps> = ({
                   onClick={handleCopyImage}
                   className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-150 ease-in-out flex items-center justify-center whitespace-nowrap"
                   title="Copy image to clipboard"
+                  aria-label="Copy image to clipboard"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -245,9 +261,10 @@ export const ImageGenerationPanel: React.FC<ImageGenerationPanelProps> = ({
                 </button>
                 <button
                   onClick={handleSubmitClick}
-                  disabled={isLoading || !isApiKeyConfigured}
+                  disabled={!isInteractive}
                   className="w-full sm:w-auto bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-150 ease-in-out flex items-center justify-center whitespace-nowrap disabled:opacity-60"
                   title="Regenerate image with the same prompt"
+                  aria-label="Regenerate image"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -269,6 +286,7 @@ export const ImageGenerationPanel: React.FC<ImageGenerationPanelProps> = ({
                   onClick={handleDownload}
                   className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-150 ease-in-out flex items-center justify-center whitespace-nowrap"
                   title="Download image"
+                  aria-label="Download image"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
