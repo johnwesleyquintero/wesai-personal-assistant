@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { LoadingSpinner } from './LoadingSpinner.tsx';
+import { AspectRatio } from '../types.ts'; // Import AspectRatio type
 
 interface ImageGenerationPanelProps {
   prompt: string;
   onPromptChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
-  onClearPrompt: () => void; // New prop for clearing prompt
-  onSubmit: () => void;
+  onClearPrompt: () => void;
+  onSubmit: (aspectRatio: AspectRatio, negativePrompt: string) => void; // Updated onSubmit signature
   isLoading: boolean;
   isApiKeyConfigured: boolean;
-  imageData: string | null; // Base64 encoded image data
+  imageData: string | null;
   error: string | null;
   setError: (error: string | null) => void;
 }
@@ -26,17 +27,20 @@ export const ImageGenerationPanel: React.FC<ImageGenerationPanelProps> = ({
 }) => {
   const [downloadName, setDownloadName] = useState('generated-image.jpg');
   const [isCopied, setIsCopied] = useState(false);
+  const [aspectRatio, setAspectRatio] = useState<AspectRatio>('1:1'); // Default aspect ratio
+  const [negativePrompt, setNegativePrompt] = useState<string>(''); // New state for negative prompt
 
   const handleCopyImage = async () => {
     if (!imageData) return;
     try {
-      const byteCharacters = atob(imageData);
+      // Decode base64 image data to a Blob
+      const byteCharacters = atob(imageData.split(',')[1]); // Remove "data:image/jpeg;base64," prefix if present
       const byteNumbers = new Array(byteCharacters.length);
       for (let i = 0; i < byteCharacters.length; i++) {
         byteNumbers[i] = byteCharacters.charCodeAt(i);
       }
       const byteArray = new Uint8Array(byteNumbers);
-      const blob = new Blob([byteArray], { type: 'image/jpeg' });
+      const blob = new Blob([byteArray], { type: 'image/jpeg' }); // Ensure correct MIME type
 
       await navigator.clipboard.write([
         new ClipboardItem({
@@ -50,10 +54,11 @@ export const ImageGenerationPanel: React.FC<ImageGenerationPanelProps> = ({
       setError('Failed to copy image to clipboard.');
     }
   };
+
   const handleDownload = () => {
     if (!imageData) return;
     const link = document.createElement('a');
-    link.href = `data:image/jpeg;base64,${imageData}`;
+    link.href = imageData; // imageData is already a data URL
     link.download =
       downloadName.endsWith('.jpg') || downloadName.endsWith('.jpeg')
         ? downloadName
@@ -81,7 +86,7 @@ export const ImageGenerationPanel: React.FC<ImageGenerationPanelProps> = ({
         .replace(/[^a-z0-9]/gi, '_')
         .toLowerCase() || 'generated_image';
     setDownloadName(`${newDownloadName}.jpg`);
-    onSubmit();
+    onSubmit(aspectRatio, negativePrompt);
   };
 
   return (
@@ -122,6 +127,50 @@ export const ImageGenerationPanel: React.FC<ImageGenerationPanelProps> = ({
           </button>
         )}
       </div>
+
+      <div className="flex flex-col sm:flex-row gap-4 mb-4">
+        <div className="flex-1">
+          <label
+            htmlFor="aspectRatioSelect"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+          >
+            Aspect Ratio:
+          </label>
+          <select
+            id="aspectRatioSelect"
+            value={aspectRatio}
+            onChange={(e) => setAspectRatio(e.target.value as AspectRatio)}
+            disabled={isLoading || !isApiKeyConfigured}
+            className="w-full p-2.5 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 font-mono text-sm transition-colors duration-150 ease-in-out disabled:opacity-70 disabled:cursor-not-allowed"
+          >
+            <option value="1:1">1:1 (Square)</option>
+            <option value="16:9">16:9 (Landscape)</option>
+            <option value="4:3">4:3 (Landscape)</option>
+            <option value="3:2">3:2 (Landscape)</option>
+            <option value="2:3">2:3 (Portrait)</option>
+            <option value="9:16">9:16 (Portrait)</option>
+            <option value="3:4">3:4 (Portrait)</option>
+          </select>
+        </div>
+        <div className="flex-1">
+          <label
+            htmlFor="negativePromptInput"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+          >
+            Negative Prompt (Optional):
+          </label>
+          <input
+            type="text"
+            id="negativePromptInput"
+            value={negativePrompt}
+            onChange={(e) => setNegativePrompt(e.target.value)}
+            disabled={isLoading || !isApiKeyConfigured}
+            className="w-full p-2.5 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 font-mono text-sm transition-colors duration-150 ease-in-out disabled:opacity-70 disabled:cursor-not-allowed"
+            placeholder="e.g., 'text, blurry, dark, dull colors'"
+          />
+        </div>
+      </div>
+
       <button
         onClick={handleSubmitClick}
         disabled={isLoading || !isApiKeyConfigured || !prompt.trim()}
@@ -156,7 +205,7 @@ export const ImageGenerationPanel: React.FC<ImageGenerationPanelProps> = ({
           </h2>
           <div className="flex flex-col items-center">
             <img
-              src={`data:image/jpeg;base64,${imageData}`}
+              src={imageData}
               alt={prompt || 'Generated image'}
               className="max-w-full h-auto rounded-md shadow-md border border-gray-300 dark:border-gray-600 mb-4"
               style={{ maxHeight: '60vh' }}

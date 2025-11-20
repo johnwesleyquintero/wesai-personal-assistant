@@ -1,13 +1,13 @@
 import { create } from 'zustand';
 import { Chat } from '@google/genai';
-import { ActiveTab, ApiKeySource, Theme, ChatMessage } from './types.ts';
+import { ActiveTab, ApiKeySource, Theme, ChatMessage, AspectRatio } from './types.ts';
 import {
   reviewCodeWithGemini,
   refactorCodeWithGeminiStream,
   getReactComponentPreview,
   generateCodeWithGemini,
   generateContentWithGemini,
-  generateImageWithImagen,
+  generateImageWithGemini, // Changed from generateImageWithImagen
   initializeGeminiClient,
   clearGeminiClient,
   startChatSession,
@@ -69,7 +69,7 @@ interface AppState {
   handleClearChatInput: () => void;
   handleTabChange: (tab: ActiveTab) => Promise<void>;
   handleSubmitCodeInteraction: () => Promise<void>;
-  handleImageGenerationSubmit: () => Promise<void>;
+  handleImageGenerationSubmit: (aspectRatio: AspectRatio, negativePrompt: string) => Promise<void>;
   extractComponentCode: (markdownContent: string) => string | null;
   handleChatSubmit: () => Promise<void>;
   handleNewChat: () => void;
@@ -324,7 +324,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
   },
 
-  handleImageGenerationSubmit: async () => {
+  handleImageGenerationSubmit: async (aspectRatio, negativePrompt) => {
     const { imagePrompt } = get();
     if (!imagePrompt.trim()) {
       set({ error: 'Please enter a description for the image.' });
@@ -333,7 +333,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ isLoading: true, generatedImageData: null, error: null });
 
     try {
-      const imageData = await generateImageWithImagen(imagePrompt);
+      const imageData = await generateImageWithGemini(imagePrompt, aspectRatio, negativePrompt);
       set({ generatedImageData: imageData });
     } catch (err) {
       const errorMessage =
