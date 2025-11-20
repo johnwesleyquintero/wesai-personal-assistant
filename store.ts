@@ -296,7 +296,7 @@ export const useAppStore = create<AppState>((set, get) => ({
             set({ error: `Refactoring error: ${part.message}` });
             break;
           } else if (part.type === 'finish_reason') {
-            console.log('Refactoring stream finished:', part.reason, part.safetyRatings);
+            console.warn('Refactoring stream finished:', part.reason, part.safetyRatings);
             if (part.reason === 'SAFETY' || part.reason === 'OTHER') {
               set({
                 error: `Refactoring was stopped. Reason: ${part.reason}. Please check the content or try again.`,
@@ -324,7 +324,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
   },
 
-  handleImageGenerationSubmit: async (aspectRatio, negativePrompt) => {
+  handleImageGenerationSubmit: async (aspectRatio: AspectRatio, negativePrompt: string) => {
     const { imagePrompt } = get();
     if (!imagePrompt.trim()) {
       set({ error: 'Please enter a description for the image.' });
@@ -396,7 +396,7 @@ export const useAppStore = create<AppState>((set, get) => ({
           }));
         }
         if (finishReason) {
-          console.log('Chat stream finished:', finishReason, safetyRatings);
+          console.warn('Chat stream finished:', finishReason, safetyRatings);
           const finalComponentCode = extractCode(currentModelContent);
           if (finishReason !== 'STOP' && finishReason !== 'MAX_TOKENS') {
             set((state: AppState) => ({
@@ -493,7 +493,7 @@ export const useAppStore = create<AppState>((set, get) => ({
           }));
         }
         if (finishReason) {
-          console.log('Chat stream finished (retry):', finishReason, safetyRatings);
+          console.warn('Chat stream finished (retry):', finishReason, safetyRatings);
           const finalComponentCode = extractCode(currentModelContent);
           if (finishReason !== 'STOP' && finishReason !== 'MAX_TOKENS') {
             set((state: AppState) => ({

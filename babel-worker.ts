@@ -7,7 +7,7 @@ importScripts('https://unpkg.com/@babel/standalone/babel.min.js');
 // This is the main message handler for the Web Worker
 self.onmessage = (event: MessageEvent) => {
   // Babel should now be available globally after importScripts
-  const Babel = (self as any).Babel; // Assert Babel type for TypeScript
+  const Babel = (self as any).Babel;
   // The check for Babel's presence might still be good for robustness,
   // though importScripts should ensure it's loaded.
   if (!Babel) {
@@ -36,15 +36,15 @@ self.onmessage = (event: MessageEvent) => {
 
     // Post the successful result back to the main thread
     self.postMessage({ id, type: 'TRANSPILE_SUCCESS', transpiledCode: transformed.code });
-  } catch (e: any) {
+  } catch (e: unknown) {
     // Post any errors back to the main thread
     self.postMessage({
       id,
       type: 'TRANSPILE_ERROR',
       error: {
-        message: e.message,
-        stack: e.stack,
-        name: e.name,
+        message: (e as Error).message,
+        stack: (e as Error).stack,
+        name: (e as Error as { name?: string }).name,
       },
     });
   }

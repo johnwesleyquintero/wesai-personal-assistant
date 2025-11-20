@@ -1,5 +1,6 @@
 import { useAppStore } from '../../store';
 import { useCallback } from 'react';
+import { AspectRatio } from '../../types';
 
 export const useImageGenerationLogic = () => {
   const {
@@ -22,7 +23,7 @@ export const useImageGenerationLogic = () => {
     handleClearImagePrompt();
   }, [handleClearImagePrompt]);
 
-  const memoizedHandleImageGenerationSubmit = useCallback((aspectRatio: any, negativePrompt: string) => {
+  const memoizedHandleImageGenerationSubmit = useCallback((aspectRatio: AspectRatio, negativePrompt: string) => {
     handleImageGenerationSubmit(aspectRatio, negativePrompt);
   }, [handleImageGenerationSubmit]);
 

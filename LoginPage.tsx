@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
-import { Theme } from './types';
 
 interface LoginPageProps {
   onLoginSuccess: () => void;
-
 }
 
 const DEMO_USERNAME = import.meta.env.VITE_DEMO_USERNAME || 'demo';

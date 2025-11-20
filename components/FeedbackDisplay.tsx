@@ -7,11 +7,11 @@ interface FeedbackDisplayProps {
 }
 
 interface CustomCodeRendererProps {
-  node?: any;
+  node?: unknown;
   inline?: boolean;
   className?: string;
   children: React.ReactNode;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export const FeedbackDisplay: React.FC<FeedbackDisplayProps> = ({ feedback }) => {

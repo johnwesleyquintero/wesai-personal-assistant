@@ -29,7 +29,7 @@ interface RefactorStreamingPart {
   data?: string;
   message?: string;
   reason?: string;
-  safetyRatings?: any;
+  safetyRatings?: unknown;
 }
 
 const getAiInstance = (): GoogleGenAI => {
@@ -49,12 +49,12 @@ const createPrompt = (basePrompt: string): string => {
 };
 
 // --- IMPROVED ERROR HANDLING ---
-const handleApiError = (error: any, context: string): Error => {
+const handleApiError = (error: unknown, context: string): Error => {
   console.error(`[Gemini Service] Error in ${context}:`, error);
-
-  const message = error?.message?.toLowerCase() || '';
-  const status = error?.status || error?.response?.status; 
-  const rawErrorText = JSON.stringify(error).toLowerCase();
+  const e = error as { message?: string; status?: number; response?: { status?: number } } | Error | string | unknown;
+  const message = typeof e === 'object' && e && 'message' in e && typeof (e as any).message === 'string' ? (e as any).message.toLowerCase() : '';
+  const status = typeof e === 'object' && e && 'status' in e ? (e as any).status : (typeof (e as any)?.response === 'object' ? (e as any).response?.status : undefined);
+  const rawErrorText = (() => { try { return JSON.stringify(error).toLowerCase(); } catch { return ''; } })();
 
   // 1. Rate Limiting (429) & Server Overload (503)
   if (status === 429 || status === 503) {
@@ -464,9 +464,13 @@ export const startChatSession = async (initialSystemInstruction: string = ''): P
 
 const retryWithFallbackModel = async (
   message: string,
-  originalError: any,
+  originalError: unknown,
 ): Promise<AsyncIterable<GenerateContentResponse>> => {
-  console.warn(`Attempting with fallback model due to: ${originalError.message}`);
+  console.warn(
+    `Attempting with fallback model due to: ${
+      (originalError as Error)?.message ?? String(originalError)
+    }`,
+  );
   try {
     const activeProfile = getActiveInstructionProfile();
     const defaultSystemInstruction = `I am WesAI, John Wesley Quintero's AI assistant. I am here to assist you, showcase John's expertise, and interact on his behalf. I embody John Wesley Quintero's professional identity: expert, confident, helpful, and proactive. I always communicate in the first person. I can help with career representation, technical project and coding assistance, data analysis, visualization, reporting, and content and strategic brainstorming.`;
@@ -481,7 +485,12 @@ const retryWithFallbackModel = async (
 
     return await sendMessageToChatStream(fallbackChatSession, message, true);
   } catch (fallbackError) {
-    throw handleApiError(fallbackError, `fallback chat attempt after ${originalError.message}`);
+    throw handleApiError(
+      fallbackError,
+      `fallback chat attempt after ${
+        (originalError as Error)?.message ?? String(originalError)
+      }`,
+    );
   }
 };
 
@@ -493,9 +502,9 @@ export const sendMessageToChatStream = async (
   try {
     const stream = await chat.sendMessageStream({ message: message });
     return stream;
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Check for both response status and raw status
-    const status = error?.status || error?.response?.status;
+    const status = (error as any)?.status || (error as any)?.response?.status;
     
     // Retry on Rate Limit (429) or Service Overload (503) if we haven't already
     if ((status === 429 || status === 503) && !useFallback) {

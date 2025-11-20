@@ -12,7 +12,6 @@ import { SettingsModal } from './components/SettingsModal.tsx';
 import { TabNavigation } from './components/TabNavigation.tsx';
 import { CodeInteractionPanel } from './components/CodeInteractionPanel.tsx';
 import { ChatInterfacePanel } from './components/ChatInterfacePanel.tsx';
-import { DocumentationViewerPanel } from './components/DocumentationViewerPanel.tsx';
 import { ImageGenerationPanel } from './components/ImageGenerationPanel.tsx';
 
 const App: React.FC = () => {
@@ -85,7 +84,7 @@ const App: React.FC = () => {
   const isApiKeyConfigured = !!activeApiKey;
 
   if (!isLoggedIn) {
-    return <LoginPage onLoginSuccess={handleLoginSuccess} currentTheme={theme} />;
+    return <LoginPage onLoginSuccess={handleLoginSuccess} />;
   }
 
   return (

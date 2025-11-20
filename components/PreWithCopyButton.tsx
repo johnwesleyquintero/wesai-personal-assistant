@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef } from 'react';
 
-export const PreWithCopyButton: React.FC<React.HTMLAttributes<HTMLPreElement> & { node?: any }> = ({
+export const PreWithCopyButton: React.FC<React.HTMLAttributes<HTMLPreElement> & { node?: unknown }> = ({
   children,
   ...props
 }) => {

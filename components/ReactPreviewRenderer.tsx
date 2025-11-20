@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useId, ReactNode, ComponentType, useRef } from 'react';
+import React, { useState, useEffect, useId, ReactNode, useRef } from 'react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -223,6 +223,9 @@ export const ReactPreviewRenderer: React.FC<ReactPreviewRendererProps> = ({
   }, [iframeLoaded, transpiledCodeForDebug, code, darkTheme, transpilationError]);
 
   const renderErrorState = (caughtError: unknown): ReactNode => {
+    const isIframeError = (e: unknown): e is { message: string; stack?: string; transpiledCode?: string } => {
+      return !!e && typeof e === 'object' && 'message' in e && 'transpiledCode' in e;
+    };
     // Use the custom onErrorRender prop if provided by the user
     // This allows the consumer of ReactPreviewRenderer to control the error UI
     if (onErrorRender) {
@@ -236,15 +239,10 @@ export const ReactPreviewRenderer: React.FC<ReactPreviewRendererProps> = ({
     let debugCode = null;
 
     // Check if it's an iframe error object
-    if (
-      caughtError &&
-      typeof caughtError === 'object' &&
-      'message' in caughtError &&
-      'transpiledCode' in caughtError
-    ) {
-      message = (caughtError as any).message;
-      stack = (caughtError as any).stack;
-      debugCode = (caughtError as any).transpiledCode;
+    if (isIframeError(caughtError)) {
+      message = caughtError.message;
+      stack = caughtError.stack ?? null;
+      debugCode = caughtError.transpiledCode ?? null;
       message = `Execution Error in Sandbox: ${message}`;
     } else if (caughtError instanceof Error) {
       message = caughtError.message;

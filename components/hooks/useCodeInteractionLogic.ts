@@ -1,5 +1,4 @@
 import { useAppStore } from '../../store';
-import { ActiveTab } from '../../types';
 import { useMemo } from 'react';
 
 export const useCodeInteractionLogic = () => {
