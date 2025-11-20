@@ -1,10 +1,12 @@
 import { GoogleGenAI, GenerateContentResponse, Chat } from '@google/genai';
-import { getActiveInstructionProfile } from './instructionService'; // New import
+import { getActiveInstructionProfile } from './instructionService';
 
 let ai: GoogleGenAI | null = null;
-const MODEL_NAME_TEXT = 'gemini-2.5-flash-preview-05-20';
-const MODEL_NAME_IMAGE = 'imagen-3.0-generate-002';
-const MODEL_NAME_FALLBACK = 'gemini-1.5-flash-latest'; // Define fallback model
+
+// --- UPDATED CONSTANTS FOR STABILITY ---
+const MODEL_NAME_TEXT = 'gemini-1.5-flash'; // Standard, fast production model
+const MODEL_NAME_IMAGE = 'imagen-3.0-generate-001'; // Stable image model
+const MODEL_NAME_FALLBACK = 'gemini-1.5-flash-8b'; // Faster/Cheaper fallback for retries
 
 export const initializeGeminiClient = (apiKey: string): void => {
   try {
@@ -62,21 +64,41 @@ const createPrompt = (basePrompt: string): string => {
     : basePrompt;
 };
 
+// --- IMPROVED ERROR HANDLING ---
 const handleApiError = (error: any, context: string): Error => {
-  console.error(`Error calling Gemini API for ${context}:`, error);
-  if (error.response?.status === 429) {
-    return new Error('Rate limit exceeded. Please try again later.');
-  } else if (
-    error.message.includes('API key not valid') ||
-    error.message.includes('invalid api key') ||
-    error.message.includes('API key is not valid')
-  ) {
-    return new Error('Invalid API key. Please check your API key.');
-  } else if (error instanceof Error) {
-    return new Error(`Gemini API request for ${context} failed: ${error.message}`);
+  console.error(`[Gemini Service] Error in ${context}:`, error);
+
+  const message = error?.message?.toLowerCase() || '';
+  const status = error?.status || error?.response?.status; 
+
+  // 1. Rate Limiting (429) & Server Overload (503)
+  if (status === 429 || status === 503) {
+    return new Error('System is currently busy or rate-limited. Please try again shortly.', { cause: error });
   }
+
+  // 2. Authentication / API Key Issues
+  if (
+    status === 403 ||
+    message.includes('api key not valid') ||
+    message.includes('invalid api key')
+  ) {
+    return new Error('Authentication failed. Please check your API key configuration.', { cause: error });
+  }
+
+  // 3. Model Not Found (Fixes your 404 issue)
+  if (status === 404 || message.includes('not found') || message.includes('unsupported model')) {
+    return new Error('The configured AI model is unavailable or deprecated. Please check model constants.', { cause: error });
+  }
+
+  // 4. Safety/Content Policy Violations
+  if (message.includes('safety') || message.includes('blocked')) {
+    return new Error('The request was blocked due to safety settings.', { cause: error });
+  }
+
+  // 5. Generic Fallback
   return new Error(
-    `An unknown error occurred while communicating with the Gemini API for ${context}.`,
+    `Gemini API request for ${context} failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    { cause: error }
   );
 };
 
@@ -362,8 +384,12 @@ export const sendMessageToChatStream = async (
     const stream = await chat.sendMessageStream({ message: message });
     return stream;
   } catch (error: any) {
-    if ((error.response?.status === 429 || error.response?.status === 503) && !useFallback) {
-      throw await retryWithFallbackModel(message, error);
+    // Check for both response status and raw status
+    const status = error?.status || error?.response?.status;
+    
+    // Retry on Rate Limit (429) or Service Overload (503) if we haven't already
+    if ((status === 429 || status === 503) && !useFallback) {
+      return await retryWithFallbackModel(message, error);
     }
     throw handleApiError(error, 'send message to chat stream');
   }
