@@ -23,7 +23,7 @@ This document explains the WesAI Personal Assistant application.
 - **Interactive Chat:**
   - Ask follow-up questions about the content or images the AI creates.
   - Get general help with different tasks.
-  - See a live preview for some types of content generated in the chat.
+  - See a live preview for some types of content generated in the chat, now with enhanced support for common styling utilities.
 - **Built-in Help:** Access this documentation anytime directly within the application.
 - **Modern Design:** Enjoy a clean, responsive interface built with modern web technologies, featuring theme support and easy-to-use clear input buttons.
 
@@ -57,10 +57,6 @@ Once you have the application files and your API key:
 6.  **Copy Output:** Use the copy buttons next to the generated content or chat messages.
 7.  **Clear Inputs:** Click the "X" icon next to the input boxes to quickly clear them.
 8.  **Logout:** Click the "Logout" button in the API key management section. This will also remove your API key from the browser.
-
-## Limitations
-
-- The live preview feature for some content types in the chat is currently not working correctly. We are working to fix this issue.
 
 ## Where to Find the Code
 
