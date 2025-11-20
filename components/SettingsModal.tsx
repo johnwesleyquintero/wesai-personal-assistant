@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { FaGithub } from 'react-icons/fa';
 import { ThemeToggleButton } from './ThemeToggleButton';
 import { DocumentationViewerPanel } from './DocumentationViewerPanel';
@@ -18,7 +18,7 @@ interface SettingsModalProps {
 
 type ModalTab = 'settings' | 'documentation';
 
-export const SettingsModal: React.FC<SettingsModalProps> = ({
+export const SettingsModal: React.FC<SettingsModalProps> = memo(({
   isOpen,
   onClose,
   onSaveKey,
@@ -209,4 +209,4 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       </div>
     </div>
   );
-};
+});

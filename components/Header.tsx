@@ -1,4 +1,4 @@
-import React from 'react';
+import { memo } from 'react';
 import { FaCog } from 'react-icons/fa';
 import { Theme } from '../types';
 
@@ -9,7 +9,7 @@ interface HeaderProps {
   onSettingsClick: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ title, onSettingsClick }) => {
+export const Header: React.FC<HeaderProps> = memo(({ title, onSettingsClick }) => {
   return (
     <header className="relative py-4 text-center">
       <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 py-2 sm:text-5xl">
@@ -27,4 +27,4 @@ export const Header: React.FC<HeaderProps> = ({ title, onSettingsClick }) => {
       </div>
     </header>
   );
-};
+});

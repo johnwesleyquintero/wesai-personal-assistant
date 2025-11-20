@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Header } from './components/Header.tsx';
 import { LoginPage } from './LoginPage.tsx';
 import { useAppStore } from './store.ts';
@@ -15,8 +15,8 @@ import CustomInstructionsPanel from './components/CustomInstructionsPanel.tsx';
 const App: React.FC = () => {
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
-  const handleOpenSettingsModal = () => setIsSettingsModalOpen(true);
-  const handleCloseSettingsModal = () => setIsSettingsModalOpen(false);
+  const handleOpenSettingsModal = useCallback(() => setIsSettingsModalOpen(true), []);
+  const handleCloseSettingsModal = useCallback(() => setIsSettingsModalOpen(false), []);
 
   const {
     code,
