@@ -27,7 +27,7 @@ The WesAI Personal Assistant is a feature-rich web application with a modern, re
 
 The application is stable and functional, providing the core features as intended. However, there is one known limitation:
 
-*   **Live Preview Feature:** The live preview for certain content types within the chat interface is currently not functioning correctly. This is a known issue that is being tracked for a future fix.
+*   **Live Preview Feature:** The live preview for certain content types within the chat interface has been enhanced to support common styling utility imports (`clsx`, `tailwind-merge`), improving its functionality and stability.
 
 ## 4. Future Roadmap & Recommended Improvements
 
