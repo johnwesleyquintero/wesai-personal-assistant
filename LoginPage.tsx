@@ -3,7 +3,7 @@ import { Theme } from './types';
 
 interface LoginPageProps {
   onLoginSuccess: () => void;
-  currentTheme: Theme;
+
 }
 
 const DEMO_USERNAME = import.meta.env.VITE_DEMO_USERNAME || 'demo';

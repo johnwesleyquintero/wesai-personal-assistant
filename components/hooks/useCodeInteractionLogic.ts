@@ -1,6 +1,6 @@
 import { useAppStore } from '../../store';
 import { ActiveTab } from '../../types';
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 
 export const useCodeInteractionLogic = () => {
   const {
@@ -26,17 +26,11 @@ export const useCodeInteractionLogic = () => {
     );
   }, [activeTab]);
 
-  const memoizedHandleCodeChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    handleCodeChange(e);
-  }, [handleCodeChange]);
+  
 
-  const memoizedHandleClearCodeInput = useCallback(() => {
-    handleClearCodeInput();
-  }, [handleClearCodeInput]);
+  
 
-  const memoizedHandleSubmitCodeInteraction = useCallback(() => {
-    handleSubmitCodeInteraction();
-  }, [handleSubmitCodeInteraction]);
+  
 
   return {
     code,
@@ -46,9 +40,9 @@ export const useCodeInteractionLogic = () => {
     activeApiKey,
     activeTab,
     codeInteractionActive,
-    handleCodeChange: memoizedHandleCodeChange,
-    handleClearCodeInput: memoizedHandleClearCodeInput,
-    handleSubmitCodeInteraction: memoizedHandleSubmitCodeInteraction,
+    handleCodeChange,
+    handleClearCodeInput,
+    handleSubmitCodeInteraction,
     setError,
   };
 };

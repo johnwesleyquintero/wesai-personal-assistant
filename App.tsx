@@ -32,6 +32,7 @@ const App: React.FC = () => {
     handleLoginSuccess,
     handleLogout,
     handleTabChange,
+    setIsLoggedIn,
   } = useAppStore();
 
   const {
@@ -74,10 +75,10 @@ const App: React.FC = () => {
   useEffect(() => {
     const loggedInStatus = localStorage.getItem('isWesAiUserLoggedIn');
     if (loggedInStatus === 'true') {
-      useAppStore.getState().setIsLoggedIn(true);
+      setIsLoggedIn(true);
       initializeActiveApiKey();
     } else {
-      useAppStore.getState().setIsLoggedIn(false);
+      setIsLoggedIn(false);
     }
   }, [initializeActiveApiKey]);
 
