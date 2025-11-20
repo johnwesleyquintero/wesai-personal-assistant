@@ -3,6 +3,7 @@ import { FaGithub } from 'react-icons/fa';
 import { ThemeToggleButton } from './ThemeToggleButton';
 import { DocumentationViewerPanel } from './DocumentationViewerPanel';
 import { ApiKeySource, Theme } from '../types.ts';
+import CustomInstructionsPanel from './CustomInstructionsPanel';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -16,7 +17,7 @@ interface SettingsModalProps {
   toggleTheme: () => void;
 }
 
-type ModalTab = 'settings' | 'documentation';
+type ModalTab = 'settings' | 'documentation' | 'customInstructions';
 
 export const SettingsModal: React.FC<SettingsModalProps> = memo(({
   isOpen,
@@ -104,6 +105,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = memo(({
             }`}
           >
             Documentation
+          </button>
+          <button
+            onClick={() => setActiveTab('customInstructions')}
+            className={`px-4 py-2 text-sm font-medium ${
+              activeTab === 'customInstructions'
+                ? 'border-b-2 border-purple-500 text-purple-600 dark:text-purple-400'
+                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+            }`}
+          >
+            Custom Instructions
           </button>
         </div>
 
@@ -205,6 +216,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = memo(({
             </div>
           )}
           {activeTab === 'documentation' && <DocumentationViewerPanel />}
+          {activeTab === 'customInstructions' && <CustomInstructionsPanel />}
         </div>
       </div>
     </div>

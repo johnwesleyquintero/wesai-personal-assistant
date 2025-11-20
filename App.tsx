@@ -10,7 +10,6 @@ import { CodeInteractionPanel } from './components/CodeInteractionPanel.tsx';
 import { ChatInterfacePanel } from './components/ChatInterfacePanel.tsx';
 import { DocumentationViewerPanel } from './components/DocumentationViewerPanel.tsx';
 import { ImageGenerationPanel } from './components/ImageGenerationPanel.tsx';
-import CustomInstructionsPanel from './components/CustomInstructionsPanel.tsx';
 
 const App: React.FC = () => {
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
@@ -119,7 +118,6 @@ const App: React.FC = () => {
             { id: 'chat', label: 'Chat' },
             { id: 'content', label: 'Generate Content' },
             { id: 'image', label: 'Image Generation' },
-            { id: 'custom-instructions', label: 'Custom Instructions' },
           ]}
         />
 
@@ -152,8 +150,6 @@ const App: React.FC = () => {
               setError={setError}
             />
           )}
-
-          {activeTab === 'custom-instructions' && <CustomInstructionsPanel />}
 
           {activeTab === 'chat' && (
             <ChatInterfacePanel

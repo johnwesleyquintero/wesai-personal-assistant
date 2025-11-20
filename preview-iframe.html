@@ -38,39 +38,23 @@
          For a production scenario, they would be included here directly or
          through a build process. For now, we assume the parent handles their loading. -->
     <script>
-        // Mock React and other required globals for execution within the iframe
-        // These would typically be provided by the parent or explicitly loaded.
-        // For now, we'll try to get them from the parent context, or create stubs.
-
-        let React = window.parent.React || {
-            createElement: (type, props, ...children) => ({ type, props, children }),
-            Fragment: 'Fragment',
-            isValidElement: () => false,
-            useState: (initial) => [initial, () => {}], // Simple stub for useState
-            useEffect: () => {}, // Simple stub for useEffect
-            useRef: () => ({ current: null }), // Simple stub for useRef
-            useId: () => 'mock-id', // Simple stub for useId
-            // Add other common React APIs if needed
-        };
-
         // Mock require for CommonJS modules that Babel might output
         const mockRequire = (name) => {
             if (name === 'react') {
-                return React;
+                return window.React;
             } else if (name === 'react-dom') {
-                // Return a minimal ReactDOM mock if needed for specific cases
-                return { createRoot: (el) => ({ render: () => {}, unmount: () => {} }) };
+                return window.ReactDOM;
             } else if (name === 'react/jsx-runtime' || name === 'react/jsx-dev-runtime') {
-                return { jsx: React.createElement, jsxs: React.createElement, Fragment: React.Fragment };
+                return { jsx: window.React.createElement, jsxs: window.React.createElement, Fragment: window.React.Fragment };
             } else if (name === 'clsx') {
                 return (...args) => args.filter(Boolean).join(' ');
             } else if (name === 'tailwind-merge') {
                 return (...args) => args.join(' ');
             } else if (name === 'react-icons/fi') { // Example for react-icons
-                return { FiAlertCircle: (props) => React.createElement('svg', { ...props, 'data-icon': 'FiAlertCircle' }) };
+                return { FiAlertCircle: (props) => window.React.createElement('svg', { ...props, 'data-icon': 'FiAlertCircle' }) };
             } else if (name === 'react-markdown') {
                 // A very basic mock for react-markdown: just renders its children
-                return (props) => React.createElement('div', null, props.children);
+                return (props) => window.React.createElement('div', null, props.children);
             } else if (name === 'remark-gfm') {
                 return {}; // remark-gfm is a plugin, not a component, so an empty object is fine
             } else if (name === 'uuid') {
@@ -81,8 +65,32 @@
                     let state = creator((set) => ({ set }), null, null);
                     return () => state;
                 };
+            } else if (name === 'lodash') {
+                return {
+                  // Basic stubs for common lodash functions
+                  debounce: (fn) => fn,
+                  throttle: (fn) => fn,
+                  get: (obj, path, defaultValue) => {
+                      if (!obj) return defaultValue;
+                      const parts = Array.isArray(path) ? path : path.split('.');
+                      let current = obj;
+                      for (let i = 0; i < parts.length; i++) {
+                          if (current === null || typeof current !== 'object') {
+                              return defaultValue;
+                          }
+                          current = current[parts[i]];
+                      }
+                      return current === undefined ? defaultValue : current;
+                  },
+                  // Add more as needed
+                };
+            } else if (name === 'moment') {
+                return () => ({
+                    format: () => '2025-01-01', // Simple mock date
+                    // Add more moment methods as needed
+                });
             }
-            console.warn(`iframe: Preview component tried to require: '${name}'. Only 'react', 'react/jsx-runtime', 'clsx', 'tailwind-merge', 'react-icons/fi', 'react-markdown', 'remark-gfm', 'uuid', 'zustand' are supported. Returning an empty object.`);
+            console.warn(`iframe: Preview component tried to require: '${name}'. Only 'react', 'react-dom', 'react/jsx-runtime', 'clsx', 'tailwind-merge', 'react-icons/fi', 'react-markdown', 'remark-gfm', 'uuid', 'zustand', 'lodash', 'moment' are supported. Returning an empty object.`);
             return {};
         };
 
@@ -157,7 +165,7 @@
                         `
                     );
 
-                    componentFactory(React, mockRequire, exportsObj, moduleObj);
+                    componentFactory(window.React, mockRequire, exportsObj, moduleObj);
 
                     const CompCandidate = moduleObj.exports.default || moduleObj.exports;
 
@@ -168,30 +176,26 @@
                         (CompCandidate && typeof CompCandidate === 'object' && typeof CompCandidate.render === 'function')
                     ) {
                         ComponentToRender = CompCandidate;
-                    } else if (React.isValidElement(CompCandidate)) {
+                    } else if (window.React.isValidElement(CompCandidate)) {
                         const ElementWrapper = ({ originalCodeProp }) =>
-                            React.cloneElement(CompCandidate, { markdown: originalCodeProp });
+                            window.React.cloneElement(CompCandidate, { markdown: originalCodeProp });
                         ComponentToRender = ElementWrapper;
                     } else {
                         throw new Error('Could not render preview: The code did not export a recognizable React component (function or class) or a valid React element.');
                     }
 
-                    // Send the component back to the parent for rendering OR
-                    // if ReactDOM is available in the iframe, render it directly.
-                    // For now, we assume ReactDOM.render is not needed in the iframe directly,
-                    // and the parent will render the element it receives.
-                    // If ReactDOM is loaded in the iframe:
                     const rootDiv = document.getElementById('root');
                     if (rootDiv && typeof window.ReactDOM !== 'undefined' && typeof window.ReactDOM.createRoot === 'function') {
                         const root = window.ReactDOM.createRoot(rootDiv);
-                        root.render(React.createElement(
+                        root.render(window.React.createElement(
                             ComponentToRender,
                             ComponentToRender === CompCandidate ? null : { originalCodeProp: originalCode }
                         ));
-                        window.parent.postMessage({ type: 'PREVIEW_READY' }, '*');
+                        // No need to post PREVIEW_READY if rendering directly in iframe, content is live.
+                        // Instead, we can notify when initial render is done if necessary, but innerHTML is safer for now.
+                        window.parent.postMessage({ type: 'PREVIEW_RENDER_SUCCESS', html: rootDiv.innerHTML }, '*');
                     } else {
-                        // If ReactDOM is not in iframe, send a signal that content is ready, and it's up to the parent to render.
-                        // For a React app, it's more typical for the parent to render.
+                        // Fallback, though with explicit script loads this branch should ideally not be taken.
                         window.parent.postMessage({ type: 'PREVIEW_RENDER_SUCCESS', html: rootDiv.innerHTML }, '*');
                     }
 
@@ -209,8 +213,8 @@
         window.parent.postMessage({ type: 'IFRAME_READY' }, '*');
 
     </script>
-    <!-- React and ReactDOM would ideally be loaded here for direct rendering in iframe -->
-    <!-- <script src="https://unpkg.com/react@18/umd/react.development.js"></script> -->
-    <!-- <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script> -->
+    <!-- React and ReactDOM loaded here for direct rendering in iframe -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
 </body>
 </html>

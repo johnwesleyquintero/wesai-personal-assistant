@@ -59,6 +59,8 @@ interface ReactPreviewRendererProps {
   onErrorRender?: (error: unknown) => ReactNode;
   /** Optional function to render a loading state. */
   onLoadingRender?: () => ReactNode;
+  /** Optional prop to always show the transpiled code for debugging purposes. */
+  showTranspiledCode?: boolean;
 }
 
 // Babel options for transpilation
@@ -101,6 +103,7 @@ export const ReactPreviewRenderer: React.FC<ReactPreviewRendererProps> = ({
   onErrorRender,
   onLoadingRender,
   darkTheme,
+  showTranspiledCode = false, // Default to false
 }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [iframeLoaded, setIframeLoaded] = useState(false);
@@ -267,17 +270,18 @@ export const ReactPreviewRenderer: React.FC<ReactPreviewRendererProps> = ({
         <strong className="font-semibold">Component Preview Error:</strong>
         <pre className="mt-1 text-xs whitespace-pre-wrap">{message}</pre>
         {stack && (
-          <pre className="mt-2 text-xs text-gray-500 dark:text-gray-400 whitespace-pre-wrap break-all">
-            {stack}
-          </pre>
+          <details className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+            <summary>Stack Trace</summary>
+            <pre className="mt-1 whitespace-pre-wrap break-all">{stack}</pre>
+          </details>
         )}
         {(debugCode || transpiledCodeForDebug) && (
-          <div className="mt-3 pt-3 border-t border-red-300 dark:border-red-600">
-            <strong className="font-semibold">Transpiled Code (for debug):</strong>
+          <details className="mt-3 pt-3 border-t border-red-300 dark:border-red-600">
+            <summary className="font-semibold">Transpiled Code (for debug)</summary>
             <pre className="mt-1 text-xs whitespace-pre-wrap break-all bg-red-50 dark:bg-red-900/20 p-2 rounded">
               {debugCode || transpiledCodeForDebug}
             </pre>
-          </div>
+          </details>
         )}
         {!(stack) && !(debugCode || transpiledCodeForDebug) && (
           <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
@@ -289,6 +293,9 @@ export const ReactPreviewRenderer: React.FC<ReactPreviewRendererProps> = ({
   };
 
   // --- Render Logic ---
+
+  // --- Render Logic ---
+  const displayDebugCode = showTranspiledCode && transpiledCodeForDebug;
 
   if (transpilationError) {
     return renderErrorState(transpilationError);
@@ -305,33 +312,53 @@ export const ReactPreviewRenderer: React.FC<ReactPreviewRendererProps> = ({
       return onLoadingRender();
     }
     return (
-      <div className="p-3 text-xs text-gray-500 dark:text-gray-400 animate-pulse">
-        Loading preview...
-      </div>
+      <>
+        <div className="p-3 text-xs text-gray-500 dark:text-gray-400 animate-pulse">
+          Loading preview...
+        </div>
+        {displayDebugCode && (
+          <details className="mt-3 pt-3 border-t border-gray-300 dark:border-gray-600">
+            <summary className="font-semibold text-sm">Transpiled Code (for debug)</summary>
+            <pre className="mt-1 text-xs whitespace-pre-wrap break-all bg-gray-50 dark:bg-gray-700/20 p-2 rounded">
+              {transpiledCodeForDebug}
+            </pre>
+          </details>
+        )}
+      </>
     );
   }
 
   // If iframe content is ready, render it directly within an Error Boundary to catch React errors
   return (
-    <PreviewErrorBoundary onErrorRender={renderErrorState}>
-      {/* We can directly inject the HTML received from the iframe */}
-      <div
-        className="p-2 border border-dashed border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-black dark:text-white min-h-[50px] overflow-auto"
-        dangerouslySetInnerHTML={{ __html: iframeContent }}
-      />
-      <iframe
-        ref={iframeRef}
-        src="./preview-iframe.html"
-        title="React Code Preview Sandbox"
-        sandbox="allow-scripts allow-forms allow-modals allow-popups allow-presentation allow-same-origin"
-        style={{
-          width: '100%',
-          height: '100%',
-          border: 'none',
-          display: 'none', // Initially hide the iframe, we render its content directly
-        }}
-        onLoad={() => setIframeLoaded(true)}
-      />
-    </PreviewErrorBoundary>
+    <>
+      <PreviewErrorBoundary onErrorRender={renderErrorState}>
+        {/* We can directly inject the HTML received from the iframe */}
+        <div
+          className="p-2 border border-dashed border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-black dark:text-white min-h-[50px] overflow-auto"
+          dangerouslySetInnerHTML={{ __html: iframeContent }}
+        />
+        <iframe
+          ref={iframeRef}
+          src="./preview-iframe.html"
+          title="React Code Preview Sandbox"
+          sandbox="allow-scripts allow-forms allow-modals allow-popups allow-presentation allow-same-origin"
+          style={{
+            width: '100%',
+            height: '100%',
+            border: 'none',
+            display: 'none', // Initially hide the iframe, we render its content directly
+          }}
+          onLoad={() => setIframeLoaded(true)}
+        />
+      </PreviewErrorBoundary>
+      {displayDebugCode && (
+        <details className="mt-3 pt-3 border-t border-gray-300 dark:border-gray-600">
+          <summary className="font-semibold text-sm">Transpiled Code (for debug)</summary>
+          <pre className="mt-1 text-xs whitespace-pre-wrap break-all bg-gray-50 dark:bg-gray-700/20 p-2 rounded">
+            {transpiledCodeForDebug}
+          </pre>
+        </details>
+      )}
+    </>
   );
 };
