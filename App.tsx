@@ -1,7 +1,11 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Header } from './components/Header.tsx';
 import { LoginPage } from './LoginPage.tsx';
 import { useAppStore } from './store.ts';
+import { useTheme } from './components/hooks/useTheme.ts';
+import { useChatLogic } from './components/hooks/useChatLogic.ts';
+import { useCodeInteractionLogic } from './components/hooks/useCodeInteractionLogic.ts';
+import { useImageGenerationLogic } from './components/hooks/useImageGenerationLogic.ts';
 
 // Import new components
 import { SettingsModal } from './components/SettingsModal.tsx';
@@ -12,10 +16,23 @@ import { DocumentationViewerPanel } from './components/DocumentationViewerPanel.
 import { ImageGenerationPanel } from './components/ImageGenerationPanel.tsx';
 
 const App: React.FC = () => {
+  const { theme, toggleTheme } = useTheme();
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
   const handleOpenSettingsModal = useCallback(() => setIsSettingsModalOpen(true), []);
   const handleCloseSettingsModal = useCallback(() => setIsSettingsModalOpen(false), []);
+
+  const {
+    apiKeySource,
+    isLoggedIn,
+    activeTab,
+    initializeActiveApiKey,
+    handleSaveApiKey,
+    handleRemoveApiKey,
+    handleLoginSuccess,
+    handleLogout,
+    handleTabChange,
+  } = useAppStore();
 
   const {
     code,
@@ -23,48 +40,36 @@ const App: React.FC = () => {
     isLoading,
     error,
     activeApiKey,
-    apiKeySource,
-    isLoggedIn,
-    activeTab,
-    theme,
+    codeInteractionActive,
+    handleCodeChange,
+    handleClearCodeInput,
+    handleSubmitCodeInteraction,
+    setError,
+  } = useCodeInteractionLogic();
+
+  const {
     chatMessages,
     chatInput,
     activeChatSession,
     copiedMessageId,
     chatError,
-    imagePrompt,
-    generatedImageData,
-    toggleTheme,
-    initializeActiveApiKey,
-    handleSaveApiKey,
-    handleRemoveApiKey,
-    handleLoginSuccess,
-    handleLogout,
-    handleCodeChange,
-    handleClearCodeInput,
-    handleImagePromptChange,
-    handleClearImagePrompt,
     handleChatInputChange,
     handleClearChatInput,
-    handleTabChange,
-    handleSubmitCodeInteraction,
-    handleImageGenerationSubmit,
     handleChatSubmit,
     handleNewChat,
     handleRetryChat,
     handleCopyChatMessage,
     handleTogglePreview,
-    setError,
-  } = useAppStore();
+  } = useChatLogic();
 
-  useEffect(() => {
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-    localStorage.setItem('theme', theme);
-  }, [theme]);
+  const {
+    imagePrompt,
+    generatedImageData,
+    onPromptChange: handleImagePromptChange,
+    onClearPrompt: handleClearImagePrompt,
+    onSubmit: handleImageGenerationSubmit,
+  } = useImageGenerationLogic();
+
 
   useEffect(() => {
     const loggedInStatus = localStorage.getItem('isWesAiUserLoggedIn');
@@ -81,13 +86,6 @@ const App: React.FC = () => {
   if (!isLoggedIn) {
     return <LoginPage onLoginSuccess={handleLoginSuccess} currentTheme={theme} />;
   }
-
-  const codeInteractionActive =
-    activeTab === 'review' ||
-    activeTab === 'refactor' ||
-    activeTab === 'preview' ||
-    activeTab === 'generate' ||
-    activeTab === 'content';
 
   return (
     <div className="min-h-screen flex flex-col items-center px-4 pt-0 sm:px-6">
