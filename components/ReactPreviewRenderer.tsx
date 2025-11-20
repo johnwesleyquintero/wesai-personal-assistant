@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useId, ReactNode, ReactElement, ComponentType } from 'react';
+import React, { useState, useEffect, useId, ReactNode, ReactElement, ComponentType, JSX } from 'react';
 
 // Ensure Babel is available on the window object for in-browser transpilation
 // Note: Relying on global `window.Babel` requires Babel to be loaded externally.
@@ -6,6 +6,9 @@ declare global {
   interface Window {
     Babel: {
       transform: (code: string, options: any) => { code: string | null };
+      // Adding common Babel plugins/presets here for clarity if needed later
+      // plugins: any[];
+      // presets: any[];
     };
   }
 }
@@ -20,25 +23,19 @@ class PreviewErrorBoundary extends React.Component<
     this.state = { hasError: false, error: null };
   }
 
-  // Use unknown for error type here as it can be anything thrown
   static getDerivedStateFromError(error: unknown) {
-    // Update state so the next render will show the fallback UI.
     return { hasError: true, error };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    // Log the error to the console
     console.error('Preview Error Boundary caught a rendering error:', error, errorInfo);
   }
 
   render() {
     if (this.state.hasError) {
-      // If an onErrorRender prop is provided, use it to render the error state
-      // Pass the actual error object to the custom render function
       if (this.props.onErrorRender) {
         return this.props.onErrorRender(this.state.error);
       }
-      // Otherwise, render a default error message
       const errorMessage =
         this.state.error instanceof Error
           ? this.state.error.message
@@ -53,7 +50,6 @@ class PreviewErrorBoundary extends React.Component<
         </div>
       );
     }
-    // Render children normally if no error
     return this.props.children;
   }
 }
@@ -81,10 +77,12 @@ const babelOptions = {
     ],
     // Transpile React JSX/TSX
     [
-      'react',
+      'react', // Use 'react' as the preset name for babel-standalone
       {
-        // 'classic' runtime requires `React` to be in scope, which we provide to `new Function`
-        runtime: 'classic',
+        // Use 'automatic' runtime for React 17+ for better ergonomics (no need to import React explicitly for JSX)
+        runtime: 'automatic',
+        // 'automatic' runtime injects `import { jsx } from 'react/jsx-runtime'` or `react/jsx-dev-runtime`.
+        // We need to ensure these modules are resolvable by our `mockRequire`.
       },
     ],
     // Transpile TypeScript, enabling TSX parsing
@@ -169,6 +167,20 @@ export const ReactPreviewRenderer: React.FC<ReactPreviewRendererProps> = ({
         'exports', // Standard CommonJS export object
         'module', // Standard CommonJS module object
         `
+        // Deconstruct common React named exports for direct access in the transpiled code.
+        // This helps if Babel's output or the execution environment expects these to be directly available.
+        const {
+          useState,
+          useEffect,
+          useCallback,
+          useMemo,
+          useRef,
+          Fragment,
+          createContext,
+          useContext,
+          // Add other commonly used React exports as needed
+        } = React;
+
         // Wrap the transpiled code in a try/catch block to catch errors during execution
         try {
           ${transpiledCode}
@@ -180,22 +192,25 @@ export const ReactPreviewRenderer: React.FC<ReactPreviewRendererProps> = ({
       );
 
       // --- Step 3: Set up the execution environment and run the factory ---
-      const R = React;
-      // Basic mock require function. Currently only supports 'react'.
-      // LIMITATION: Any other module imports will fail or return empty objects.
-      // A more robust solution requires a full bundler or more complex module proxying,
-      // typically done within a sandboxed environment.
+      const R = React; // Alias React for injection
+      // Enhanced mock require function to support common React named exports and jsx-runtime
       const mockRequire = (name: string) => {
         if (name === 'react') {
-          // Return the React object injected into the new Function scope
+          // For 'react' module, return the full React object.
+          // This allows transpiled code to access named exports like `React.useState`.
           return R;
+        } else if (name === 'react/jsx-runtime' || name === 'react/jsx-dev-runtime') {
+          // Provide the necessary JSX runtime functions for 'automatic' runtime.
+          // These are typically `jsx` and `jsxs` from 'react/jsx-runtime'.
+          // `React.createElement` is generally compatible.
+          return { jsx: R.createElement, jsxs: R.createElement, Fragment: R.Fragment };
         }
         console.warn(
-          `Preview component tried to require: '${name}'. Only 'react' is supported. Returning an empty object.`,
+          `Preview component tried to require: '${name}'. Only 'react' and 'react/jsx-runtime' are supported. Returning an empty object.`,
         );
         return {}; // Return an empty object for unsupported modules to prevent immediate crashes
       };
-      const exportsObj: { default?: any } = {}; // Object to capture exports from the evaluated code
+      const exportsObj: { default?: any; [key: string]: any } = {}; // Object to capture exports from the evaluated code
       const moduleObj = { exports: exportsObj }; // Mock module object for CommonJS compatibility
 
       // Execute the factory function with the mocked environment
@@ -222,7 +237,7 @@ export const ReactPreviewRenderer: React.FC<ReactPreviewRendererProps> = ({
       else if (React.isValidElement(CompCandidate)) {
         // It's a React element. Wrap it in a component for rendering, cloning to pass props.
         // This wrapper assumes the original element can receive props, particularly 'markdown'.
-        const ElementWrapper: ComponentType<{ markdown: string }> = ({ markdown }) =>
+        const ElementWrapper: ComponentType<{ markdown: string }> = ({ markdown }: { markdown: string }) =>
           React.cloneElement(CompCandidate as ReactElement<{ markdown?: string }>, {
             markdown, // Pass the code prop as 'markdown' to the cloned element
           });

@@ -22,7 +22,9 @@
     "forceConsistentCasingInFileNames": true,
 
     /* Vite specific */
-    "types": ["vite/client", "react/experimental", "react-dom/experimental"]
+    // Removing experimental React types which may cause resolution issues and are not standard for React 19.
+    // TypeScript will now implicitly discover '@types/react' from node_modules.
+    "types": ["vite/client"]
   },
   "include": ["**/*.ts", "**/*.tsx", "vite.config.ts"],
   "exclude": ["vite.config.ts"],
