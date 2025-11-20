@@ -196,19 +196,21 @@ export const ReactPreviewRenderer: React.FC<ReactPreviewRendererProps> = ({
       // Enhanced mock require function to support common React named exports and jsx-runtime
       const mockRequire = (name: string) => {
         if (name === 'react') {
-          // For 'react' module, return the full React object.
-          // This allows transpiled code to access named exports like `React.useState`.
           return R;
         } else if (name === 'react/jsx-runtime' || name === 'react/jsx-dev-runtime') {
-          // Provide the necessary JSX runtime functions for 'automatic' runtime.
-          // These are typically `jsx` and `jsxs` from 'react/jsx-runtime'.
-          // `React.createElement` is generally compatible.
           return { jsx: R.createElement, jsxs: R.createElement, Fragment: R.Fragment };
+        } else if (name === 'clsx') {
+          // Mock clsx for Tailwind CSS class combining
+          return (...args: any[]) => args.filter(Boolean).join(' ');
+        } else if (name === 'tailwind-merge') {
+          // Mock tailwind-merge for safely combining Tailwind classes
+          // For a simple mock, we can just join them. A real implementation is more complex.
+          return (...args: string[]) => args.join(' ');
         }
         console.warn(
-          `Preview component tried to require: '${name}'. Only 'react' and 'react/jsx-runtime' are supported. Returning an empty object.`,
+          `Preview component tried to require: '${name}'. Only 'react', 'react/jsx-runtime', 'clsx', and 'tailwind-merge' are supported. Returning an empty object.`,
         );
-        return {}; // Return an empty object for unsupported modules to prevent immediate crashes
+        return {};
       };
       const exportsObj: { default?: any; [key: string]: any } = {}; // Object to capture exports from the evaluated code
       const moduleObj = { exports: exportsObj }; // Mock module object for CommonJS compatibility
