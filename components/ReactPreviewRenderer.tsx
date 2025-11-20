@@ -124,7 +124,7 @@ export const ReactPreviewRenderer: React.FC<ReactPreviewRendererProps> = ({
     // Create a new Web Worker instance
     // It's important to use a bundler-friendly way to reference the worker file,
     // or ensure 'babel-worker.ts' is directly accessible as 'babel-worker.js' at runtime.
-    const worker = new Worker('babel-worker.ts', { type: 'module' });
+    const worker = new Worker('babel-worker.ts');
 
     worker.onmessage = (event: MessageEvent) => {
       const { type, transpiledCode, error } = event.data;
