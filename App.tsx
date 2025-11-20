@@ -120,7 +120,6 @@ const App: React.FC = () => {
             { id: 'content', label: 'Generate Content' },
             { id: 'image', label: 'Image Generation' },
             { id: 'custom-instructions', label: 'Custom Instructions' },
-            { id: 'documentation', label: 'Documentation' },
           ]}
         />
 
@@ -174,8 +173,6 @@ const App: React.FC = () => {
               onRetryChat={handleRetryChat}
             />
           )}
-
-          {activeTab === 'documentation' && <DocumentationViewerPanel />}
         </main>
         <footer className="text-center mt-12 py-6 border-t border-gray-200 dark:border-gray-700">
           <p className="text-sm text-gray-500 dark:text-gray-400">
