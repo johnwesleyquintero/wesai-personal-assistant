@@ -3,10 +3,10 @@ import { getActiveInstructionProfile } from './instructionService';
 
 let ai: GoogleGenAI | null = null;
 
-// --- UPDATED CONSTANTS FOR STABILITY ---
-const MODEL_NAME_TEXT = 'gemini-1.5-flash'; // Standard, fast production model
-const MODEL_NAME_IMAGE = 'imagen-3.0-generate-001'; // Stable image model
-const MODEL_NAME_FALLBACK = 'gemini-1.5-flash-8b'; // Faster/Cheaper fallback for retries
+// --- UPDATED MODEL CONSTANTS (2025) ---
+const MODEL_NAME_TEXT = 'gemini-2.0-flash';           // Main free-tier model
+const MODEL_NAME_IMAGE = 'imagen-3.0';                // Stable free-tier image model
+const MODEL_NAME_FALLBACK = 'gemini-2.0-flash-lite';  // Cheaper fallback
 
 export const initializeGeminiClient = (apiKey: string): void => {
   try {
