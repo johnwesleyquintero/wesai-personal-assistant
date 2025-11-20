@@ -1,15 +1,11 @@
-import React, { useState, useEffect, useId, ReactNode, ReactElement, ComponentType, JSX } from 'react';
+import React, { useState, useEffect, useId, ReactNode, ComponentType, useRef } from 'react';
 
-// Ensure Babel is available on the window object for in-browser transpilation
-// Note: Relying on global `window.Babel` requires Babel to be loaded externally.
+// Declare `Worker` for TypeScript without needing a separate .d.ts file if targeting older TS versions
 declare global {
   interface Window {
-    Babel: {
-      transform: (code: string, options: any) => { code: string | null };
-      // Adding common Babel plugins/presets here for clarity if needed later
-      // plugins: any[];
-      // presets: any[];
-    };
+    // If you are targeting ES6/ES2015 lib in tsconfig, Worker might already be declared.
+    // Otherwise, you might need to declare it explicitly for the global scope if not using 'webworker' lib.
+    // Worker: typeof Worker;
   }
 }
 
@@ -57,6 +53,8 @@ class PreviewErrorBoundary extends React.Component<
 interface ReactPreviewRendererProps {
   /** The TypeScript/TSX/JavaScript code string to transpile and render. */
   code: string;
+  /** Whether the parent application is in dark mode, to pass to the iframe. */
+  darkTheme?: boolean;
   /** Optional function to render a custom error state (transpilation, evaluation, or rendering). */
   onErrorRender?: (error: unknown) => ReactNode;
   /** Optional function to render a loading state. */
@@ -102,178 +100,123 @@ export const ReactPreviewRenderer: React.FC<ReactPreviewRendererProps> = ({
   code,
   onErrorRender,
   onLoadingRender,
+  darkTheme,
 }) => {
-  // State to hold the component/element type or wrapper to render
-  // React.ElementType can be a string (HTML element), a function, or a class (React component)
-  const [ComponentToRender, setComponentToRender] = useState<React.ElementType | null>(null);
-  // State to hold errors occurring during transpilation or evaluation (before rendering)
-  const [evaluationError, setEvaluationError] = useState<unknown | null>(null);
-  // State to hold the transpiled code for debugging if an evaluation error occurs
-  const [transpiledCodeForDebug, setTranspiledCodeForDebug] = useState<string | null>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [iframeLoaded, setIframeLoaded] = useState(false);
+  const [iframeError, setIframeError] = useState<unknown | null>(null);
+  const [iframeContent, setIframeContent] = useState<string | null>(null); // To store rendered HTML from iframe
 
-  // useId provides a stable ID unique to this component instance for filename in Babel output
   const uniqueId = useId();
+  const [transpiledCodeForDebug, setTranspiledCodeForDebug] = useState<string | null>(null);
+  const [transpilationError, setTranspilationError] = useState<unknown | null>(null);
 
+  // Effect to handle Babel transpilation
   useEffect(() => {
-    // Reset state when the code prop changes to show loading/clear previous error
-    setComponentToRender(null);
-    setEvaluationError(null);
+    setTranspilationError(null);
     setTranspiledCodeForDebug(null);
 
     if (!code || code.trim() === '') {
-      // No code provided, clear preview or show message
-      setEvaluationError('No code provided for preview.');
+      setTranspilationError('No code provided for preview.');
       return;
     }
 
-    // Ensure Babel is loaded before attempting transpilation
-    if (typeof window.Babel === 'undefined') {
-      const babelError =
-        "Babel is not available for transpilation. Ensure it's loaded in the browser environment.";
-      console.error(babelError);
-      setEvaluationError(babelError);
-      return;
-    }
+    // Create a new Web Worker instance
+    // It's important to use a bundler-friendly way to reference the worker file,
+    // or ensure 'babel-worker.ts' is directly accessible as 'babel-worker.js' at runtime.
+    const worker = new Worker('babel-worker.ts', { type: 'module' });
 
-    let transpiledCode: string | null = null; // Local variable to hold transpiled code
+    worker.onmessage = (event: MessageEvent) => {
+      const { type, transpiledCode, error } = event.data;
+      if (type === 'TRANSPILE_SUCCESS') {
+        setTranspiledCodeForDebug(transpiledCode);
+        setTranspilationError(null);
+      } else if (type === 'TRANSPILE_ERROR') {
+        console.error('Error from Babel Web Worker:', error);
+        setTranspilationError(error);
+      }
+    };
 
-    try {
-      // --- Step 1: Transpile the user's code using Babel ---
-      // This runs synchronously and can be CPU-intensive. Consider a Web Worker for performance.
-      const transformed = window.Babel.transform(code, {
-        ...babelOptions,
-        // Use a unique filename for better debugging context in transformed code/errors
-        filename: `preview-${uniqueId}.tsx`,
-      });
+    worker.onerror = (errorEvent: ErrorEvent) => {
+      console.error('Web Worker error:', errorEvent);
+      setTranspilationError(new Error(`Web Worker error: ${errorEvent.message}`));
+    };
 
-      transpiledCode = transformed.code;
-      setTranspiledCodeForDebug(transpiledCode); // Store for potential error logging later
+    // Send the code to the worker for transpilation
+    worker.postMessage({
+      id: uniqueId, // Use uniqueId to identify messages if multiple workers were managed
+      code: code,
+      filename: `preview-${uniqueId}.tsx`,
+      babelOptions: babelOptions,
+    });
 
-      if (!transpiledCode) {
-        // Babel transform might return null without throwing in some edge cases
-        throw new Error('Babel transpilation failed: No output code generated.');
+    // Cleanup worker on component unmount or code change
+    return () => {
+      worker.terminate();
+    };
+  }, [code, uniqueId]); // Depend on 'code' to re-run when the previewed code changes. uniqueId is stable.
+
+
+  // Effect to manage iframe communication
+  useEffect(() => {
+    setIframeError(null);
+    setIframeContent(null);
+
+    const iframe = iframeRef.current;
+    if (!iframe) return;
+
+    const handleIframeMessage = (event: MessageEvent) => {
+      // Ensure messages are from the expected iframe source
+      if (iframe.contentWindow && event.source !== iframe.contentWindow) {
+        return;
       }
 
-      // --- Step 2: Evaluate the transpiled code using new Function ---
-      // WARNING: SECURITY RISK - Executes code in the current browser context.
-      // Malicious code can access window, document, local storage, etc.
-      // ***USE A SANDBOXED IFRAME FOR UNTRUSTED INPUT***
+      const { type, error, stack, transpiledCode, html } = event.data;
 
-      // Create a function factory to evaluate the code. This allows controlling the scope
-      // and injecting necessary globals like React and a mock require.
-      const componentFactory = new Function(
-        'React', // Inject React
-        'require', // Inject mock require
-        'exports', // Standard CommonJS export object
-        'module', // Standard CommonJS module object
-        `
-        // Deconstruct common React named exports for direct access in the transpiled code.
-        // This helps if Babel's output or the execution environment expects these to be directly available.
-        const {
-          useState,
-          useEffect,
-          useCallback,
-          useMemo,
-          useRef,
-          Fragment,
-          createContext,
-          useContext,
-          // Add other commonly used React exports as needed
-        } = React;
+      switch (type) {
+        case 'IFRAME_READY':
+          setIframeLoaded(true);
+          break;
+        case 'PREVIEW_RENDER_SUCCESS':
+          setIframeContent(html);
+          setIframeError(null);
+          break;
+        case 'PREVIEW_ERROR':
+          setIframeError({ message: error, stack, transpiledCode });
+          setIframeContent(null);
+          break;
+        default:
+          break;
+      }
+    };
 
-        // Wrap the transpiled code in a try/catch block to catch errors during execution
-        try {
-          ${transpiledCode}
-        } catch (e) {
-          console.error('Error executing transpiled preview code:', e);
-          throw e; // Re-throw to be caught by the outer useEffect try/catch
-        }
-      `,
+    window.addEventListener('message', handleIframeMessage);
+
+    // If iframe is loaded and we have transpiled code (and no transpilation error)
+    // send it to the iframe for evaluation and rendering
+    if (iframeLoaded && transpiledCodeForDebug && !transpilationError) {
+      iframe.contentWindow?.postMessage(
+        {
+          type: 'PREVIEW_CODE',
+          code: transpiledCodeForDebug,
+          originalCode: code,
+          darkTheme: darkTheme,
+        },
+        '*',
       );
-
-      // --- Step 3: Set up the execution environment and run the factory ---
-      const R = React; // Alias React for injection
-      // Enhanced mock require function to support common React named exports and jsx-runtime
-      const mockRequire = (name: string) => {
-        if (name === 'react') {
-          return R;
-        } else if (name === 'react/jsx-runtime' || name === 'react/jsx-dev-runtime') {
-          return { jsx: R.createElement, jsxs: R.createElement, Fragment: R.Fragment };
-        } else if (name === 'clsx') {
-          // Mock clsx for Tailwind CSS class combining
-          return (...args: any[]) => args.filter(Boolean).join(' ');
-        } else if (name === 'tailwind-merge') {
-          // Mock tailwind-merge for safely combining Tailwind classes
-          // For a simple mock, we can just join them. A real implementation is more complex.
-          return (...args: string[]) => args.join(' ');
-        }
-        console.warn(
-          `Preview component tried to require: '${name}'. Only 'react', 'react/jsx-runtime', 'clsx', and 'tailwind-merge' are supported. Returning an empty object.`,
+    } else if (iframeLoaded && transpilationError) {
+        // If there's a transpilation error, clear iframe content and report error
+        iframe.contentWindow?.postMessage(
+            { type: 'PREVIEW_CODE', code: null, originalCode: code, darkTheme: darkTheme },
+            '*'
         );
-        return {};
-      };
-      const exportsObj: { default?: any; [key: string]: any } = {}; // Object to capture exports from the evaluated code
-      const moduleObj = { exports: exportsObj }; // Mock module object for CommonJS compatibility
-
-      // Execute the factory function with the mocked environment
-      componentFactory(R, mockRequire, exportsObj, moduleObj);
-
-      // --- Step 4: Identify the component or element to render from exports ---
-      // Look for a default export first, then fallback to general module.exports
-      const CompCandidate = moduleObj.exports.default || moduleObj.exports;
-
-      // Check if the export is a React component (function or class)
-      if (
-        typeof CompCandidate === 'function' || // Function component
-        (CompCandidate &&
-          typeof CompCandidate === 'object' &&
-          typeof (CompCandidate as any).render === 'function') // Class component instance check (less common export but possible)
-        // Note: Checking `CompCandidate.prototype.isReactComponent` is the standard for classes,
-        // but the function check covers functional components. The current check is okay but not exhaustive.
-      ) {
-        // It's a React component class or function.
-        // We cast it to React.ElementType. The rendering logic will handle passing props.
-        setComponentToRender(CompCandidate as React.ElementType);
-      }
-      // Check if the export is a valid React element (e.g., <div>)
-      else if (React.isValidElement(CompCandidate)) {
-        // It's a React element. Wrap it in a component for rendering, cloning to pass props.
-        // This wrapper assumes the original element can receive props, particularly 'markdown'.
-        const ElementWrapper: ComponentType<{ markdown: string }> = ({ markdown }: { markdown: string }) =>
-          React.cloneElement(CompCandidate as ReactElement<{ markdown?: string }>, {
-            markdown, // Pass the code prop as 'markdown' to the cloned element
-          });
-        // Set the wrapper component as the thing to render
-        setComponentToRender(ElementWrapper);
-      }
-      // If neither a component nor a valid element was exported/resulted
-      else {
-        console.error(
-          'Preview: Transpiled code did not export a usable React component, function, or element.',
-          'Exported value:',
-          CompCandidate,
-          'Full exports:',
-          moduleObj.exports,
-        );
-        throw new Error(
-          'Could not render preview: The code did not export a recognizable React component (function or class) or a valid React element.',
-        );
-      }
-    } catch (e: unknown) {
-      // Catch errors during Babel transpilation or `new Function` evaluation/execution
-      console.error('Error during preview transpilation or evaluation:', e);
-
-      // Store the error for rendering the error state
-      setEvaluationError(e);
-
-      // Log the transpiled code if evaluation failed, for debugging
-      if (transpiledCode) {
-        console.log('Transpiled code (for debug):\n', transpiledCode);
-      }
     }
-  }, [code, uniqueId]); // Depend on 'code' to re-run when the previewed code changes. useId is stable.
 
-  // Function to render errors (transpilation, evaluation, or rendering caught by ErrorBoundary)
+    return () => {
+      window.removeEventListener('message', handleIframeMessage);
+    };
+  }, [iframeLoaded, transpiledCodeForDebug, code, darkTheme, transpilationError]);
+
   const renderErrorState = (caughtError: unknown): ReactNode => {
     // Use the custom onErrorRender prop if provided by the user
     // This allows the consumer of ReactPreviewRenderer to control the error UI
@@ -285,10 +228,23 @@ export const ReactPreviewRenderer: React.FC<ReactPreviewRendererProps> = ({
     // Default error rendering UI
     let message = 'An unknown error occurred.';
     let stack = null;
+    let debugCode = null;
 
-    if (caughtError instanceof Error) {
+    // Check if it's an iframe error object
+    if (
+      caughtError &&
+      typeof caughtError === 'object' &&
+      'message' in caughtError &&
+      'transpiledCode' in caughtError
+    ) {
+      message = (caughtError as any).message;
+      stack = (caughtError as any).stack;
+      debugCode = (caughtError as any).transpiledCode;
+      message = `Execution Error in Sandbox: ${message}`;
+    } else if (caughtError instanceof Error) {
       message = caughtError.message;
       stack = caughtError.stack;
+      debugCode = transpiledCodeForDebug; // Use parent's transpiled code for main thread errors
       // Check if it's likely a transpilation error based on message
       if (message.includes('Babel')) {
         message = `Transpilation Error: ${message}`;
@@ -310,23 +266,20 @@ export const ReactPreviewRenderer: React.FC<ReactPreviewRendererProps> = ({
       <div className="p-3 text-sm text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/40 rounded border border-red-300 dark:border-red-600">
         <strong className="font-semibold">Component Preview Error:</strong>
         <pre className="mt-1 text-xs whitespace-pre-wrap">{message}</pre>
-        {/* Display stack trace only for Error instances */}
-        {caughtError instanceof Error && stack && (
+        {stack && (
           <pre className="mt-2 text-xs text-gray-500 dark:text-gray-400 whitespace-pre-wrap break-all">
             {stack}
           </pre>
         )}
-        {/* Display transpiled code for debugging if available */}
-        {transpiledCodeForDebug && (
+        {(debugCode || transpiledCodeForDebug) && (
           <div className="mt-3 pt-3 border-t border-red-300 dark:border-red-600">
             <strong className="font-semibold">Transpiled Code (for debug):</strong>
             <pre className="mt-1 text-xs whitespace-pre-wrap break-all bg-red-50 dark:bg-red-900/20 p-2 rounded">
-              {transpiledCodeForDebug}
+              {debugCode || transpiledCodeForDebug}
             </pre>
           </div>
         )}
-        {/* Hint to check console if no detailed info is shown */}
-        {!(caughtError instanceof Error && stack) && !transpiledCodeForDebug && (
+        {!(stack) && !(debugCode || transpiledCodeForDebug) && (
           <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
             Check the browser console for more details.
           </p>
@@ -337,19 +290,20 @@ export const ReactPreviewRenderer: React.FC<ReactPreviewRendererProps> = ({
 
   // --- Render Logic ---
 
-  // If there was an error during transpilation or evaluation (handled in useEffect)
-  if (evaluationError) {
-    // Call renderErrorState with the caught evaluation error
-    return renderErrorState(evaluationError);
+  if (transpilationError) {
+    return renderErrorState(transpilationError);
   }
 
-  // If still loading (ComponentToRender is null)
-  if (!ComponentToRender) {
-    // Use custom loading render if provided
+  // If iframe has reported an error
+  if (iframeError) {
+    return renderErrorState(iframeError);
+  }
+
+  // If iframe is not loaded or no content has been rendered yet
+  if (!iframeLoaded || !iframeContent) {
     if (onLoadingRender) {
       return onLoadingRender();
     }
-    // Default loading state UI
     return (
       <div className="p-3 text-xs text-gray-500 dark:text-gray-400 animate-pulse">
         Loading preview...
@@ -357,19 +311,27 @@ export const ReactPreviewRenderer: React.FC<ReactPreviewRendererProps> = ({
     );
   }
 
-  // If a component or element wrapper is ready, render it inside the Error Boundary
-  // The Error Boundary catches errors that happen *during* React's rendering phase of the previewed code.
+  // If iframe content is ready, render it directly within an Error Boundary to catch React errors
   return (
-    // Pass renderErrorState to the Error Boundary's onErrorRender prop.
-    // This ensures a consistent error UI for both evaluation and rendering errors.
     <PreviewErrorBoundary onErrorRender={renderErrorState}>
-      <div className="p-2 border border-dashed border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-black dark:text-white min-h-[50px] overflow-auto">
-        {/* Render the component or element wrapper.
-            We pass the original 'code' as a 'markdown' prop.
-            This assumes the previewed component/element expects this prop,
-            especially if it was wrapped because it was originally an element. */}
-        <ComponentToRender markdown={code} />
-      </div>
+      {/* We can directly inject the HTML received from the iframe */}
+      <div
+        className="p-2 border border-dashed border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-black dark:text-white min-h-[50px] overflow-auto"
+        dangerouslySetInnerHTML={{ __html: iframeContent }}
+      />
+      <iframe
+        ref={iframeRef}
+        src="./preview-iframe.html"
+        title="React Code Preview Sandbox"
+        sandbox="allow-scripts allow-forms allow-modals allow-popups allow-presentation allow-same-origin"
+        style={{
+          width: '100%',
+          height: '100%',
+          border: 'none',
+          display: 'none', // Initially hide the iframe, we render its content directly
+        }}
+        onLoad={() => setIframeLoaded(true)}
+      />
     </PreviewErrorBoundary>
   );
 };

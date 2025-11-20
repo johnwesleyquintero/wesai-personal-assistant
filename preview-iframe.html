@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Code Preview Sandbox</title>
+    <meta charset="utf-8" />
+    <style>
+        html, body { margin: 0; padding: 0; overflow: auto; background-color: white; color: black; font-family: sans-serif; }
+        body.dark { background-color: #1e1e1e; color: #d4d4d4; }
+        .error {
+            padding: 10px;
+            background-color: #fee2e2;
+            color: #ef4444;
+            border: 1px solid #fca5a5;
+            border-radius: 4px;
+            font-size: 0.875rem;
+        }
+        .error.dark {
+            background-color: #2a0000;
+            color: #f87171;
+            border-color: #b91c1c;
+        }
+        .loading {
+            padding: 10px;
+            color: #9ca3af;
+            font-size: 0.75rem;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <!-- These scripts are assumed to be available globally in the parent window.
+         For a production scenario, they would be included here directly or
+         through a build process. For now, we assume the parent handles their loading. -->
+    <script>
+        // Mock React and other required globals for execution within the iframe
+        // These would typically be provided by the parent or explicitly loaded.
+        // For now, we'll try to get them from the parent context, or create stubs.
+
+        let React = window.parent.React || {
+            createElement: (type, props, ...children) => ({ type, props, children }),
+            Fragment: 'Fragment',
+            isValidElement: () => false,
+            useState: (initial) => [initial, () => {}], // Simple stub for useState
+            useEffect: () => {}, // Simple stub for useEffect
+            useRef: () => ({ current: null }), // Simple stub for useRef
+            useId: () => 'mock-id', // Simple stub for useId
+            // Add other common React APIs if needed
+        };
+
+        // Mock require for CommonJS modules that Babel might output
+        const mockRequire = (name) => {
+            if (name === 'react') {
+                return React;
+            } else if (name === 'react-dom') {
+                // Return a minimal ReactDOM mock if needed for specific cases
+                return { createRoot: (el) => ({ render: () => {}, unmount: () => {} }) };
+            } else if (name === 'react/jsx-runtime' || name === 'react/jsx-dev-runtime') {
+                return { jsx: React.createElement, jsxs: React.createElement, Fragment: React.Fragment };
+            } else if (name === 'clsx') {
+                return (...args) => args.filter(Boolean).join(' ');
+            } else if (name === 'tailwind-merge') {
+                return (...args) => args.join(' ');
+            } else if (name === 'react-icons/fi') { // Example for react-icons
+                return { FiAlertCircle: (props) => React.createElement('svg', { ...props, 'data-icon': 'FiAlertCircle' }) };
+            } else if (name === 'react-markdown') {
+                // A very basic mock for react-markdown: just renders its children
+                return (props) => React.createElement('div', null, props.children);
+            } else if (name === 'remark-gfm') {
+                return {}; // remark-gfm is a plugin, not a component, so an empty object is fine
+            } else if (name === 'uuid') {
+                return { v4: () => 'mock-uuid-' + Math.random().toString(36).substring(2, 9) };
+            } else if (name === 'zustand') {
+                // Mock zustand: A store creator. This is a very basic mock.
+                return (creator) => {
+                    let state = creator((set) => ({ set }), null, null);
+                    return () => state;
+                };
+            }
+            console.warn(`iframe: Preview component tried to require: '${name}'. Only 'react', 'react/jsx-runtime', 'clsx', 'tailwind-merge', 'react-icons/fi', 'react-markdown', 'remark-gfm', 'uuid', 'zustand' are supported. Returning an empty object.`);
+            return {};
+        };
+
+        let exportsObj = {};
+        let moduleObj = { exports: exportsObj };
+
+        // Function to render an error message in the iframe
+        function renderError(message, stack, transpiledCodeForDebug) {
+            const root = document.getElementById('root');
+            if (root) {
+                root.innerHTML = `
+                    <div class="error ${document.body.classList.contains('dark') ? 'dark' : ''}">
+                        <strong style="font-weight: 600;">Sandbox Error:</strong>
+                        <pre style="margin-top: 4px; font-size: 0.75rem; white-space: pre-wrap;">${message}</pre>
+                        ${stack ? `<pre style="margin-top: 8px; font-size: 0.75rem; color: #9ca3af; white-space: pre-wrap; word-break: break-all;">${stack}</pre>` : ''}
+                        ${transpiledCodeForDebug ? `
+                            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #fca5a5;">
+                                <strong style="font-weight: 600;">Transpiled Code (for debug):</strong>
+                                <pre style="margin-top: 4px; font-size: 0.75rem; white-space: pre-wrap; word-break: break-all; background-color: ${document.body.classList.contains('dark') ? '#2a0000' : '#fee2e2'}; padding: 8px; border-radius: 4px;">${transpiledCodeForDebug}</pre>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }
+        }
+
+        // Listener for messages from the parent window
+        window.addEventListener('message', (event) => {
+            if (event.source !== window.parent) {
+                return;
+            }
+
+            const { type, code, originalCode, darkTheme } = event.data;
+
+            if (darkTheme) {
+                document.body.classList.add('dark');
+            } else {
+                document.body.classList.remove('dark');
+            }
+
+            if (type === 'PREVIEW_CODE') {
+                try {
+                    // Clear previous content
+                    document.getElementById('root').innerHTML = '';
+                    exportsObj = {};
+                    moduleObj = { exports: exportsObj };
+
+                    if (!code) {
+                        renderError('No transpiled code received.', null, originalCode);
+                        return;
+                    }
+
+                    // Deconstruct common React named exports for direct access in the transpiled code.
+                    const reactDeconstruct = `
+                        const {
+                            useState, useEffect, useCallback, useMemo, useRef, Fragment,
+                            createContext, useContext, createElement, cloneElement, isValidElement
+                        } = React;
+                    `;
+
+                    // Evaluate the transpiled code within a new Function context
+                    const componentFactory = new Function(
+                        'React', 'require', 'exports', 'module',
+                        `
+                            ${reactDeconstruct}
+                            try {
+                                ${code}
+                            } catch (e) {
+                                console.error('Error executing transpiled preview code in iframe:', e);
+                                throw e;
+                            }
+                        `
+                    );
+
+                    componentFactory(React, mockRequire, exportsObj, moduleObj);
+
+                    const CompCandidate = moduleObj.exports.default || moduleObj.exports;
+
+                    let ComponentToRender = null;
+
+                    if (
+                        typeof CompCandidate === 'function' ||
+                        (CompCandidate && typeof CompCandidate === 'object' && typeof CompCandidate.render === 'function')
+                    ) {
+                        ComponentToRender = CompCandidate;
+                    } else if (React.isValidElement(CompCandidate)) {
+                        const ElementWrapper = ({ originalCodeProp }) =>
+                            React.cloneElement(CompCandidate, { markdown: originalCodeProp });
+                        ComponentToRender = ElementWrapper;
+                    } else {
+                        throw new Error('Could not render preview: The code did not export a recognizable React component (function or class) or a valid React element.');
+                    }
+
+                    // Send the component back to the parent for rendering OR
+                    // if ReactDOM is available in the iframe, render it directly.
+                    // For now, we assume ReactDOM.render is not needed in the iframe directly,
+                    // and the parent will render the element it receives.
+                    // If ReactDOM is loaded in the iframe:
+                    const rootDiv = document.getElementById('root');
+                    if (rootDiv && typeof window.ReactDOM !== 'undefined' && typeof window.ReactDOM.createRoot === 'function') {
+                        const root = window.ReactDOM.createRoot(rootDiv);
+                        root.render(React.createElement(
+                            ComponentToRender,
+                            ComponentToRender === CompCandidate ? null : { originalCodeProp: originalCode }
+                        ));
+                        window.parent.postMessage({ type: 'PREVIEW_READY' }, '*');
+                    } else {
+                        // If ReactDOM is not in iframe, send a signal that content is ready, and it's up to the parent to render.
+                        // For a React app, it's more typical for the parent to render.
+                        window.parent.postMessage({ type: 'PREVIEW_RENDER_SUCCESS', html: rootDiv.innerHTML }, '*');
+                    }
+
+                } catch (e) {
+                    console.error('Error in iframe during code evaluation:', e);
+                    let message = e instanceof Error ? e.message : String(e);
+                    let stack = e instanceof Error ? e.stack : null;
+                    renderError(message, stack, originalCode);
+                    window.parent.postMessage({ type: 'PREVIEW_ERROR', error: message, stack: stack, transpiledCode: originalCode }, '*');
+                }
+            }
+        });
+
+        // Inform the parent that the iframe is ready to receive code
+        window.parent.postMessage({ type: 'IFRAME_READY' }, '*');
+
+    </script>
+    <!-- React and ReactDOM would ideally be loaded here for direct rendering in iframe -->
+    <!-- <script src="https://unpkg.com/react@18/umd/react.development.js"></script> -->
+    <!-- <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script> -->
+</body>
+</html>
