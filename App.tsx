@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Header } from './components/Header.tsx';
 import { LoginPage } from './LoginPage.tsx';
 import { useAppStore } from './store.ts';
 
 // Import new components
-import { ApiKeySection } from './components/ApiKeySection.tsx';
+import { SettingsModal } from './components/SettingsModal.tsx';
 import { TabNavigation } from './components/TabNavigation.tsx';
 import { CodeInteractionPanel } from './components/CodeInteractionPanel.tsx';
 import { ChatInterfacePanel } from './components/ChatInterfacePanel.tsx';
@@ -13,6 +13,11 @@ import { ImageGenerationPanel } from './components/ImageGenerationPanel.tsx';
 import CustomInstructionsPanel from './components/CustomInstructionsPanel.tsx';
 
 const App: React.FC = () => {
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+
+  const handleOpenSettingsModal = () => setIsSettingsModalOpen(true);
+  const handleCloseSettingsModal = () => setIsSettingsModalOpen(false);
+
   const {
     code,
     feedback,
@@ -88,9 +93,16 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col items-center px-4 pt-0 sm:px-6">
       <div className="w-full sm:max-w-5xl">
-        <Header title="WesAI Personal Assistant" toggleTheme={toggleTheme} currentTheme={theme} />
+        <Header
+          title="WesAI Personal Assistant"
+          toggleTheme={toggleTheme}
+          currentTheme={theme}
+          onSettingsClick={handleOpenSettingsModal}
+        />
 
-        <ApiKeySection
+        <SettingsModal
+          isOpen={isSettingsModalOpen}
+          onClose={handleCloseSettingsModal}
           onSaveKey={handleSaveApiKey}
           onRemoveKey={handleRemoveApiKey}
           isKeySet={isApiKeyConfigured}

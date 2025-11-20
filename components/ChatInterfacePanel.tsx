@@ -86,9 +86,9 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = ({
           {error && (
             <button
               onClick={onRetryChat}
-              className="ml-4 px-3 py-1 bg-red-700 text-white text-xs rounded-md hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500"
+              className="ml-4 px-3 py-1 bg-gray-600 text-white text-xs rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
             >
-              Retry with Fallback
+              Retry
             </button>
           )}
         </div>

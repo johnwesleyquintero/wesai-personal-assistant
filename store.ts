@@ -209,11 +209,38 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   handleTabChange: async (tab: ActiveTab) => {
-    set({ activeTab: tab, feedback: '', error: null, chatError: null, generatedImageData: null });
+    set((state) => {
+      const newState: Partial<AppState> = {
+        activeTab: tab,
+        feedback: '',
+        error: null,
+        chatError: null,
+        generatedImageData: null,
+      };
 
-    if (tab !== 'image') {
-      set({ imagePrompt: '' });
-    }
+      if (state.activeTab === 'image' && tab !== 'image') {
+        newState.imagePrompt = '';
+      }
+
+      if (
+        state.activeTab !== 'review' &&
+        state.activeTab !== 'refactor' &&
+        state.activeTab !== 'preview' &&
+        state.activeTab !== 'generate' &&
+        state.activeTab !== 'content' &&
+        state.activeTab !== 'custom-instructions' &&
+        tab !== 'review' &&
+        tab !== 'refactor' &&
+        tab !== 'preview' &&
+        tab !== 'generate' &&
+        tab !== 'content' &&
+        tab !== 'custom-instructions'
+      ) {
+        newState.code = '';
+      }
+      return newState;
+    });
+
     if (
       tab !== 'review' &&
       tab !== 'refactor' &&

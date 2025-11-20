@@ -25,7 +25,31 @@ export const ImageGenerationPanel: React.FC<ImageGenerationPanelProps> = ({
   setError,
 }) => {
   const [downloadName, setDownloadName] = useState('generated-image.jpg');
+  const [isCopied, setIsCopied] = useState(false);
 
+  const handleCopyImage = async () => {
+    if (!imageData) return;
+    try {
+      const byteCharacters = atob(imageData);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'image/jpeg' });
+
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          [blob.type]: blob,
+        }),
+      ]);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000); // Reset after 2 seconds
+    } catch (err) {
+      console.error('Failed to copy image: ', err);
+      setError('Failed to copy image to clipboard.');
+    }
+  };
   const handleDownload = () => {
     if (!imageData) return;
     const link = document.createElement('a');
@@ -137,35 +161,83 @@ export const ImageGenerationPanel: React.FC<ImageGenerationPanelProps> = ({
               className="max-w-full h-auto rounded-md shadow-md border border-gray-300 dark:border-gray-600 mb-4"
               style={{ maxHeight: '60vh' }}
             />
-            <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-3 w-full sm:w-auto">
-              <input
-                type="text"
-                value={downloadName}
-                onChange={(e) => setDownloadName(e.target.value)}
-                placeholder="image_name.jpg"
-                className="p-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-gray-100 text-sm w-full sm:w-auto flex-grow"
-                aria-label="Download file name"
-              />
-              <button
-                onClick={handleDownload}
-                className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-150 ease-in-out flex items-center justify-center whitespace-nowrap"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-5 h-5 mr-2"
+            <div className="flex flex-col sm:flex-row items-center justify-between w-full mt-4">
+              <div className="flex-grow mb-2 sm:mb-0 sm:mr-2">
+                <input
+                  type="text"
+                  value={downloadName}
+                  onChange={(e) => setDownloadName(e.target.value)}
+                  placeholder="image_name.jpg"
+                  className="p-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-gray-100 text-sm w-full"
+                  aria-label="Download file name"
+                />
+              </div>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={handleCopyImage}
+                  className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-150 ease-in-out flex items-center justify-center whitespace-nowrap"
+                  title="Copy image to clipboard"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"
-                  />
-                </svg>
-                Download Image
-              </button>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="w-5 h-5 mr-2"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.373-.03.748-.03 1.125 0 1.131.094 1.976 1.057 1.976 2.192V7.5m-8.25 4.5a3 3 0 0 1-3-3V7.5a3 3 0 0 1 3-3h1.5a3 3 0 0 1 3 3v.75m0 0h1.5m-1.5 0a3 3 0 0 0 3 3h1.5a3 3 0 0 0 3-3V7.5a3 3 0 0 0-3-3h-1.5m-1.5 4.5a3 3 0 0 0-3 3v3.75a3 3 0 0 0 3 3h1.5a3 3 0 0 0 3-3V12a3 3 0 0 0-3-3h-1.5Z"
+                    />
+                  </svg>
+                  {isCopied ? 'Copied!' : 'Copy'}
+                </button>
+                <button
+                  onClick={handleSubmitClick}
+                  disabled={isLoading || !isApiKeyConfigured}
+                  className="w-full sm:w-auto bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-150 ease-in-out flex items-center justify-center whitespace-nowrap disabled:opacity-60"
+                  title="Regenerate image with the same prompt"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="w-5 h-5 mr-2"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 11.667 0m0 0h-4.992m4.992 0-3.181-3.183a8.25 8.25 0 0 0-11.667 0"
+                    />
+                  </svg>
+                  Regenerate
+                </button>
+                <button
+                  onClick={handleDownload}
+                  className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-150 ease-in-out flex items-center justify-center whitespace-nowrap"
+                  title="Download image"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="w-5 h-5 mr-2"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"
+                    />
+                  </svg>
+                  Download
+                </button>
+              </div>
             </div>
           </div>
         </div>
