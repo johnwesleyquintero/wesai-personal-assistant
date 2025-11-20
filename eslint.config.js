@@ -60,6 +60,11 @@ export default tseslint.config(
       'react/react-in-jsx-scope': 'off',
       // Prettier rule integration
       'prettier/prettier': 'warn',
+      // Additional rules for code consistency and quality
+      'no-console': ['warn', { allow: ['warn', 'error'] }], // Warn for console.log, allow console.warn/error
+      'no-debugger': 'error', // Disallow debugger statements
+      'react/self-closing-comp': ['warn', { component: true, html: true }], // Enforce self-closing JSX elements
+      'react/jsx-boolean-value': ['warn', 'never'], // Enforce boolean attributes notation in JSX (e.g., `checked` instead of `checked={true}`)
     },
     settings: {
       react: {

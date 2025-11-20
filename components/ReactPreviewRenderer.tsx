@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useId, ReactNode, ComponentType, useRef } from 'react';
+import { clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 // Declare `Worker` for TypeScript without needing a separate .d.ts file if targeting older TS versions
 declare global {
@@ -334,7 +336,12 @@ export const ReactPreviewRenderer: React.FC<ReactPreviewRendererProps> = ({
       <PreviewErrorBoundary onErrorRender={renderErrorState}>
         {/* We can directly inject the HTML received from the iframe */}
         <div
-          className="p-2 border border-dashed border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-black dark:text-white min-h-[50px] overflow-auto"
+          className={twMerge(
+            clsx(
+              'p-2 border border-dashed rounded bg-white text-black min-h-[50px] overflow-auto',
+              darkTheme ? 'border-gray-600 bg-gray-800 text-white' : 'border-gray-300',
+            ),
+          )}
           dangerouslySetInnerHTML={{ __html: iframeContent }}
         />
         <iframe
