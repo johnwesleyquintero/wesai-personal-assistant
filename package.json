@@ -29,6 +29,7 @@
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.0",
     "tailwind-merge": "^3.4.0",
+    "tailwindcss": "^4.1.17",
     "typescript-eslint": "^8.33.1",
     "uuid": "^13.0.0",
     "zustand": "^5.0.8"
