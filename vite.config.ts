@@ -26,7 +26,6 @@ export default defineConfig({
         },
       },
     },
-    // Minify output for production build
-    minify: 'terser', // Default terser compression will be used.
+    minify: 'esbuild',
   },
 });
