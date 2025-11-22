@@ -84,7 +84,24 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = ({
         <div className="p-3 border-b border-red-300 dark:border-red-600 bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-200 text-sm flex items-center justify-between">
           <div className="flex items-center space-x-2">
             {(error.toLowerCase().includes('safety') || error.toLowerCase().includes('blocked')) && (
-              <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-red-200 dark:bg-red-800 text-red-800 dark:text-red-200">Safety Blocked</span>
+              <span className="relative group px-2 py-0.5 text-xs font-semibold rounded-full bg-red-200 dark:bg-red-800 text-red-800 dark:text-red-200" title={(() => {
+                const e = error.toLowerCase();
+                if (e.includes('rate') || e.includes('429') || e.includes('busy') || e.includes('503')) return 'Rate limited or service busy. Retry.';
+                if (e.includes('auth') || e.includes('key') || e.includes('invalid')) return 'Authentication issue. Check API key.';
+                if (e.includes('model') || e.includes('unsupported') || e.includes('deprecated') || e.includes('404')) return 'Model unavailable. Update model.';
+                return 'Blocked by safety settings.';
+              })()}>
+                Safety Blocked
+                <span className="absolute left-0 mt-1 hidden group-hover:block bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 text-[10px] px-2 py-1 rounded shadow">
+                  {(() => {
+                    const e = error.toLowerCase();
+                    if (e.includes('rate') || e.includes('429') || e.includes('busy') || e.includes('503')) return 'Rate limited or service busy. Retry.';
+                    if (e.includes('auth') || e.includes('key') || e.includes('invalid')) return 'Authentication issue. Check API key.';
+                    if (e.includes('model') || e.includes('unsupported') || e.includes('deprecated') || e.includes('404')) return 'Model unavailable. Update model.';
+                    return 'Blocked by safety settings.';
+                  })()}
+                </span>
+              </span>
             )}
             <span>
               <strong>Chat Error:</strong> {error}
@@ -175,6 +192,18 @@ interface ChatMessageItemProps {
 
 const ChatMessageItem: React.FC<ChatMessageItemProps> = memo(
   ({ msg, copiedMessageId, onTogglePreview, onCopyChatMessage }) => {
+    const getDownloadName = (code: string, fallbackId: string) => {
+      const s = code;
+      const m1 = s.match(/export\s+default\s+function\s+([A-Za-z_][A-Za-z0-9_]*)/);
+      if (m1) return `${m1[1]}.tsx`;
+      const m2 = s.match(/export\s+default\s+([A-Za-z_][A-Za-z0-9_]*)/);
+      if (m2) return `${m2[1]}.tsx`;
+      const m3 = s.match(/function\s+([A-Za-z_][A-Za-z0-9_]*)/);
+      if (m3 && s.includes(`export default ${m3[1]}`)) return `${m3[1]}.tsx`;
+      const m4 = s.match(/const\s+([A-Za-z_][A-Za-z0-9_]*)\s*=\s*\(/);
+      if (m4 && s.includes(`export default ${m4[1]}`)) return `${m4[1]}.tsx`;
+      return `component-${fallbackId}.tsx`;
+    };
     return (
       <div className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
         <div
@@ -296,11 +325,12 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = memo(
             {msg.componentCode && (
               <button
                 onClick={() => {
+                  const name = getDownloadName(msg.componentCode as string, msg.id);
                   const blob = new Blob([msg.componentCode as string], { type: 'text/plain' });
                   const url = URL.createObjectURL(blob);
                   const a = document.createElement('a');
                   a.href = url;
-                  a.download = `component-${msg.id}.tsx`;
+                  a.download = name;
                   document.body.appendChild(a);
                   a.click();
                   document.body.removeChild(a);
