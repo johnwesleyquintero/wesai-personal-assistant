@@ -7,13 +7,16 @@ import {
   getReactComponentPreview,
   generateCodeWithGemini,
   generateContentWithGemini,
-  generateImageWithGemini, // Changed from generateImageWithImagen
+  generateImageWithGemini,
   initializeGeminiClient,
   clearGeminiClient,
   startChatSession,
   sendMessageToChatStream,
 } from './services/geminiService.ts';
 import { getActiveInstructionProfile } from './services/instructionService.ts';
+
+export const LS_KEY_API = 'geminiApiKey';
+export const LS_KEY_LOGGED_IN = 'isWesAiUserLoggedIn';
 
 interface AppState {
   // Global state
@@ -123,7 +126,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   toggleTheme: () => set((state) => ({ theme: state.theme === 'light' ? 'dark' : 'light' })),
 
   initializeActiveApiKey: () => {
-    const storedKey = localStorage.getItem('geminiApiKey');
+    const storedKey = localStorage.getItem(LS_KEY_API);
     const envApiKey =
       typeof import.meta.env !== 'undefined' ? import.meta.env.VITE_GEMINI_API_KEY : undefined;
 
@@ -141,14 +144,14 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   handleSaveApiKey: (key: string) => {
     if (key.trim()) {
-      localStorage.setItem('geminiApiKey', key);
+      localStorage.setItem(LS_KEY_API, key);
       set({ activeApiKey: key, apiKeySource: 'ui', error: null, chatError: null });
       initializeGeminiClient(key);
     }
   },
 
   handleRemoveApiKey: () => {
-    localStorage.removeItem('geminiApiKey');
+    localStorage.removeItem(LS_KEY_API);
     set({
       feedback: '',
       generatedImageData: null,
@@ -161,14 +164,14 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   handleLoginSuccess: () => {
-    localStorage.setItem('isWesAiUserLoggedIn', 'true');
+    localStorage.setItem(LS_KEY_LOGGED_IN, 'true');
     set({ isLoggedIn: true });
     get().initializeActiveApiKey();
   },
 
   handleLogout: () => {
-    localStorage.removeItem('isWesAiUserLoggedIn');
-    localStorage.removeItem('geminiApiKey');
+    localStorage.removeItem(LS_KEY_LOGGED_IN);
+    localStorage.removeItem(LS_KEY_API);
     set({
       isLoggedIn: false,
       feedback: '',
@@ -346,7 +349,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   extractComponentCode: (markdownContent: string): string | null => {
-    const codeBlockRegex = /```(?:tsx|jsx)\s*\n([\s\S]+?)\n```/;
+    const codeBlockRegex = /```(?:tsx|jsx|ts|typescript)?\s*\n([\s\S]+?)\n```/;
     const match = markdownContent.match(codeBlockRegex);
     if (match && match[1] && match[1].trim() !== '') {
       return match[1];

@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Header } from './components/Header.tsx';
 import { LoginPage } from './LoginPage.tsx';
-import { useAppStore } from './store.ts';
+import { useAppStore, LS_KEY_LOGGED_IN } from './store.ts';
 import { useTheme } from './components/hooks/useTheme.ts';
 import { useChatLogic } from './components/hooks/useChatLogic.ts';
 import { useCodeInteractionLogic } from './components/hooks/useCodeInteractionLogic.ts';
@@ -72,7 +72,7 @@ const App: React.FC = () => {
 
 
   useEffect(() => {
-    const loggedInStatus = localStorage.getItem('isWesAiUserLoggedIn');
+    const loggedInStatus = localStorage.getItem(LS_KEY_LOGGED_IN);
     if (loggedInStatus === 'true') {
       setIsLoggedIn(true);
       initializeActiveApiKey();
