@@ -60,6 +60,7 @@ const App: React.FC = () => {
     handleRetryChat,
     handleCopyChatMessage,
     handleTogglePreview,
+    sendOnEnter,
   } = useChatLogic();
 
   const {
@@ -165,6 +166,7 @@ const App: React.FC = () => {
               error={chatError}
               onNewChat={handleNewChat}
               onRetryChat={handleRetryChat}
+              sendOnEnter={sendOnEnter}
             />
           )}
         </main>

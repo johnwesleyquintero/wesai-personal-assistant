@@ -20,6 +20,7 @@ interface ChatInterfacePanelProps {
   error: string | null;
   onNewChat: () => void; // Add new chat prop
   onRetryChat: () => void; // New prop for retrying chat with fallback
+  sendOnEnter: boolean;
 }
 
 export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = ({
@@ -37,6 +38,7 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = ({
   error,
   onNewChat,
   onRetryChat,
+  sendOnEnter,
 }) => {
   const chatMessagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -80,17 +82,20 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = ({
       </div>
       {error && (
         <div className="p-3 border-b border-red-300 dark:border-red-600 bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-200 text-sm flex items-center justify-between">
-          <div>
-            <strong>Chat Error:</strong> {error}
+          <div className="flex items-center space-x-2">
+            {(error.toLowerCase().includes('safety') || error.toLowerCase().includes('blocked')) && (
+              <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-red-200 dark:bg-red-800 text-red-800 dark:text-red-200">Safety Blocked</span>
+            )}
+            <span>
+              <strong>Chat Error:</strong> {error}
+            </span>
           </div>
-          {error && (
-            <button
-              onClick={onRetryChat}
-              className="ml-4 px-3 py-1 bg-gray-600 text-white text-xs rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
-            >
-              Retry
-            </button>
-          )}
+          <button
+            onClick={onRetryChat}
+            className="ml-4 px-3 py-1 bg-gray-600 text-white text-xs rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+          >
+            Retry
+          </button>
         </div>
       )}
       <div className="flex-grow p-4 space-y-4 overflow-y-auto">
@@ -110,13 +115,20 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = ({
         className="p-3 border-t border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800"
       >
         <div className="flex items-center space-x-2 relative">
-          <input
-            type="text"
+          <textarea
             value={chatInput}
             onChange={(e) => onChatInputChange(e.target.value)}
+            onKeyDown={(e) => {
+              if (sendOnEnter && e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (!isLoading && isApiKeyConfigured && isChatSessionActive && chatInput.trim()) {
+                  onChatSubmit();
+                }
+              }
+            }}
             placeholder={getInputPlaceholder()}
             disabled={isLoading || !isApiKeyConfigured || !isChatSessionActive}
-            className="flex-grow p-2.5 pr-10 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 text-sm"
+            className="flex-grow p-2.5 pr-10 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 text-sm resize-y min-h-[44px]"
             aria-label="Chat input"
           />
           {chatInput && !isLoading && (
@@ -216,6 +228,7 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = memo(
             </div>
           )}
           {msg.role === 'model' && msg.content.trim() && (
+            <>
             <button
               onClick={() =>
                 onCopyChatMessage(
@@ -280,7 +293,30 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = memo(
                     : 'Copy Markdown'}
               </span>
             </button>
-          )}
+            {msg.componentCode && (
+              <button
+                onClick={() => {
+                  const blob = new Blob([msg.componentCode as string], { type: 'text/plain' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `component-${msg.id}.tsx`;
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                  URL.revokeObjectURL(url);
+                }}
+                title="Download Component"
+                aria-label="Download component code as TSX file"
+                className="absolute top-1.5 right-9 p-1 rounded-md transition-all duration-150 ease-in-out opacity-0 group-hover:opacity-60 focus:opacity-100 hover:opacity-100 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-400 dark:hover:bg-gray-500"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
+                  <path d="M12 16l4-5h-3V4h-2v7H8l4 5zm8 3H4v-2h16v2z" />
+                </svg>
+              </button>
+            )}
+            </>
+        )}
         </div>
       </div>
     );

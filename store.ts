@@ -17,6 +17,8 @@ import { getActiveInstructionProfile } from './services/instructionService.ts';
 
 export const LS_KEY_API = 'geminiApiKey';
 export const LS_KEY_LOGGED_IN = 'isWesAiUserLoggedIn';
+export const LS_KEY_STREAM_NOTES = 'showStreamFinishNotes';
+export const LS_KEY_SEND_ON_ENTER = 'sendOnEnter';
 
 interface AppState {
   // Global state
@@ -29,6 +31,8 @@ interface AppState {
   isLoggedIn: boolean;
   activeTab: ActiveTab;
   theme: Theme;
+  showStreamFinishNotes: boolean;
+  sendOnEnter: boolean;
 
   // Chat specific state
   chatMessages: ChatMessage[];
@@ -59,6 +63,8 @@ interface AppState {
   setImagePrompt: (prompt: string) => void;
   setGeneratedImageData: (data: string | null) => void;
   toggleTheme: () => void;
+  setShowStreamFinishNotes: (show: boolean) => void;
+  setSendOnEnter: (send: boolean) => void;
   initializeActiveApiKey: () => void;
   handleSaveApiKey: (key: string) => void;
   handleRemoveApiKey: () => void;
@@ -96,6 +102,14 @@ export const useAppStore = create<AppState>((set, get) => ({
     if (storedTheme) return storedTheme;
     return window.matchMedia?.('(prefers-color-scheme: dark)')?.matches ? 'dark' : 'light';
   })(),
+  showStreamFinishNotes: (() => {
+    const v = localStorage.getItem(LS_KEY_STREAM_NOTES);
+    return v === null ? true : v === 'true';
+  })(),
+  sendOnEnter: (() => {
+    const v = localStorage.getItem(LS_KEY_SEND_ON_ENTER);
+    return v === null ? true : v === 'true';
+  })(),
 
   chatMessages: [],
   chatInput: '',
@@ -124,6 +138,14 @@ export const useAppStore = create<AppState>((set, get) => ({
   setImagePrompt: (prompt: string) => set({ imagePrompt: prompt }),
   setGeneratedImageData: (data: string | null) => set({ generatedImageData: data }),
   toggleTheme: () => set((state) => ({ theme: state.theme === 'light' ? 'dark' : 'light' })),
+  setShowStreamFinishNotes: (show: boolean) => {
+    localStorage.setItem(LS_KEY_STREAM_NOTES, String(show));
+    set({ showStreamFinishNotes: show });
+  },
+  setSendOnEnter: (send: boolean) => {
+    localStorage.setItem(LS_KEY_SEND_ON_ENTER, String(send));
+    set({ sendOnEnter: send });
+  },
 
   initializeActiveApiKey: () => {
     const storedKey = localStorage.getItem(LS_KEY_API);
@@ -407,7 +429,10 @@ export const useAppStore = create<AppState>((set, get) => ({
                 msg.id === modelMessageId
                   ? {
                       ...msg,
-                      content: msg.content + `\n\n*(Stream finished: ${finishReason})*`,
+                      content:
+                        get().showStreamFinishNotes
+                          ? msg.content + `\n\n*(Stream finished: ${finishReason})*`
+                          : msg.content,
                       componentCode: finalComponentCode,
                     }
                   : msg,
@@ -504,7 +529,10 @@ export const useAppStore = create<AppState>((set, get) => ({
                 msg.id === modelMessageId
                   ? {
                       ...msg,
-                      content: msg.content + `\n\n*(Stream finished: ${finishReason})*`,
+                      content:
+                        get().showStreamFinishNotes
+                          ? msg.content + `\n\n*(Stream finished: ${finishReason})*`
+                          : msg.content,
                       componentCode: finalComponentCode,
                     }
                   : msg,

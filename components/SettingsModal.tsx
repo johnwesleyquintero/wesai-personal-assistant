@@ -3,6 +3,7 @@ import { FaGithub } from 'react-icons/fa';
 import { ThemeToggleButton } from './ThemeToggleButton';
 import { DocumentationViewerPanel } from './DocumentationViewerPanel';
 import { ApiKeySource, Theme } from '../types.ts';
+import { useAppStore } from '../store.ts';
 import CustomInstructionsPanel from './CustomInstructionsPanel';
 
 interface SettingsModalProps {
@@ -19,7 +20,7 @@ interface SettingsModalProps {
 
 type ModalTab = 'settings' | 'documentation' | 'customInstructions';
 
-export const SettingsModal: React.FC<SettingsModalProps> = memo(({
+export const SettingsModal: React.FC<SettingsModalProps> = memo(({ 
   isOpen,
   onClose,
   onSaveKey,
@@ -33,6 +34,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = memo(({
   const [apiKeyInput, setApiKeyInput] = useState<string>('');
   const [showSavedMessage, setShowSavedMessage] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<ModalTab>('settings');
+  const [showConfirmRemove, setShowConfirmRemove] = useState<boolean>(false);
+
+  const { showStreamFinishNotes, setShowStreamFinishNotes, sendOnEnter, setSendOnEnter } = useAppStore();
 
   if (!isOpen) {
     return null;
@@ -50,12 +54,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = memo(({
   };
 
   const handleRemove = () => {
-    const confirmationMessage =
-      'Are you sure you want to remove the API key? This will clear the currently saved key and any generated content from this session. The application will then attempt to use an environment variable key if available. If no key is active, features will be disabled.';
-    if (window.confirm(confirmationMessage)) {
-      onRemoveKey();
-      setApiKeyInput('');
-    }
+    setShowConfirmRemove(true);
   };
 
   return (
@@ -195,6 +194,42 @@ export const SettingsModal: React.FC<SettingsModalProps> = memo(({
                   </div>
                 </div>
 
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Chat Stream Notes
+                  </label>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      id="toggleStreamNotes"
+                      type="checkbox"
+                      checked={showStreamFinishNotes}
+                      onChange={(e) => setShowStreamFinishNotes(e.target.checked)}
+                      className="h-4 w-4"
+                    />
+                    <label htmlFor="toggleStreamNotes" className="text-sm text-gray-700 dark:text-gray-300">
+                      Show "stream finished" annotations in chat
+                    </label>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Chat Input Behavior
+                  </label>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      id="toggleSendOnEnter"
+                      type="checkbox"
+                      checked={sendOnEnter}
+                      onChange={(e) => setSendOnEnter(e.target.checked)}
+                      className="h-4 w-4"
+                    />
+                    <label htmlFor="toggleSendOnEnter" className="text-sm text-gray-700 dark:text-gray-300">
+                      Send on Enter (use Shift+Enter for newline)
+                    </label>
+                  </div>
+                </div>
+
                 {showSavedMessage && (
                   <p className="text-sm text-green-500 dark:text-green-400">
                     API Key saved successfully! Closing modal...
@@ -218,6 +253,31 @@ export const SettingsModal: React.FC<SettingsModalProps> = memo(({
           {activeTab === 'documentation' && <DocumentationViewerPanel />}
           {activeTab === 'customInstructions' && <CustomInstructionsPanel />}
         </div>
+
+        {showConfirmRemove && (
+          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-md">
+              <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Remove API Key?</h4>
+              <p className="text-sm text-gray-700 dark:text-gray-300 mt-2">
+                This clears the saved key and session content, and features will be disabled if no environment key is active.
+              </p>
+              <div className="mt-4 flex justify-end space-x-2">
+                <button
+                  onClick={() => setShowConfirmRemove(false)}
+                  className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => { onRemoveKey(); setApiKeyInput(''); setShowConfirmRemove(false); }}
+                  className="px-4 py-2 rounded bg-red-600 hover:bg-red-700 text-white"
+                >
+                  Confirm
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

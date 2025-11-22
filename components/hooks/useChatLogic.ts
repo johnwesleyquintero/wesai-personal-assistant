@@ -14,6 +14,7 @@ export const useChatLogic = () => {
     handleRetryChat,
     handleCopyChatMessage,
     handleTogglePreview,
+    sendOnEnter,
   } = useAppStore();
 
   
@@ -44,5 +45,6 @@ export const useChatLogic = () => {
     handleRetryChat,
     handleCopyChatMessage,
     handleTogglePreview,
+    sendOnEnter,
   };
 };
