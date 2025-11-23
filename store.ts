@@ -14,6 +14,7 @@ import {
   sendMessageToChatStream,
 } from './services/geminiService.ts';
 import { getActiveInstructionProfile } from './services/instructionService.ts';
+import { getEnvVariable } from './utils/env.ts'; // Import the new utility
 
 export const LS_KEY_API = 'geminiApiKey';
 export const LS_KEY_LOGGED_IN = 'isWesAiUserLoggedIn';
@@ -154,8 +155,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   initializeActiveApiKey: () => {
     const storedKey = localStorage.getItem(LS_KEY_API);
-    const envApiKey =
-      typeof import.meta.env !== 'undefined' ? import.meta.env.VITE_GEMINI_API_KEY : undefined;
+    const envApiKey = getEnvVariable('VITE_GEMINI_API_KEY');
 
     if (storedKey) {
       set({ activeApiKey: storedKey, apiKeySource: 'ui' });
@@ -282,39 +282,22 @@ export const useAppStore = create<AppState>((set, get) => ({
         generatedImageData: null,
       };
 
+      // Clear image prompt only if leaving the image tab
       if (state.activeTab === 'image' && tab !== 'image') {
         newState.imagePrompt = '';
       }
 
-      if (
-        state.activeTab !== 'review' &&
-        state.activeTab !== 'refactor' &&
-        state.activeTab !== 'preview' &&
-        state.activeTab !== 'generate' &&
-        state.activeTab !== 'content' &&
-        state.activeTab !== 'custom-instructions' &&
-        tab !== 'review' &&
-        tab !== 'refactor' &&
-        tab !== 'preview' &&
-        tab !== 'generate' &&
-        tab !== 'content' &&
-        tab !== 'custom-instructions'
-      ) {
+      // Clear code input if switching to a non-code-related tab from a code-related tab
+      const codeRelatedTabs: ActiveTab[] = ['review', 'refactor', 'preview', 'generate', 'content', 'custom-instructions'];
+      const wasCodeRelated = codeRelatedTabs.includes(state.activeTab);
+      const isNowCodeRelated = codeRelatedTabs.includes(tab);
+
+      if (wasCodeRelated && !isNowCodeRelated) {
         newState.code = '';
       }
+
       return newState;
     });
-
-    if (
-      tab !== 'review' &&
-      tab !== 'refactor' &&
-      tab !== 'preview' &&
-      tab !== 'generate' &&
-      tab !== 'content' &&
-      tab !== 'custom-instructions'
-    ) {
-      set({ code: '' });
-    }
 
     if (tab === 'chat') {
       get().initializeChatSession(); // Use the new action

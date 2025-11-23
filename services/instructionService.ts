@@ -2,6 +2,15 @@ import { CustomInstructionProfile } from '../types';
 
 const STORAGE_KEY = 'customInstructionProfiles';
 
+// Custom error class for localStorage operations
+export class LocalStorageError extends Error {
+  constructor(message: string, public originalError?: unknown) {
+    super(message);
+    this.name = 'LocalStorageError';
+    Object.setPrototypeOf(this, LocalStorageError.prototype);
+  }
+}
+
 // Helper function to get profiles from localStorage
 function getStoredProfiles(): CustomInstructionProfile[] {
   try {
@@ -9,7 +18,7 @@ function getStoredProfiles(): CustomInstructionProfile[] {
     return profilesJson ? JSON.parse(profilesJson) : [];
   } catch (error) {
     console.error('Error reading profiles from localStorage:', error);
-    return [];
+    throw new LocalStorageError('Failed to read custom instruction profiles from local storage.', error);
   }
 }
 
@@ -19,6 +28,7 @@ function saveStoredProfiles(profiles: CustomInstructionProfile[]): void {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(profiles));
   } catch (error) {
     console.error('Error saving profiles to localStorage:', error);
+    throw new LocalStorageError('Failed to save custom instruction profiles to local storage.', error);
   }
 }
 
