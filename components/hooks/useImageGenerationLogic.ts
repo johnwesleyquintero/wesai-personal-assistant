@@ -8,11 +8,11 @@ export const useImageGenerationLogic = () => {
     generatedImageData,
     isLoading,
     activeApiKey,
-    error,
+    imageError,
     handleImagePromptChange,
     handleClearImagePrompt,
     handleImageGenerationSubmit,
-    setError,
+    setImageError,
   } = useAppStore();
 
   const memoizedHandleImagePromptChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -32,8 +32,8 @@ export const useImageGenerationLogic = () => {
     generatedImageData,
     isLoading,
     isApiKeyConfigured: !!activeApiKey,
-    error,
-    setError,
+    imageError,
+    setImageError,
     onPromptChange: memoizedHandleImagePromptChange,
     onClearPrompt: memoizedHandleClearImagePrompt,
     onSubmit: memoizedHandleImageGenerationSubmit,

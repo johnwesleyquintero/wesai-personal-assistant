@@ -2,6 +2,7 @@ import React from 'react';
 import { CodeInput } from './CodeInput.tsx';
 import { FeedbackDisplay } from './FeedbackDisplay.tsx';
 import { LoadingSpinner } from './LoadingSpinner.tsx';
+import { ErrorMessage } from './ErrorMessage.tsx';
 
 interface CodeInteractionPanelProps {
   activeTab: 'review' | 'refactor' | 'preview' | 'generate' | 'content';
@@ -248,14 +249,7 @@ export const CodeInteractionPanel: React.FC<CodeInteractionPanelProps> = ({
       </button>
 
       {/* Error Message */}
-      {error && (
-        <div
-          className="mt-4 p-4 bg-red-100 dark:bg-red-700/30 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-200 rounded-md shadow"
-          role="alert"
-        >
-          <strong className="font-semibold">Error:</strong> {error}
-        </div>
-      )}
+      <ErrorMessage message={error} />
 
       {/* Loading State Display */}
       {isLoading && (

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { LoadingSpinner } from './LoadingSpinner.tsx';
 import { AspectRatio } from '../types.ts'; // Import AspectRatio type
+import { ErrorMessage } from './ErrorMessage.tsx';
 
 interface ImageGenerationPanelProps {
   prompt: string;
@@ -191,15 +192,7 @@ export const ImageGenerationPanel: React.FC<ImageGenerationPanelProps> = ({
         {isLoading ? 'Generating Image...' : 'Generate Image'}
       </button>
 
-      {error && (
-        <div
-          className="mt-4 p-4 bg-red-100 dark:bg-red-700/30 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-200 rounded-md shadow"
-          role="alert"
-          aria-live="assertive"
-        >
-          <strong className="font-semibold">Error:</strong> {error}
-        </div>
-      )}
+      <ErrorMessage message={error} />
 
       {isLoading && !imageData && (
         <div

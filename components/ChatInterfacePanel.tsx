@@ -4,6 +4,7 @@ import remarkGfm from 'remark-gfm';
 import { LoadingSpinner } from './LoadingSpinner.tsx';
 import { ReactPreviewRenderer } from './ReactPreviewRenderer.tsx';
 import { ChatMessage } from '../types.ts';
+import { ErrorMessage } from './ErrorMessage.tsx';
 
 interface ChatInterfacePanelProps {
   chatMessages: ChatMessage[];
@@ -80,35 +81,7 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = ({
           New Chat
         </button>
       </div>
-      {error && (
-        <div className="p-3 border-b border-red-300 dark:border-red-600 bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-200 text-sm flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            {(error.toLowerCase().includes('safety') || error.toLowerCase().includes('blocked')) && (
-              <span className="relative group px-2 py-0.5 text-xs font-semibold rounded-full bg-red-200 dark:bg-red-800 text-red-800 dark:text-red-200">
-                Safety Blocked
-                <span className="absolute left-1/2 -translate-x-1/2 top-full mt-2 hidden group-hover:block bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 text-[10px] px-3 py-1.5 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 z-10 whitespace-nowrap">
-                  {(() => {
-                    const e = error.toLowerCase();
-                    if (e.includes('rate') || e.includes('429') || e.includes('busy') || e.includes('503')) return 'Rate limited or service busy. Retry.';
-                    if (e.includes('auth') || e.includes('key') || e.includes('invalid')) return 'Authentication issue. Check API key.';
-                    if (e.includes('model') || e.includes('unsupported') || e.includes('deprecated') || e.includes('404')) return 'Model unavailable. Update model.';
-                    return 'Blocked by safety settings.';
-                  })()}
-                </span>
-              </span>
-            )}
-            <span className="ml-2">
-              <strong>Error:</strong> {error}
-            </span>
-          </div>
-          <button
-            onClick={onRetryChat}
-            className="ml-4 px-3 py-1 bg-gray-600 text-white text-xs rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
-          >
-            Retry
-          </button>
-        </div>
-      )}
+      <ErrorMessage message={error} onRetry={onRetryChat} isChatError />
       <div className="flex-grow p-4 space-y-4 overflow-y-auto">
         {chatMessages.map((msg) => (
           <ChatMessageItem

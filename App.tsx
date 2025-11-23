@@ -69,6 +69,8 @@ const App: React.FC = () => {
     onPromptChange: handleImagePromptChange,
     onClearPrompt: handleClearImagePrompt,
     onSubmit: handleImageGenerationSubmit,
+    imageError,
+    setImageError,
   } = useImageGenerationLogic();
 
 
@@ -80,7 +82,7 @@ const App: React.FC = () => {
     } else {
       setIsLoggedIn(false);
     }
-  }, [initializeActiveApiKey]);
+  }, [initializeActiveApiKey, setIsLoggedIn]);
 
   const isApiKeyConfigured = !!activeApiKey;
 
@@ -145,8 +147,8 @@ const App: React.FC = () => {
               isLoading={isLoading}
               isApiKeyConfigured={isApiKeyConfigured}
               imageData={generatedImageData}
-              error={error}
-              setError={setError}
+              error={imageError}
+              setError={setImageError}
             />
           )}
 

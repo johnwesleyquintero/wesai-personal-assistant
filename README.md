@@ -67,7 +67,7 @@ Once you have the application files and your API key:
 
 ## Privacy Policy
 
-Your privacy is important. Here's how WesAI Personal Assistant handles your data:
+Your privacy is important. Here's how WesAI handles your data:
 
 - **API Keys:** Your Gemini API key is stored only in your browser's local storage. It is never sent to our servers or shared with anyone else. You can save or remove your key whenever you want.
 - **Your Inputs:** Any text or image descriptions you enter are sent directly to the Google Gemini API for processing. We do not save, record, or look at this information ourselves. Google's rules apply to how they use data from the API.

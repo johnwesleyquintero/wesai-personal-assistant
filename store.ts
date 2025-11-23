@@ -44,6 +44,7 @@ interface AppState {
   // Image generation specific state
   imagePrompt: string;
   generatedImageData: string | null;
+  imageError: string | null; // New error state for image generation
 
   // Actions
   setCode: (code: string) => void;
@@ -62,6 +63,7 @@ interface AppState {
   setChatError: (error: string | null) => void;
   setImagePrompt: (prompt: string) => void;
   setGeneratedImageData: (data: string | null) => void;
+  setImageError: (error: string | null) => void; // New action for image error
   toggleTheme: () => void;
   setShowStreamFinishNotes: (show: boolean) => void;
   setSendOnEnter: (send: boolean) => void;
@@ -120,6 +122,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   imagePrompt: '',
   generatedImageData: null,
+  imageError: null, // Initial state for image error
 
   // Actions
   setCode: (code: string) => set({ code }),
@@ -138,6 +141,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   setChatError: (error: string | null) => set({ chatError: error }),
   setImagePrompt: (prompt: string) => set({ imagePrompt: prompt }),
   setGeneratedImageData: (data: string | null) => set({ generatedImageData: data }),
+  setImageError: (error: string | null) => set({ imageError: error }), // Action to set image error
   toggleTheme: () => set((state) => ({ theme: state.theme === 'light' ? 'dark' : 'light' })),
   setShowStreamFinishNotes: (show: boolean) => {
     localStorage.setItem(LS_KEY_STREAM_NOTES, String(show));
@@ -366,10 +370,10 @@ export const useAppStore = create<AppState>((set, get) => ({
   handleImageGenerationSubmit: async (aspectRatio: AspectRatio, negativePrompt: string) => {
     const { imagePrompt } = get();
     if (!imagePrompt.trim()) {
-      set({ error: 'Please enter a description for the image.' });
+      set({ imageError: 'Please enter a description for the image.' }); // Use imageError
       return;
     }
-    set({ isLoading: true, generatedImageData: null, error: null });
+    set({ isLoading: true, generatedImageData: null, imageError: null }); // Use imageError
 
     try {
       const imageData = await generateImageWithGemini(imagePrompt, aspectRatio, negativePrompt);
@@ -377,7 +381,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'An unknown error occurred during image generation.';
-      set({ error: `Image Generation Error: ${errorMessage}` });
+      set({ imageError: `Image Generation Error: ${errorMessage}` }); // Use imageError
       console.error('Image generation error:', err);
     } finally {
       set({ isLoading: false });

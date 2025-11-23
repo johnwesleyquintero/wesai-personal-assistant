@@ -243,7 +243,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = memo(({
             <div className="p-4 text-gray-700 dark:text-gray-300">
               <h3 className="text-xl font-semibold mb-4">Help Center</h3>
               <p className="mb-2">
-                Welcome to WesAI Personal Assistant! This application helps you interact with Google Gemini for various tasks.
+                Welcome to WesAI! This application helps you interact with Google Gemini for various tasks.
               </p>
               <h4 className="text-lg font-semibold mt-4 mb-2">Key Features:</h4>
               <ul className="list-disc list-inside space-y-1">
