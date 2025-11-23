@@ -241,25 +241,32 @@ export const SettingsModal: React.FC<SettingsModalProps> = memo(({
           )}
           {activeTab === 'helpCenter' && (
             <div className="p-4 text-gray-700 dark:text-gray-300">
-              <h3 className="text-xl font-semibold mb-4">Help Center</h3>
+              <h3 className="text-xl font-semibold mb-4">WesAI Help Center</h3>
               <p className="mb-2">
-                Welcome to WesAI! This application helps you interact with Google Gemini for various tasks.
+                Welcome to WesAI, your personal AI assistant powered by Google Gemini! This application is designed to help you with a variety of tasks, from brainstorming and content generation to code assistance and image creation.
               </p>
               <h4 className="text-lg font-semibold mt-4 mb-2">Key Features:</h4>
               <ul className="list-disc list-inside space-y-1">
-                <li><span className="font-bold">Chat:</span> Engage in conversational AI to get answers, brainstorm ideas, and more.</li>
-                <li><span className="font-bold">Generate Content:</span> Utilize AI to create various forms of textual content.</li>
-                <li><span className="font-bold">Image Generation:</span> Generate images from text prompts.</li>
-                <li><span className="font-bold">Code Interaction (Review/Refactor):</span> Submit code snippets for review, refactoring suggestions, or to generate code based on your requirements.</li>
-                <li><span className="font-bold">Custom Instructions:</span> Personalize AI behavior with custom instructions for a tailored experience.</li>
+                <li><span className="font-bold">Chat Interface:</span> Engage in dynamic conversations with AI, ask questions, get explanations, and brainstorm ideas.</li>
+                <li><span className="font-bold">Content Generation:</span> Generate various forms of textual content, from creative writing to technical descriptions.</li>
+                <li><span className="font-bold">Image Generation:</span> Create images directly from your text prompts.</li>
+                <li><span className="font-bold">Code Interaction:</span> Get assistance with code review, refactoring, or generating new code snippets based on your requirements.</li>
+                <li><span className="font-bold">Custom Instructions:</span> Tailor the AI's behavior and responses to your specific needs for a more personalized experience.</li>
               </ul>
-              <h4 className="text-lg font-semibold mt-4 mb-2">How to Use:</h4>
+              <h4 className="text-lg font-semibold mt-4 mb-2">Getting Started:</h4>
               <ul className="list-disc list-inside space-y-1">
-                <li><span className="font-bold">API Key:</span> Ensure your Gemini API key is set in the Settings tab to access AI functionalities. You can use an environment variable or save it directly in the UI.</li>
-                <li><span className="font-bold">Tabs:</span> Navigate between different functionalities (Chat, Generate Content, Image Generation) using the tabs at the top.</li>
-                <li><span className="font-bold">Settings:</span> Access general settings, manage your API key, and configure chat behavior.</li>
+                <li><span className="font-bold">API Key Setup:</span> To unlock AI functionalities, ensure your Gemini API key is configured in the <span className="font-bold">Settings</span> tab. You can provide it via an environment variable or save it directly within the UI.</li>
+                <li><span className="font-bold">Navigation:</span> Easily switch between different functionalities using the tabs at the top (Chat, Content, Image, Code).</li>
+                <li><span className="font-bold">Settings & Customization:</span> Use the <span className="font-bold">Settings</span> tab to manage your API key, customize chat behavior (like "Send on Enter"), and access this Help Center.</li>
               </ul>
-              <p className="mt-4">If you encounter any issues, please refer to the Change Log for recent updates or contact support for further assistance.</p>
+              <h4 className="text-lg font-semibold mt-4 mb-2">Troubleshooting Tips:</h4>
+              <ul className="list-disc list-inside space-y-1">
+                <li><span className="font-bold">API Key Issues:</span> If AI features are not working, double-check your API key in the Settings tab. Ensure it's valid and correctly entered.</li>
+                <li><span className="font-bold">Model Errors:</span> If you encounter messages about "Model unavailable" or "unsupported," try updating your model in settings or check the Gemini API documentation for available models.</li>
+                <li><span className="font-bold">Safety Blocks:</span> If a response is blocked due to "safety settings," try rephrasing your prompt to avoid sensitive topics.</li>
+                <li><span className="font-bold">General Issues:</span> For persistent problems, refer to the application's change log or restart the application.</li>
+              </ul>
+              <p className="mt-4">For further assistance or to report bugs, please refer to the project's documentation or reach out through the appropriate support channels.</p>
             </div>
           )}
           {activeTab === 'customInstructions' && <CustomInstructionsPanel />}
