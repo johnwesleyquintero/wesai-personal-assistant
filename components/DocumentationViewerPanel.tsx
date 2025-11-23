@@ -4,15 +4,38 @@ import remarkGfm from 'remark-gfm';
 import { LoadingSpinner } from './LoadingSpinner.tsx';
 import { PreWithCopyButton } from './PreWithCopyButton.tsx';
 
+interface TocItem {
+  id: string;
+  text: string;
+  level: number;
+}
+
 export const DocumentationViewerPanel: React.FC = () => {
   const [documentationContent, setDocumentationContent] = useState<string>('');
   const [isDocLoading, setIsDocLoading] = useState<boolean>(false);
   const [docError, setDocError] = useState<string | null>(null);
+  const [tocItems, setTocItems] = useState<TocItem[]>([]);
+
+  const extractHeadings = useCallback((markdown: string) => {
+    const headings: TocItem[] = [];
+    // Regex to find h2 (##) and h3 (###) headings
+    const regex = /^(## |### )(.*)$/gm;
+    let match;
+    while ((match = regex.exec(markdown)) !== null) {
+      const level = match[1].startsWith('## ') ? 2 : 3;
+      const text = match[2].trim();
+      // Simple slug generation for ID. remarkGfm typically handles this automatically for IDs.
+      const id = text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-*|-*$/g, '');
+      headings.push({ id, text, level });
+    }
+    setTocItems(headings);
+  }, []);
 
   const fetchDocumentation = useCallback(async () => {
     if (!documentationContent && !isDocLoading) {
       setIsDocLoading(true);
       setDocError(null);
+      setTocItems([]); // Clear TOC when starting new fetch
       try {
         const response = await fetch('/README.md');
         if (!response.ok) {
@@ -22,16 +45,18 @@ export const DocumentationViewerPanel: React.FC = () => {
         }
         const markdown = await response.text();
         setDocumentationContent(markdown);
+        extractHeadings(markdown); // Extract headings after content is set
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
         setDocError(`Error loading documentation: ${errorMessage}`);
         setDocumentationContent('');
+        setTocItems([]); // Clear TOC on error
         console.error(err);
       } finally {
         setIsDocLoading(false);
       }
     }
-  }, [documentationContent, isDocLoading]);
+  }, [documentationContent, isDocLoading, extractHeadings]);
 
   useEffect(() => {
     fetchDocumentation();
@@ -50,6 +75,26 @@ export const DocumentationViewerPanel: React.FC = () => {
       <h2 className="text-xl font-semibold mb-3 text-gray-800 dark:text-gray-200">
         {getFeedbackTitle()}
       </h2>
+
+      {/* Table of Contents */}
+      {!isDocLoading && !docError && tocItems.length > 0 && (
+        <nav className="mb-6 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-sm">
+          <h3 className="text-lg font-semibold mb-2 text-gray-800 dark:text-gray-200">Table of Contents</h3>
+          <ul className="list-none p-0 m-0">
+            {tocItems.map((item) => (
+              <li key={item.id} className={`${item.level === 3 ? 'ml-4' : ''}`}>
+                <a
+                  href={`#${item.id}`}
+                  className="text-blue-600 dark:text-blue-400 hover:underline text-sm py-1 block"
+                >
+                  {item.text}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
+
       <div className="bg-gray-50 dark:bg-gray-700 p-4 md:p-6 rounded-lg shadow-inner">
         {isDocLoading && (
           <div className="flex flex-col items-center justify-center p-6">

@@ -1,7 +1,6 @@
 import React, { useState, memo } from 'react';
 import { FaGithub } from 'react-icons/fa';
 import { ThemeToggleButton } from './ThemeToggleButton';
-import { DocumentationViewerPanel } from './DocumentationViewerPanel';
 import { ApiKeySource, Theme } from '../types.ts';
 import { useAppStore } from '../store.ts';
 import CustomInstructionsPanel from './CustomInstructionsPanel';
@@ -18,9 +17,9 @@ interface SettingsModalProps {
   toggleTheme: () => void;
 }
 
-type ModalTab = 'settings' | 'documentation' | 'customInstructions';
+type ModalTab = 'settings' | 'helpCenter' | 'customInstructions';
 
-export const SettingsModal: React.FC<SettingsModalProps> = memo(({ 
+export const SettingsModal: React.FC<SettingsModalProps> = memo(({
   isOpen,
   onClose,
   onSaveKey,
@@ -96,14 +95,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = memo(({
             Settings
           </button>
           <button
-            onClick={() => setActiveTab('documentation')}
+            onClick={() => setActiveTab('helpCenter')}
             className={`px-4 py-2 text-sm font-medium ${
-              activeTab === 'documentation'
+              activeTab === 'helpCenter'
                 ? 'border-b-2 border-purple-500 text-purple-600 dark:text-purple-400'
                 : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
             }`}
           >
-            Documentation
+            Help Center
           </button>
           <button
             onClick={() => setActiveTab('customInstructions')}
@@ -138,16 +137,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = memo(({
                   )}
                 </div>
                 <div className="flex items-center space-x-2">
-                  <a
-                    href="https://github.com/johnwesleyquintero/wesai"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="GitHub Repository"
-                    className="text-purple-500 hover:text-purple-700 text-2xl"
-                  >
-                    <FaGithub />
-                  </a>
-                  <ThemeToggleButton currentTheme={theme} toggleTheme={toggleTheme} />
                   {onLogout && (
                     <button
                       onClick={onLogout}
@@ -250,7 +239,29 @@ export const SettingsModal: React.FC<SettingsModalProps> = memo(({
               </div>
             </div>
           )}
-          {activeTab === 'documentation' && <DocumentationViewerPanel />}
+          {activeTab === 'helpCenter' && (
+            <div className="p-4 text-gray-700 dark:text-gray-300">
+              <h3 className="text-xl font-semibold mb-4">Help Center</h3>
+              <p className="mb-2">
+                Welcome to WesAI Personal Assistant! This application helps you interact with Google Gemini for various tasks.
+              </p>
+              <h4 className="text-lg font-semibold mt-4 mb-2">Key Features:</h4>
+              <ul className="list-disc list-inside space-y-1">
+                <li><span className="font-bold">Chat:</span> Engage in conversational AI to get answers, brainstorm ideas, and more.</li>
+                <li><span className="font-bold">Generate Content:</span> Utilize AI to create various forms of textual content.</li>
+                <li><span className="font-bold">Image Generation:</span> Generate images from text prompts.</li>
+                <li><span className="font-bold">Code Interaction (Review/Refactor):</span> Submit code snippets for review, refactoring suggestions, or to generate code based on your requirements.</li>
+                <li><span className="font-bold">Custom Instructions:</span> Personalize AI behavior with custom instructions for a tailored experience.</li>
+              </ul>
+              <h4 className="text-lg font-semibold mt-4 mb-2">How to Use:</h4>
+              <ul className="list-disc list-inside space-y-1">
+                <li><span className="font-bold">API Key:</span> Ensure your Gemini API key is set in the Settings tab to access AI functionalities. You can use an environment variable or save it directly in the UI.</li>
+                <li><span className="font-bold">Tabs:</span> Navigate between different functionalities (Chat, Generate Content, Image Generation) using the tabs at the top.</li>
+                <li><span className="font-bold">Settings:</span> Access general settings, manage your API key, and configure chat behavior.</li>
+              </ul>
+              <p className="mt-4">If you encounter any issues, please refer to the Change Log for recent updates or contact support for further assistance.</p>
+            </div>
+          )}
           {activeTab === 'customInstructions' && <CustomInstructionsPanel />}
         </div>
 
