@@ -58,6 +58,7 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = memo(({
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
   const [saveName, setSaveName] = useState('');
   const [renameMap, setRenameMap] = useState<Record<string, string>>({});
+  const [searchTerm, setSearchTerm] = useState('');
 
   const scrollToBottom = () => {
     chatMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -231,79 +232,102 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = memo(({
                 Close
               </button>
             </div>
+            <div className="mt-3">
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search by name..."
+                className="w-full p-2 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded"
+              />
+            </div>
             <div className="mt-3 max-h-[50vh] overflow-y-auto space-y-2">
               {savedChatSessions.length === 0 ? (
                 <div className="text-sm text-gray-600 dark:text-gray-300">No saved contexts yet.</div>
               ) : (
-                savedChatSessions.map((s) => (
-                  <div key={s.id} className="flex items-center justify-between p-3 rounded bg-gray-100 dark:bg-gray-700">
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-                        {renameMap[s.id] !== undefined ? (
-                          <input
-                            type="text"
-                            value={renameMap[s.id]}
-                            onChange={(e) => setRenameMap((m) => ({ ...m, [s.id]: e.target.value }))}
-                            className="w-full p-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded"
-                          />
-                        ) : (
-                          s.name
-                        )}
-                      </div>
-                      <div className="text-xs text-gray-600 dark:text-gray-300">
-                        {new Date(s.timestamp).toLocaleString()}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 ml-3">
-                      <button
-                        onClick={() => onLoadSavedChatSession(s.id)}
-                        className="px-2 py-1 text-xs rounded bg-blue-600 hover:bg-blue-700 text-white"
-                      >
-                        Load
-                      </button>
-                      {renameMap[s.id] !== undefined ? (
-                        <>
+                savedChatSessions
+                  .filter((s) => s.name.toLowerCase().includes(searchTerm.toLowerCase()))
+                  .map((s) => {
+                    const allText = s.messages.map((m) => m.content || '').join(' ');
+                    const totalChars = allText.length;
+                    const snippet = allText.slice(0, 140);
+                    const showEllipsis = totalChars > 140;
+                    return (
+                      <div key={s.id} className="flex items-center justify-between p-3 rounded bg-gray-100 dark:bg-gray-700">
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                            {renameMap[s.id] !== undefined ? (
+                              <input
+                                type="text"
+                                value={renameMap[s.id]}
+                                onChange={(e) => setRenameMap((m) => ({ ...m, [s.id]: e.target.value }))}
+                                className="w-full p-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded"
+                              />
+                            ) : (
+                              s.name
+                            )}
+                          </div>
+                          <div className="text-xs text-gray-600 dark:text-gray-300">
+                            {new Date(s.timestamp).toLocaleString()} • {totalChars} chars
+                          </div>
+                          {snippet && (
+                            <div className="mt-1 text-xs text-gray-700 dark:text-gray-200 line-clamp-2">
+                              {snippet}
+                              {showEllipsis ? '…' : ''}
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 ml-3">
+                          <button
+                            onClick={() => onLoadSavedChatSession(s.id)}
+                            className="px-2 py-1 text-xs rounded bg-blue-600 hover:bg-blue-700 text-white"
+                          >
+                            Load
+                          </button>
+                          {renameMap[s.id] !== undefined ? (
+                            <>
+                              <button
+                                onClick={() => {
+                                  const v = (renameMap[s.id] || '').trim();
+                                  if (v) {
+                                    onRenameSavedChatSession(s.id, v);
+                                    setRenameMap((m) => {
+                                      const { [s.id]: _, ...rest } = m;
+                                      return rest;
+                                    });
+                                  }
+                                }}
+                                className="px-2 py-1 text-xs rounded bg-green-600 hover:bg-green-700 text-white"
+                              >
+                                Save Name
+                              </button>
+                              <button
+                                onClick={() => setRenameMap((m) => { const { [s.id]: _, ...rest } = m; return rest; })}
+                                className="px-2 py-1 text-xs rounded bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-gray-200"
+                              >
+                                Cancel
+                              </button>
+                            </>
+                          ) : (
+                            <button
+                              onClick={() => setRenameMap((m) => ({ ...m, [s.id]: s.name }))}
+                              className="px-2 py-1 text-xs rounded bg-purple-600 hover:bg-purple-700 text-white"
+                            >
+                              Rename
+                            </button>
+                          )}
                           <button
                             onClick={() => {
-                              const v = (renameMap[s.id] || '').trim();
-                              if (v) {
-                                onRenameSavedChatSession(s.id, v);
-                                setRenameMap((m) => {
-                                  const { [s.id]: _, ...rest } = m;
-                                  return rest;
-                                });
-                              }
+                              if (window.confirm('Delete this context?')) onDeleteSavedChatSession(s.id);
                             }}
-                            className="px-2 py-1 text-xs rounded bg-green-600 hover:bg-green-700 text-white"
+                            className="px-2 py-1 text-xs rounded bg-red-600 hover:bg-red-700 text-white"
                           >
-                            Save Name
+                            Delete
                           </button>
-                          <button
-                            onClick={() => setRenameMap((m) => { const { [s.id]: _, ...rest } = m; return rest; })}
-                            className="px-2 py-1 text-xs rounded bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-gray-200"
-                          >
-                            Cancel
-                          </button>
-                        </>
-                      ) : (
-                        <button
-                          onClick={() => setRenameMap((m) => ({ ...m, [s.id]: s.name }))}
-                          className="px-2 py-1 text-xs rounded bg-purple-600 hover:bg-purple-700 text-white"
-                        >
-                          Rename
-                        </button>
-                      )}
-                      <button
-                        onClick={() => {
-                          if (window.confirm('Delete this context?')) onDeleteSavedChatSession(s.id);
-                        }}
-                        className="px-2 py-1 text-xs rounded bg-red-600 hover:bg-red-700 text-white"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                ))
+                        </div>
+                      </div>
+                    );
+                  })
               )}
             </div>
           </div>

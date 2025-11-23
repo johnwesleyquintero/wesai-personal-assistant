@@ -77,9 +77,9 @@ export default tseslint.config(
   // These are separate config objects or arrays provided as additional arguments
   // to tseslint.config. Use the spread operator (...) for arrays.
 
-  ...compat.extends(pluginReact.configs.recommended),
+  ...compat.extends('plugin:react/recommended'),
 
-  pluginReactHooks.configs.recommended, // React hooks recommended rules (often a single object)
+  ...compat.extends('plugin:react-hooks/recommended'),
 
   pluginJs.configs.recommended, // Standard JS recommended rules (often a single object)
 

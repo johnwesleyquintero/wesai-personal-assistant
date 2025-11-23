@@ -114,8 +114,6 @@ const App: React.FC = () => {
           isKeySet={isApiKeyConfigured}
           currentKeySource={apiKeySource}
           onLogout={handleLogout}
-          theme={theme}
-          toggleTheme={toggleTheme}
         />
 
         <TabNavigation

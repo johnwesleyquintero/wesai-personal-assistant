@@ -1,7 +1,5 @@
 import React, { useState, memo } from 'react';
-import { FaGithub } from 'react-icons/fa';
-import { ThemeToggleButton } from './ThemeToggleButton';
-import { ApiKeySource, Theme } from '../types.ts';
+import { ApiKeySource } from '../types.ts';
 import { useAppStore } from '../store.ts';
 import CustomInstructionsPanel from './CustomInstructionsPanel';
 import { SVG_ICONS } from '../src/constants';
@@ -14,13 +12,11 @@ interface SettingsModalProps {
   isKeySet: boolean;
   currentKeySource: ApiKeySource;
   onLogout: () => void;
-  theme: Theme;
-  toggleTheme: () => void;
 }
 
 type ModalTab = 'settings' | 'helpCenter' | 'customInstructions';
 
-export const SettingsModal: React.FC<SettingsModalProps> = memo(({
+export const SettingsModal: React.FC<SettingsModalProps> = memo(({ 
   isOpen,
   onClose,
   onSaveKey,
@@ -28,8 +24,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = memo(({
   isKeySet,
   currentKeySource,
   onLogout,
-  theme,
-  toggleTheme,
 }) => {
   const [apiKeyInput, setApiKeyInput] = useState<string>('');
   const [showSavedMessage, setShowSavedMessage] = useState<boolean>(false);
