@@ -60,7 +60,7 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = ({
     if (isLoading) return 'WesAI is thinking...';
     if (!isApiKeyConfigured) return 'API Key not configured. Cannot chat.';
     if (!isChatSessionActive) return 'Chat session not active...';
-    return "Type your message here (e.g., 'Create a simple React counter component')...";
+    return "How can I help you today?...";
   };
 
   const getButtonText = (): string => {
