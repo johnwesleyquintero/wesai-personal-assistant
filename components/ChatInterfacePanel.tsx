@@ -84,13 +84,7 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = ({
         <div className="p-3 border-b border-red-300 dark:border-red-600 bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-200 text-sm flex items-center justify-between">
           <div className="flex items-center space-x-2">
             {(error.toLowerCase().includes('safety') || error.toLowerCase().includes('blocked')) && (
-              <span className="relative group px-2 py-0.5 text-xs font-semibold rounded-full bg-red-200 dark:bg-red-800 text-red-800 dark:text-red-200" title={(() => {
-                const e = error.toLowerCase();
-                if (e.includes('rate') || e.includes('429') || e.includes('busy') || e.includes('503')) return 'Rate limited or service busy. Retry.';
-                if (e.includes('auth') || e.includes('key') || e.includes('invalid')) return 'Authentication issue. Check API key.';
-                if (e.includes('model') || e.includes('unsupported') || e.includes('deprecated') || e.includes('404')) return 'Model unavailable. Update model.';
-                return 'Blocked by safety settings.';
-              })()}>
+              <span className="relative group px-2 py-0.5 text-xs font-semibold rounded-full bg-red-200 dark:bg-red-800 text-red-800 dark:text-red-200">
                 Safety Blocked
                 <span className="absolute left-0 mt-1 hidden group-hover:block bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 text-[10px] px-2 py-1 rounded shadow">
                   {(() => {
@@ -103,8 +97,8 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = ({
                 </span>
               </span>
             )}
-            <span>
-              <strong>Chat Error:</strong> {error}
+            <span className="ml-2">
+              <strong>Error:</strong> {error}
             </span>
           </div>
           <button
@@ -280,7 +274,7 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = memo(
                     : 'Copy Markdown to clipboard'
               }
               className={`absolute top-1.5 right-1.5 p-1 rounded-md transition-all duration-150 ease-in-out 
-                        opacity-0 group-hover:opacity-60 focus:opacity-100 hover:opacity-100
+                        opacity-60 focus:opacity-100 hover:opacity-100
                         ${
                           copiedMessageId === msg.id
                             ? 'bg-green-500 text-white'
@@ -338,7 +332,7 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = memo(
                 }}
                 title="Download Component"
                 aria-label="Download component code as TSX file"
-                className="absolute top-1.5 right-9 p-1 rounded-md transition-all duration-150 ease-in-out opacity-0 group-hover:opacity-60 focus:opacity-100 hover:opacity-100 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-400 dark:hover:bg-gray-500"
+                className="absolute top-1.5 right-9 p-1 rounded-md transition-all duration-150 ease-in-out opacity-60 group-hover:opacity-100 focus:opacity-100 hover:opacity-100 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-400 dark:hover:bg-gray-500"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
                   <path d="M12 16l4-5h-3V4h-2v7H8l4 5zm8 3H4v-2h16v2z" />
