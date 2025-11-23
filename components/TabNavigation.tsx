@@ -9,7 +9,7 @@ interface TabNavigationProps {
 
 export const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabChange, tabs }) => {
   return (
-    <div className="mb-6 border-b border-gray-300 dark:border-gray-700 flex overflow-x-auto whitespace-nowrap no-scrollbar">
+    <div className="mb-6 border-b border-gray-300 dark:border-gray-700 flex overflow-x-auto whitespace-nowrap scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800">
       {tabs.map((tab) => (
         <button
           key={tab.id}
