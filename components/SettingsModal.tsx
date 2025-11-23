@@ -4,6 +4,7 @@ import { ThemeToggleButton } from './ThemeToggleButton';
 import { ApiKeySource, Theme } from '../types.ts';
 import { useAppStore } from '../store.ts';
 import CustomInstructionsPanel from './CustomInstructionsPanel';
+import { SVG_ICONS } from '../src/constants';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -71,16 +72,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = memo(({
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 z-10"
           aria-label="Close settings modal"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="h-6 w-6"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
+          {SVG_ICONS.CLOSE}
         </button>
 
         <div className="flex border-b border-gray-200 dark:border-gray-700 mb-4">
