@@ -15,6 +15,12 @@ export const useChatLogic = () => {
     handleCopyChatMessage,
     handleTogglePreview,
     sendOnEnter,
+    savedChatSessions,
+    initializeSavedChatSessions,
+    saveChatSession,
+    loadSavedChatSession,
+    deleteSavedChatSession,
+    renameSavedChatSession,
   } = useAppStore();
 
   
@@ -46,5 +52,11 @@ export const useChatLogic = () => {
     handleCopyChatMessage,
     handleTogglePreview,
     sendOnEnter,
+    savedChatSessions,
+    initializeSavedChatSessions,
+    saveChatSession,
+    loadSavedChatSession,
+    deleteSavedChatSession,
+    renameSavedChatSession,
   };
 };

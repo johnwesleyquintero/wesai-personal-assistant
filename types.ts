@@ -19,6 +19,13 @@ export interface ChatMessage {
   showPreview?: boolean; // Toggles between code view and preview view for this message
 }
 
+export interface SavedChatSession {
+  id: string;
+  name: string;
+  timestamp: number; // Unix timestamp for when the session was saved
+  messages: ChatMessage[];
+}
+
 export interface CustomInstructionProfile {
   id: string; // Unique identifier
   name: string;

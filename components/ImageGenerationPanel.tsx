@@ -15,7 +15,7 @@ interface ImageGenerationPanelProps {
   setError: (error: string | null) => void;
 }
 
-export const ImageGenerationPanel: React.FC<ImageGenerationPanelProps> = ({
+export const ImageGenerationPanel: React.FC<ImageGenerationPanelProps> = React.memo(({
   prompt,
   onPromptChange,
   onClearPrompt,
@@ -304,4 +304,4 @@ export const ImageGenerationPanel: React.FC<ImageGenerationPanelProps> = ({
       )}
     </div>
   );
-};
+});

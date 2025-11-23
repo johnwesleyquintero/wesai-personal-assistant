@@ -36,7 +36,7 @@ const parseRefactorFeedback = (
   return { summary, refactoredCode };
 };
 
-export const CodeInteractionPanel: React.FC<CodeInteractionPanelProps> = ({
+export const CodeInteractionPanel: React.FC<CodeInteractionPanelProps> = React.memo(({
   activeTab,
   code,
   onCodeChange,
@@ -263,4 +263,4 @@ export const CodeInteractionPanel: React.FC<CodeInteractionPanelProps> = ({
       {!isLoading && renderFeedback()}
     </>
   );
-};
+});

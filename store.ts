@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { Chat } from '@google/genai';
-import { ActiveTab, ApiKeySource, Theme, ChatMessage, AspectRatio } from './types.ts';
+import { ActiveTab, ApiKeySource, Theme, ChatMessage, AspectRatio, SavedChatSession } from './types.ts';
 import {
   reviewCodeWithGemini,
   refactorCodeWithGeminiStream,
@@ -20,6 +20,7 @@ export const LS_KEY_API = 'geminiApiKey';
 export const LS_KEY_LOGGED_IN = 'isWesAiUserLoggedIn';
 export const LS_KEY_STREAM_NOTES = 'showStreamFinishNotes';
 export const LS_KEY_SEND_ON_ENTER = 'sendOnEnter';
+export const LS_KEY_SAVED_CHATS = 'savedChatSessions'; // New local storage key
 
 interface AppState {
   // Global state
@@ -41,6 +42,8 @@ interface AppState {
   activeChatSession: Chat | null;
   copiedMessageId: string | null;
   chatError: string | null;
+  savedChatSessions: SavedChatSession[]; // New state for saved chat sessions
+  activeSavedChatSessionId: string | null; // ID of the currently loaded saved chat
 
   // Image generation specific state
   imagePrompt: string;
@@ -88,7 +91,13 @@ interface AppState {
   handleRetryChat: () => Promise<void>;
   handleCopyChatMessage: (content: string, messageId: string) => void;
   handleTogglePreview: (messageId: string) => void;
-  initializeChatSession: () => Promise<void>; // New action to initialize chat session
+  initializeChatSession: (systemInstruction?: string, savedChatId?: string) => Promise<void>; // Modified to accept system instruction and saved chat ID
+  initializeSavedChatSessions: () => void; // New action to load saved chat sessions
+  saveChatSession: (sessionName: string, messagesToSave: ChatMessage[]) => void;
+  loadSavedChatSession: (sessionId: string) => void;
+  deleteSavedChatSession: (sessionId: string) => void;
+  renameSavedChatSession: (sessionId: string, newName: string) => void;
+  setActiveSavedChatSessionId: (sessionId: string | null) => void;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -120,6 +129,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   activeChatSession: null,
   copiedMessageId: null,
   chatError: null,
+  savedChatSessions: [], // Initialize with empty array
+  activeSavedChatSessionId: null, // Initialize as null
 
   imagePrompt: '',
   generatedImageData: null,
@@ -153,6 +164,76 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ sendOnEnter: send });
   },
 
+  initializeSavedChatSessions: () => {
+    try {
+      const storedSessions = localStorage.getItem(LS_KEY_SAVED_CHATS);
+      if (storedSessions) {
+        const parsedSessions: SavedChatSession[] = JSON.parse(storedSessions);
+        set({ savedChatSessions: parsedSessions });
+      } else {
+        set({ savedChatSessions: [] });
+      }
+    } catch (err) {
+      console.error('Failed to parse saved chat sessions from local storage:', err);
+      set({ savedChatSessions: [], chatError: 'Error loading saved chat sessions.' });
+    }
+  },
+
+  saveChatSession: (sessionName: string, messagesToSave: ChatMessage[]) => {
+    const newSession: SavedChatSession = {
+      id: `saved-${Date.now()}`,
+      name: sessionName,
+      timestamp: Date.now(),
+      messages: messagesToSave,
+    };
+
+    set((state) => {
+      const updatedSessions = [...state.savedChatSessions, newSession];
+      localStorage.setItem(LS_KEY_SAVED_CHATS, JSON.stringify(updatedSessions));
+      return { savedChatSessions: updatedSessions };
+    });
+  },
+
+  loadSavedChatSession: (sessionId: string) => {
+    const { savedChatSessions, initializeChatSession } = get();
+    const sessionToLoad = savedChatSessions.find((session) => session.id === sessionId);
+
+    if (sessionToLoad) {
+      set({
+        chatMessages: sessionToLoad.messages,
+        activeChatSession: null, // Clear current session to force re-initialization with new context
+        activeSavedChatSessionId: sessionId,
+      });
+      // Re-initialize chat session with the loaded messages
+      initializeChatSession(undefined, sessionId);
+    } else {
+      set({ chatError: 'Saved chat session not found.' });
+    }
+  },
+
+  deleteSavedChatSession: (sessionId: string) => {
+    set((state) => {
+      const updatedSessions = state.savedChatSessions.filter((session) => session.id !== sessionId);
+      localStorage.setItem(LS_KEY_SAVED_CHATS, JSON.stringify(updatedSessions));
+      return {
+        savedChatSessions: updatedSessions,
+        activeSavedChatSessionId: state.activeSavedChatSessionId === sessionId ? null : state.activeSavedChatSessionId,
+      };
+    });
+  },
+
+  renameSavedChatSession: (sessionId: string, newName: string) => {
+    set((state) => {
+      const updatedSessions = state.savedChatSessions.map((s) =>
+        s.id === sessionId ? { ...s, name: newName } : s,
+      );
+      localStorage.setItem(LS_KEY_SAVED_CHATS, JSON.stringify(updatedSessions));
+      return { savedChatSessions: updatedSessions };
+    });
+  },
+
+  setActiveSavedChatSessionId: (sessionId: string | null) => set({ activeSavedChatSessionId: sessionId }),
+
   initializeActiveApiKey: () => {
     const storedKey = localStorage.getItem(LS_KEY_API);
     const envApiKey = getEnvVariable('VITE_GEMINI_API_KEY');
@@ -172,6 +253,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     if (get().activeApiKey) {
       get().initializeChatSession();
     }
+    get().initializeSavedChatSessions(); // Initialize saved sessions here
   },
 
   handleSaveApiKey: (key: string) => {
@@ -180,6 +262,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       set({ activeApiKey: key, apiKeySource: 'ui', error: null, chatError: null });
       initializeGeminiClient(key);
       get().initializeChatSession(); // Attempt to initialize chat session after API key is saved
+      get().initializeSavedChatSessions(); // Also refresh saved sessions
     }
   },
 
@@ -192,6 +275,8 @@ export const useAppStore = create<AppState>((set, get) => ({
       chatError: null,
       chatMessages: [],
       activeChatSession: null,
+      savedChatSessions: [], // Clear saved sessions on API key removal
+      activeSavedChatSessionId: null,
     });
     get().initializeActiveApiKey();
     // Chat session should be cleared, no need to re-initialize here
@@ -202,6 +287,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ isLoggedIn: true });
     get().initializeActiveApiKey();
     get().initializeChatSession(); // Attempt to initialize chat session after login
+    get().initializeSavedChatSessions(); // Also refresh saved sessions
   },
 
   handleLogout: () => {
@@ -218,6 +304,8 @@ export const useAppStore = create<AppState>((set, get) => ({
       activeChatSession: null,
       code: '',
       imagePrompt: '',
+      savedChatSessions: [], // Clear saved sessions on logout
+      activeSavedChatSessionId: null,
     });
     get().initializeActiveApiKey();
     // No chat session to initialize after logout
@@ -247,28 +335,51 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ chatInput: '' });
   },
 
-  initializeChatSession: async () => {
-    const { activeChatSession, activeApiKey } = get();
-    if (!activeChatSession && !!activeApiKey) {
-      set({ isLoading: true, chatError: null });
-      try {
-        const activeProfile = getActiveInstructionProfile();
-        const defaultSystemInstruction = 'Hey there! 👋 How can I help you today?';
-        const systemInstruction = activeProfile
-          ? activeProfile.instructions
-          : defaultSystemInstruction;
-
-        const session = await startChatSession(systemInstruction);
-        set({ activeChatSession: session });
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-        set({ chatError: `Failed to start chat session: ${errorMessage}` });
-        console.error(err);
-      } finally {
-        set({ isLoading: false });
-      }
-    } else if (!activeApiKey) {
+  initializeChatSession: async (systemInstructionOverride?: string, savedChatId?: string) => {
+    const { activeChatSession, activeApiKey, savedChatSessions } = get();
+    if (!activeApiKey) {
       set({ chatError: 'API Key is not configured. Please set your API key to use chat.' });
+      return;
+    }
+
+    // If an existing session is active AND we're not loading a new saved chat, don't re-initialize
+    if (activeChatSession && !savedChatId) {
+      return;
+    }
+
+    set({ isLoading: true, chatError: null });
+    try {
+      const activeProfile = getActiveInstructionProfile();
+      let effectiveSystemInstruction = systemInstructionOverride || (activeProfile ? activeProfile.instructions : 'Hey there! 👋 How can I help you today?');
+      let initialChatMessages: ChatMessage[] = [];
+
+      if (savedChatId) {
+        const savedSession = savedChatSessions.find(s => s.id === savedChatId);
+        if (savedSession) {
+          initialChatMessages = savedSession.messages;
+          set({ chatMessages: initialChatMessages }); // Update chatMessages state with loaded messages
+        }
+      }
+
+      // Prepare history for the new session, including system instruction and initial messages
+      const history: { role: 'user' | 'model'; parts: { text: string }[] }[] = [
+        { role: 'user', parts: [{ text: effectiveSystemInstruction }] },
+        { role: 'model', parts: [{ text: 'Okay, I am ready!' }] },
+        ...initialChatMessages.map((msg) => ({
+          role: msg.role === 'user' ? ('user' as const) : ('model' as const),
+          parts: [{ text: msg.content }],
+        })),
+      ];
+      
+      const session = await startChatSession(effectiveSystemInstruction, history);
+      set({ activeChatSession: session, chatMessages: initialChatMessages }); // Set chat messages from loaded session
+
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+      set({ chatError: `Failed to start chat session: ${errorMessage}` });
+      console.error(err);
+    } finally {
+      set({ isLoading: false });
     }
   },
 
@@ -469,7 +580,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   handleNewChat: () => {
-    set({ chatMessages: [], activeChatSession: null, chatError: null });
+    set({ chatMessages: [], activeChatSession: null, chatError: null, activeSavedChatSessionId: null });
     get().initializeChatSession(); // Initialize new session immediately
   },
 

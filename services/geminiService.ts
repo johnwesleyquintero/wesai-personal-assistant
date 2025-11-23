@@ -441,7 +441,10 @@ export async function editImageWithGemini(originalImageSrc: string, editPrompt: 
 
 // --- Chat Functions ---
 
-export const startChatSession = async (initialSystemInstruction: string = ''): Promise<Chat> => {
+export const startChatSession = async (
+  initialSystemInstruction: string = '',
+  history: { role: 'user' | 'model'; parts: { text: string }[] }[] = [],
+): Promise<Chat> => {
   const defaultSystemInstruction = `I am WesAI, John Wesley Quintero's AI assistant. I am here to assist you, showcase John's expertise, and interact on his behalf. I embody John Wesley Quintero's professional identity: expert, confident, helpful, and proactive. I always communicate in the first person. I can help with career representation, technical project and coding assistance, data analysis, visualization, reporting, and content and strategic brainstorming.`;
   const currentAi = getAiInstance();
   const activeProfile = getActiveInstructionProfile();
@@ -455,6 +458,7 @@ export const startChatSession = async (initialSystemInstruction: string = ''): P
       config: {
         systemInstruction: systemInstruction,
       },
+      history: history, // Pass the history to the chat session
     });
     return chatSession;
   } catch (error) {

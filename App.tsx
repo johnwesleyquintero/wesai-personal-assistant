@@ -61,6 +61,12 @@ const App: React.FC = () => {
     handleCopyChatMessage,
     handleTogglePreview,
     sendOnEnter,
+    savedChatSessions,
+    initializeSavedChatSessions,
+    saveChatSession,
+    loadSavedChatSession,
+    deleteSavedChatSession,
+    renameSavedChatSession,
   } = useChatLogic();
 
   const {
@@ -169,6 +175,12 @@ const App: React.FC = () => {
               onNewChat={handleNewChat}
               onRetryChat={handleRetryChat}
               sendOnEnter={sendOnEnter}
+              savedChatSessions={savedChatSessions}
+              onInitializeSavedChatSessions={initializeSavedChatSessions}
+              onSaveChatSession={saveChatSession}
+              onLoadSavedChatSession={loadSavedChatSession}
+              onDeleteSavedChatSession={deleteSavedChatSession}
+              onRenameSavedChatSession={renameSavedChatSession}
             />
           )}
 
