@@ -96,7 +96,7 @@ const CustomInstructionsPanel: React.FC = () => {
             id="profileName"
             value={profileName}
             onChange={(e) => setProfileName(e.target.value)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
           />
         </div>
         <div className="mb-4">
@@ -111,7 +111,7 @@ const CustomInstructionsPanel: React.FC = () => {
             rows={6}
             value={instructions}
             onChange={(e) => setInstructions(e.target.value)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
           ></textarea>
         </div>
         <div className="flex space-x-4">
