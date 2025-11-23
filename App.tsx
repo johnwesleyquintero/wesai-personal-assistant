@@ -13,7 +13,6 @@ import { TabNavigation } from './components/TabNavigation.tsx';
 import { CodeInteractionPanel } from './components/CodeInteractionPanel.tsx';
 import { ChatInterfacePanel } from './components/ChatInterfacePanel.tsx';
 import { ImageGenerationPanel } from './components/ImageGenerationPanel.tsx';
-import { DocumentationViewerPanel } from './components/DocumentationViewerPanel.tsx';
 
 const App: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
@@ -118,7 +117,6 @@ const App: React.FC = () => {
             { id: 'chat', label: 'Chat' },
             { id: 'content', label: 'Generate Content' },
             { id: 'image', label: 'Image Generation' },
-            { id: 'documentation', label: 'Documentation' },
           ]}
         />
 
@@ -172,9 +170,6 @@ const App: React.FC = () => {
             />
           )}
 
-          {activeTab === 'documentation' && (
-            <DocumentationViewerPanel />
-          )}
         </main>
         <footer className="text-center mt-12 py-6 border-t border-gray-200 dark:border-gray-700">
           <p className="text-sm text-gray-500 dark:text-gray-400">
