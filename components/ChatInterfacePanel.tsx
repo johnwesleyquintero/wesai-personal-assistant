@@ -86,7 +86,7 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = ({
             {(error.toLowerCase().includes('safety') || error.toLowerCase().includes('blocked')) && (
               <span className="relative group px-2 py-0.5 text-xs font-semibold rounded-full bg-red-200 dark:bg-red-800 text-red-800 dark:text-red-200">
                 Safety Blocked
-                <span className="absolute left-0 mt-1 hidden group-hover:block bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 text-[10px] px-2 py-1 rounded shadow">
+                <span className="absolute left-1/2 -translate-x-1/2 top-full mt-2 hidden group-hover:block bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 text-[10px] px-3 py-1.5 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 z-10 whitespace-nowrap">
                   {(() => {
                     const e = error.toLowerCase();
                     if (e.includes('rate') || e.includes('429') || e.includes('busy') || e.includes('503')) return 'Rate limited or service busy. Retry.';
@@ -148,8 +148,7 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = ({
               onClick={onClearChatInput}
               title="Clear chat input"
               aria-label="Clear chat input field"
-              className="absolute right-[4rem] sm:right-[4.5rem] p-1.5 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 rounded-full focus:outline-none focus:ring-1 focus:ring-blue-500"
-              style={{ top: '50%', transform: 'translateY(-50%)' }}
+              className="absolute right-16 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 rounded-full focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
