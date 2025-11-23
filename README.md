@@ -1,14 +1,12 @@
-# WesAI Personal Assistant
+# WesAI
 
 Your AI-powered personal assistant and creative partner.
 
-WesAI Personal Assistant is a product of [ScaleSmart](https://wescode.vercel.app/). It is a web application that uses Google's AI models (Gemini for text and Imagen for images) to help you with intelligent assistance, creating content, generating images, and having interactive conversations. It's designed with a focus on boosting your personal productivity and creativity.
+WesAI is a product of [ScaleSmart](https://wescode.vercel.app/). It is a web application that uses Google's AI models (Gemini for text and Imagen for images) to help you with intelligent assistance, creating content, generating images, and having interactive conversations. It's designed with a focus on boosting your personal productivity and creativity.
 
-This document explains the WesAI Personal Assistant application.
+This document explains the WesAI application.
 
-![WesAI Personal Assistant Screenshot](https://github.com/user-attachments/assets/df9ed07b-9e5d-416b-af24-c63e3f4be11a)
-
-**Note:** You can also view this documentation directly within the WesAI application under the "Documentation" tab.
+![WesAI Screenshot](https://github.com/user-attachments/assets/df9ed07b-9e5d-416b-af24-c63e3f4be11a)
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/2ec1707c-0c5a-49a4-821e-ee7d82bdd95d/deploy-status)](https://app.netlify.com/projects/wesai-pa/deploys)
 
@@ -24,12 +22,11 @@ This document explains the WesAI Personal Assistant application.
   - Ask follow-up questions about the content or images the AI creates.
   - Get general help with different tasks.
   - See a live preview for some types of content generated in the chat, now with enhanced support for common styling utilities.
-- **Built-in Help:** Access this documentation anytime directly within the application.
 - **Modern Design:** Enjoy a clean, responsive interface built with modern web technologies, featuring theme support and easy-to-use clear input buttons.
 
 ## Getting Started
 
-To use WesAI Personal Assistant, you will need:
+To use WesAI, you will need:
 
 - A modern web browser (like Chrome, Firefox, Edge, or Safari).
 - A **Google Gemini API Key**. You can get one from [Google AI Studio](https://aistudio.google.com/app/apikey). Make sure this key works for both the Gemini API (for text) and the Imagen API (for images).
@@ -52,7 +49,6 @@ Once you have the application files and your API key:
     - **Content:** Describe the text you want to create (like a blog post or email) and click "Create Content."
     - **Image:** Type a description (a "prompt") for the image you want and click "Generate Image." You can then download the image.
     - **Chat:** Click the "Chat" tab to ask questions about previous AI outputs or get general help. Some content types will show a live preview here.
-    - **Documentation:** Click the "Documentation" tab to read this guide.
 5.  **See the Results:** The generated text, images, or chat responses will appear on the screen.
 6.  **Copy Output:** Use the copy buttons next to the generated content or chat messages.
 7.  **Clear Inputs:** Click the "X" icon next to the input boxes to quickly clear them.
@@ -60,7 +56,7 @@ Once you have the application files and your API key:
 
 ## Where to Find the Code
 
-- GitHub: [https://github.com/johnwesleyquintero/wesai-personal-assistant](https://github.com/johnwesleyquintero/wesai-personal-assistant).
+- GitHub: [https://github.com/johnwesleyquintero/wesai](https://github.com/johnwesleyquintero/wesai).
 
 ## Thanks To
 
@@ -76,14 +72,14 @@ Your privacy is important. Here's how WesAI Personal Assistant handles your data
 - **API Keys:** Your Gemini API key is stored only in your browser's local storage. It is never sent to our servers or shared with anyone else. You can save or remove your key whenever you want.
 - **Your Inputs:** Any text or image descriptions you enter are sent directly to the Google Gemini API for processing. We do not save, record, or look at this information ourselves. Google's rules apply to how they use data from the API.
 - **Local Storage:** Besides your API key, your preference for light or dark mode is also saved in your browser's local storage.
-- **No Tracking:** WesAI Personal Assistant does not use any third-party tracking, cookies, or analytics.
+- **No Tracking:** WesAI does not use any third-party tracking, cookies, or analytics.
 
 ## Terms of Service
 
-By using WesAI Personal Assistant, you agree to these terms:
+By using WesAI, you agree to these terms:
 
 - **API Key:** You are responsible for getting and managing your own Google Gemini API key. Your use of the Gemini API must follow Google's Terms of Service.
-- **No Guarantees:** WesAI Personal Assistant is provided "as is," without any promises or guarantees. We cannot guarantee that the AI-generated content or code will be accurate or complete.
+- **No Guarantees:** WesAI is provided "as is," without any promises or guarantees. We cannot guarantee that the AI-generated content or code will be accurate or complete.
 - **Limited Responsibility:** We are not responsible for any problems or damages that happen from using or not being able to use this application.
 - **Personal Use:** This application is meant for personal and learning use. It is not built for important or production systems.
 - **Changes:** We might change or stop offering the application at any time without telling you first.
