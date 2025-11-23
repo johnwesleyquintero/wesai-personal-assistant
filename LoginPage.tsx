@@ -29,7 +29,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
       <div className="w-full max-w-md space-y-8 bg-gray-100 dark:bg-gray-800 shadow-2xl rounded-lg p-8">
         <header className="text-center">
           <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 py-2">
-            WesAI Personal Assistant
+            WesAI
           </h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">Please log in to continue</p>
         </header>

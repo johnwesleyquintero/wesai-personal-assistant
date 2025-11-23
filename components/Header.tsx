@@ -1,6 +1,7 @@
 import { memo } from 'react';
 import { FaCog } from 'react-icons/fa';
 import { Theme } from '../types';
+import { ThemeToggleButton } from './ThemeToggleButton'; // Import ThemeToggleButton
 
 interface HeaderProps {
   title: string;
@@ -9,18 +10,19 @@ interface HeaderProps {
   onSettingsClick: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = memo(({ title, onSettingsClick }) => {
+export const Header: React.FC<HeaderProps> = memo(({ title, onSettingsClick, toggleTheme, currentTheme }) => {
   return (
     <header className="flex items-center justify-between px-4 py-4">
-      <div className="flex-grow text-center">
+      <div className="flex items-center"> {/* Group title to the left */}
         <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 py-2 sm:text-5xl">
-          {title}
+          WesAI
         </h1>
       </div>
-      <div>
+      <div className="flex items-center space-x-2"> {/* Group buttons to the right with some space */}
+        <ThemeToggleButton currentTheme={currentTheme} toggleTheme={toggleTheme} />
         <button
           onClick={onSettingsClick}
-          className="p-2 text-gray-500 rounded-full hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-purple-400"
+          className="p-2 text-purple-500 rounded-full hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 dark:text-purple-400 dark:hover:bg-gray-700 dark:focus:ring-purple-400"
           aria-label="Open settings"
           title="Open settings"
         >

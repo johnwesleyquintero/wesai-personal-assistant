@@ -1,6 +1,6 @@
 # Services Overview
 
-This directory contains various services used throughout the WesAI Personal Assistant application. Each service is designed to encapsulate specific functionalities, often related to external API interactions or complex business logic, to promote modularity and reusability.
+This directory contains various services used throughout the WesAI application. Each service is designed to encapsulate specific functionalities, often related to external API interactions or complex business logic, to promote modularity and reusability.
 
 ## `geminiService.ts`
 

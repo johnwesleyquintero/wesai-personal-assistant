@@ -92,7 +92,7 @@ const App: React.FC = () => {
     <div className="min-h-screen flex flex-col items-center px-4 pt-0 sm:px-6">
       <div className="w-full sm:max-w-5xl">
         <Header
-          title="WesAI Personal Assistant"
+          title="WesAI"
           toggleTheme={toggleTheme}
           currentTheme={theme}
           onSettingsClick={handleOpenSettingsModal}
@@ -172,7 +172,7 @@ const App: React.FC = () => {
         </main>
         <footer className="text-center mt-12 py-6 border-t border-gray-200 dark:border-gray-700">
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            WesAI Personal Assistant | Powered by Google Gemini
+            WesAI | Powered by Google Gemini
           </p>
         </footer>
       </div>
