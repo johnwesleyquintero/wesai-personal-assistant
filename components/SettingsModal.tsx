@@ -59,7 +59,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = memo(({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 dark:bg-gray-900/75"
       onClick={onClose}
     >
       <div

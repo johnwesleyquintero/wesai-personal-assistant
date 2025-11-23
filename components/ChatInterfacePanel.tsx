@@ -145,7 +145,7 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = ({
             }}
             placeholder={getInputPlaceholder()}
             disabled={isLoading || !isApiKeyConfigured || !isChatSessionActive}
-            className="flex-grow p-2.5 pr-10 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 text-sm resize-y min-h-[44px]"
+            className="flex-grow p-2.5 pr-6 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 text-sm resize-none min-h-[44px] max-h-32 overflow-y-auto"
             aria-label="Chat input"
           />
           {chatInput && !isLoading && (
@@ -154,7 +154,7 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = ({
               onClick={onClearChatInput}
               title="Clear chat input"
               aria-label="Clear chat input field"
-              className="absolute right-[calc(4rem+0.75rem)] sm:right-[calc(4.5rem+0.75rem)] p-1.5 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 rounded-full focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="absolute right-[4rem] sm:right-[4.5rem] p-1.5 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 rounded-full focus:outline-none focus:ring-1 focus:ring-blue-500"
               style={{ top: '50%', transform: 'translateY(-50%)' }}
             >
               <svg

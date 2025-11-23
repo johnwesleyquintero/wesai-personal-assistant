@@ -85,6 +85,7 @@ interface AppState {
   handleRetryChat: () => Promise<void>;
   handleCopyChatMessage: (content: string, messageId: string) => void;
   handleTogglePreview: (messageId: string) => void;
+  initializeChatSession: () => Promise<void>; // New action to initialize chat session
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -162,6 +163,11 @@ export const useAppStore = create<AppState>((set, get) => ({
       clearGeminiClient();
       set({ activeApiKey: null, apiKeySource: 'none' });
     }
+    // Attempt to initialize chat session after API key is processed
+    // This handles initial load and API key changes
+    if (get().activeApiKey) {
+      get().initializeChatSession();
+    }
   },
 
   handleSaveApiKey: (key: string) => {
@@ -169,6 +175,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       localStorage.setItem(LS_KEY_API, key);
       set({ activeApiKey: key, apiKeySource: 'ui', error: null, chatError: null });
       initializeGeminiClient(key);
+      get().initializeChatSession(); // Attempt to initialize chat session after API key is saved
     }
   },
 
@@ -183,12 +190,14 @@ export const useAppStore = create<AppState>((set, get) => ({
       activeChatSession: null,
     });
     get().initializeActiveApiKey();
+    // Chat session should be cleared, no need to re-initialize here
   },
 
   handleLoginSuccess: () => {
     localStorage.setItem(LS_KEY_LOGGED_IN, 'true');
     set({ isLoggedIn: true });
     get().initializeActiveApiKey();
+    get().initializeChatSession(); // Attempt to initialize chat session after login
   },
 
   handleLogout: () => {
@@ -207,6 +216,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       imagePrompt: '',
     });
     get().initializeActiveApiKey();
+    // No chat session to initialize after logout
   },
 
   handleCodeChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -231,6 +241,31 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   handleClearChatInput: () => {
     set({ chatInput: '' });
+  },
+
+  initializeChatSession: async () => {
+    const { activeChatSession, activeApiKey } = get();
+    if (!activeChatSession && !!activeApiKey) {
+      set({ isLoading: true, chatError: null });
+      try {
+        const activeProfile = getActiveInstructionProfile();
+        const defaultSystemInstruction = 'Hey there! 👋 How can I help you today?';
+        const systemInstruction = activeProfile
+          ? activeProfile.instructions
+          : defaultSystemInstruction;
+
+        const session = await startChatSession(systemInstruction);
+        set({ activeChatSession: session });
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+        set({ chatError: `Failed to start chat session: ${errorMessage}` });
+        console.error(err);
+      } finally {
+        set({ isLoading: false });
+      }
+    } else if (!activeApiKey) {
+      set({ chatError: 'API Key is not configured. Please set your API key to use chat.' });
+    }
   },
 
   handleTabChange: async (tab: ActiveTab) => {
@@ -278,28 +313,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
 
     if (tab === 'chat') {
-      const { activeChatSession, activeApiKey } = get();
-      if (!activeChatSession && !!activeApiKey) {
-        set({ isLoading: true, chatError: null });
-        try {
-          const activeProfile = getActiveInstructionProfile();
-          const defaultSystemInstruction = 'Hey there! 👋 How can I help you today?';
-          const systemInstruction = activeProfile
-            ? activeProfile.instructions
-            : defaultSystemInstruction;
-
-          const session = await startChatSession(systemInstruction);
-          set({ activeChatSession: session });
-        } catch (err) {
-          const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-          set({ chatError: `Failed to start chat session: ${errorMessage}` });
-          console.error(err);
-        } finally {
-          set({ isLoading: false });
-        }
-      } else if (!activeApiKey) {
-        set({ chatError: 'API Key is not configured. Please set your API key to use chat.' });
-      }
+      get().initializeChatSession(); // Use the new action
     }
   },
 
@@ -469,6 +483,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   handleNewChat: () => {
     set({ chatMessages: [], activeChatSession: null, chatError: null });
+    get().initializeChatSession(); // Initialize new session immediately
   },
 
   handleRetryChat: async () => {
