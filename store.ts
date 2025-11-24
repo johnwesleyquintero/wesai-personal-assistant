@@ -22,6 +22,7 @@ import {
 } from './services/geminiService.ts';
 import { getActiveInstructionProfile } from './services/instructionService.ts';
 import { getEnvVariable } from './utils/env.ts'; // Import the new utility
+import { generateKnowledgeContext } from './services/knowledgeBaseService.ts'; // Import the new knowledge base service
 
 export const LS_KEY_API = 'geminiApiKey';
 export const LS_KEY_LOGGED_IN = 'isWesAiUserLoggedIn';
@@ -300,7 +301,6 @@ export const useAppStore = create<AppState>((set, get) => ({
       set({ activeApiKey: key, apiKeySource: 'ui', error: null, chatError: null });
       initializeGeminiClient(key);
       get().initializeChatSession(); // Attempt to initialize chat session after API key is saved
-      get().initializeSavedChatSessions(); // Also refresh saved sessions
     }
   },
 
@@ -374,7 +374,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   initializeChatSession: async (systemInstructionOverride?: string, savedChatId?: string) => {
-    const { activeChatSession, activeApiKey, savedChatSessions } = get();
+    const { activeChatSession, activeApiKey, savedChatSessions, activeSavedChatSessionId } = get();
     if (!activeApiKey) {
       set({ chatError: 'API Key is not configured. Please set your API key to use chat.' });
       return;
@@ -388,7 +388,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ isLoading: true, chatError: null });
     try {
       const activeProfile = getActiveInstructionProfile();
-      let effectiveSystemInstruction =
+      const effectiveSystemInstruction =
         systemInstructionOverride ||
         (activeProfile ? activeProfile.instructions : 'Hey there! 👋 How can I help you today?');
       let initialChatMessages: ChatMessage[] = [];
@@ -401,15 +401,32 @@ export const useAppStore = create<AppState>((set, get) => ({
         }
       }
 
-      // Prepare history for the new session, including system instruction and initial messages
+      // Generate knowledge base context from all saved sessions if it's a new chat or a loaded saved chat
+      let knowledgeContext = '';
+      // Only generate if starting a brand new chat, or loading a specific saved chat (which should also get global context)
+      // If we are already in a saved chat (activeSavedChatSessionId is set) and not explicitly loading a *different* savedChatId,
+      // we don't need to regenerate global context here as it would have been done when the saved chat was initially loaded.
+      if (!activeSavedChatSessionId || (activeSavedChatSessionId && savedChatId)) {
+        knowledgeContext = generateKnowledgeContext(savedChatSessions);
+      }
+
+      // Prepare history for the new session, including system instruction, knowledge context, and initial messages
       const history: { role: 'user' | 'model'; parts: { text: string }[] }[] = [
         { role: 'user', parts: [{ text: effectiveSystemInstruction }] },
         { role: 'model', parts: [{ text: 'Okay, I am ready!' }] },
+      ];
+
+      if (knowledgeContext) {
+        history.push({ role: 'user', parts: [{ text: knowledgeContext }] });
+        history.push({ role: 'model', parts: [{ text: 'Acknowledged previous knowledge.' }] });
+      }
+
+      history.push(
         ...initialChatMessages.map((msg) => ({
           role: msg.role === 'user' ? ('user' as const) : ('model' as const),
           parts: [{ text: msg.content }],
         })),
-      ];
+      );
 
       const session = await startChatSession(effectiveSystemInstruction, history);
       set({ activeChatSession: session, chatMessages: initialChatMessages }); // Set chat messages from loaded session
@@ -470,7 +487,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         const result = await reviewCodeWithGemini(code);
         set({ feedback: result });
       } else if (activeTab === 'refactor') {
-        let fullRefactorText = `## Refactoring Summary:\n\n`;
+        const fullRefactorText = `## Refactoring Summary:\n\n`;
         set({ feedback: fullRefactorText });
         for await (const part of refactorCodeWithGeminiStream(code)) {
           if (part.type === 'chunk' && part.data) {

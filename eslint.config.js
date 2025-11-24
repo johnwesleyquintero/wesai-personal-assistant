@@ -5,7 +5,6 @@ import pluginReact from 'eslint-plugin-react';
 import { FlatCompat } from '@eslint/eslintrc';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import pluginReactHooks from 'eslint-plugin-react-hooks';
 import pluginReactRefresh from 'eslint-plugin-react-refresh';
 import pluginPrettier from 'eslint-plugin-prettier';
 
@@ -14,30 +13,20 @@ const __dirname = path.dirname(__filename);
 
 const compat = new FlatCompat({
   baseDirectory: __dirname,
-  // Optionally, specify config file name
-  // recommendedConfig: '.eslintrc.cjs'
 });
 
 export default tseslint.config(
-  // This is the main configuration object with files, ignores, languageOptions, etc.
   {
-    files: ['**/*.{js,mjs,cjs,ts,jsx,tsx}'],
-    ignores: [
-      'dist',
-      '.eslintrc.cjs',
-      'postcss.config.js',
-      'tailwind.config.js',
-      'vite.config.ts',
-      'eslint.config.js', // Ignore itself
-    ],
+    ignores: ['dist', 'node_modules', 'babel-worker.ts'],
+  },
+  {
+    // 💡 Restrict typed linting only to TypeScript files covered by tsconfig
+    files: ['**/*.{ts,tsx}'],
     languageOptions: {
       parser: tseslint.parser,
       parserOptions: {
-        ecmaVersion: 'latest',
-        sourceType: 'module',
-        ecmaFeatures: {
-          jsx: true,
-        },
+        projectService: true, // ✅ Enables type-aware linting
+        tsconfigRootDir: __dirname,
       },
       globals: {
         ...globals.browser,
@@ -47,41 +36,56 @@ export default tseslint.config(
     plugins: {
       'react-refresh': pluginReactRefresh,
       prettier: pluginPrettier,
+      react: pluginReact,
+    },
+    settings: {
+      react: { version: 'detect' },
     },
     rules: {
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
-      // Adjusted rule for TypeScript
       '@typescript-eslint/no-unused-vars': [
         'warn',
-        { argsIgnorePattern: '_', varsIgnorePattern: '_' },
+        { argsIgnorePattern: '_', varsIgnorePattern: '_', caughtErrorsIgnorePattern: '_' },
       ],
-      // Rules often disabled in favor of TypeScript or new React JSX transform
-      'react/prop-types': 'off',
-      'react/react-in-jsx-scope': 'off',
-      // Prettier rule integration
       'prettier/prettier': 'warn',
-      // Additional rules for code consistency and quality
-      'no-console': ['warn', { allow: ['warn', 'error'] }], // Warn for console.log, allow console.warn/error
-      'no-debugger': 'error', // Disallow debugger statements
-      'react/self-closing-comp': ['warn', { component: true, html: true }], // Enforce self-closing JSX elements
-      'react/jsx-boolean-value': ['warn', 'never'], // Enforce boolean attributes notation in JSX (e.g., `checked` instead of `checked={true}`)
+      'no-console': ['warn', { allow: ['warn', 'error'] }],
+      'no-debugger': 'error',
+      'react/self-closing-comp': ['warn', { component: true, html: true }],
+      'react/jsx-boolean-value': ['warn', 'never'],
+      'react/function-component-definition': [
+        'warn',
+        { namedComponents: 'arrow-function', unnamedComponents: 'arrow-function' },
+      ],
+      'react/hook-use-state': ['warn'],
+      'react/destructuring-assignment': ['warn', 'always'],
+      '@typescript-eslint/consistent-type-imports': [
+        'warn',
+        { prefer: 'type-imports', disallowTypeAnnotations: true },
+      ],
+      '@typescript-eslint/no-floating-promises': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+      'react/react-in-jsx-scope': 'off',
     },
-    settings: {
-      react: {
-        version: 'detect', // Automatically detect React version
+  },
+
+  // Non-TS files: JS-only config (no type-aware rules)
+  {
+    files: ['**/*.{js,jsx,mjs,cjs}'],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.node,
       },
     },
   },
 
-  // --- Extended Configurations ---
-  // These are separate config objects or arrays provided as additional arguments
-  // to tseslint.config. Use the spread operator (...) for arrays.
-
+  // --- Shared Configs ---
   ...compat.extends('plugin:react/recommended'),
-
   ...compat.extends('plugin:react-hooks/recommended'),
+  pluginJs.configs.recommended,
 
-  pluginJs.configs.recommended, // Standard JS recommended rules (often a single object)
+  // ✅ Use the base recommended config for all files
+  ...tseslint.configs.recommended,
 
-  ...tseslint.configs.recommended, // Spread the array returned by tseslint.configs.recommended
+  // ✅ Add the type-checked config ONLY for TS files (already scoped above)
 );

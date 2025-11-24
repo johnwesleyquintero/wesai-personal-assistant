@@ -291,6 +291,9 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = memo(
                       const totalChars = allText.length;
                       const snippet = allText.slice(0, 140);
                       const showEllipsis = totalChars > 140;
+                      const messageCount = s.messages.length;
+                      const lastAuthor =
+                        s.messages.length > 0 ? s.messages[s.messages.length - 1].role : 'N/A';
                       return (
                         <div
                           key={s.id}
@@ -312,7 +315,8 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = memo(
                               )}
                             </div>
                             <div className="text-xs text-gray-600 dark:text-gray-300">
-                              {new Date(s.timestamp).toLocaleString()} • {totalChars} chars
+                              {new Date(s.timestamp).toLocaleString()} • {messageCount} msgs •{' '}
+                              {totalChars} chars • Last: {lastAuthor}
                             </div>
                             {snippet && (
                               <div className="mt-1 text-xs text-gray-700 dark:text-gray-200 line-clamp-2">

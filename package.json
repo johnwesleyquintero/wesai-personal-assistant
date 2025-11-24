@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "check": "node scripts/code-checker.mjs"
   },
   "dependencies": {
     "@eslint/compat": "^2.0.0",
