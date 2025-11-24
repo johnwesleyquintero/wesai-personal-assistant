@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import { Chat } from '@google/genai';
-import {
+import type { Chat } from '@google/genai';
+import type {
   ActiveTab,
   ApiKeySource,
   Theme,
@@ -78,7 +78,6 @@ interface AppState {
   setImagePrompt: (prompt: string) => void;
   setGeneratedImageData: (data: string | null) => void;
   setImageError: (error: string | null) => void; // New action for image error
-  toggleTheme: () => void;
   setShowStreamFinishNotes: (show: boolean) => void;
   setSendOnEnter: (send: boolean) => void;
   initializeActiveApiKey: () => void;
@@ -145,7 +144,10 @@ export const useAppStore = create<AppState>((set, get) => ({
   activeSavedChatSessionId: null, // Initialize as null
   savedSessionsSort: (() => {
     const v = localStorage.getItem(LS_KEY_SAVED_CHATS_SORT);
-    return v === 'oldest' || v === 'name_asc' || v === 'name_desc' ? (v as any) : 'newest';
+    const isValidSort = (value: string | null): value is AppState['savedSessionsSort'] => {
+      return ['newest', 'oldest', 'name_asc', 'name_desc'].includes(value || '');
+    };
+    return isValidSort(v) ? v : 'newest';
   })(),
 
   imagePrompt: '',
@@ -170,7 +172,6 @@ export const useAppStore = create<AppState>((set, get) => ({
   setImagePrompt: (prompt: string) => set({ imagePrompt: prompt }),
   setGeneratedImageData: (data: string | null) => set({ generatedImageData: data }),
   setImageError: (error: string | null) => set({ imageError: error }), // Action to set image error
-  toggleTheme: () => set((state) => ({ theme: state.theme === 'light' ? 'dark' : 'light' })),
   setShowStreamFinishNotes: (show: boolean) => {
     localStorage.setItem(LS_KEY_STREAM_NOTES, String(show));
     set({ showStreamFinishNotes: show });
@@ -252,7 +253,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   duplicateSavedChatSession: (sessionId: string, newName?: string) => {
     set((state) => {
       const original = state.savedChatSessions.find((s) => s.id === sessionId);
-      if (!original) return {} as any;
+      if (!original) return {};
       const copy: SavedChatSession = {
         id: `saved-${Date.now()}`,
         name: newName && newName.trim() ? newName.trim() : `Copy of ${original.name}`,
