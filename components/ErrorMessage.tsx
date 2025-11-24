@@ -65,7 +65,7 @@ export const ErrorMessage: React.FC<ErrorMessageProps> = memo(
         {onRetry && (
           <button
             onClick={onRetry}
-            className="ml-4 px-3 py-1 bg-gray-600 text-white text-xs rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+            className="ml-4 px-3 py-1 bg-red-600 text-white text-xs rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400"
           >
             Retry
           </button>
