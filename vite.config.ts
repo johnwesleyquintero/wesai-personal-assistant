@@ -22,7 +22,7 @@ export default defineConfig({
           // Example: Group react and react-dom into a separate vendor chunk
           react: ['react', 'react-dom'],
           // You can add more specific chunks for large libraries
-          'google-genai': ['@google/generative-ai'],
+          'google-genai': ['@google/genai'],
           'react-icons': ['react-icons'],
         },
       },
