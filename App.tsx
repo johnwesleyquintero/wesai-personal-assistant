@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import type { Theme } from './types';
 import { Header } from './components/Header.tsx';
 import { LoginPage } from './LoginPage.tsx';
+import { Footer } from './components/Footer.tsx';
 import { useAppStore, LS_KEY_LOGGED_IN } from './store.ts';
 import { useTheme } from './components/hooks/useTheme.ts';
 import { useChatLogic } from './components/hooks/useChatLogic.ts';
@@ -131,7 +132,7 @@ const App: React.FC = () => {
           ]}
         />
 
-        <main className="space-y-6">
+        <main className="space-y-6 flex-grow">
           {codeInteractionActive && (
             <CodeInteractionPanel
               activeTab={activeTab as 'review' | 'refactor' | 'preview' | 'generate' | 'content'}
@@ -190,12 +191,8 @@ const App: React.FC = () => {
             />
           )}
         </main>
-        <footer className="text-center mt-12 py-6 border-t border-gray-200 dark:border-gray-700">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            WesAI | Powered by Google Gemini
-          </p>
-        </footer>
       </div>
+      <Footer />
     </div>
   );
 };
