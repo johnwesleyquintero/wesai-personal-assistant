@@ -21,8 +21,8 @@ export const TabNavigation = forwardRef<HTMLDivElement, TabNavigationProps>(
             className={`flex-shrink-0 py-3 px-4 font-medium text-sm sm:text-base border-b-2 transition-colors duration-150 ease-in-out
                         ${
                           activeTab === tab.id
-                            ? 'border-blue-500 text-blue-600 dark:text-blue-400 dark:border-blue-400'
-                            : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:border-gray-400 dark:hover:border-gray-600'
+                            ? 'bg-blue-50 dark:bg-blue-900/50 border-blue-500 text-blue-600 dark:text-blue-400 dark:border-blue-400'
+                            : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:border-gray-400 dark:hover:border-gray-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 dark:focus-visible:ring-purple-400'
                         }`}
             aria-current={activeTab === tab.id ? 'page' : undefined}
           >

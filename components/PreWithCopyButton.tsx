@@ -32,11 +32,11 @@ export const PreWithCopyButton: React.FC<
         aria-label={
           isCopied ? 'Code copied successfully. Click to copy again.' : 'Copy code to clipboard'
         }
-        className={`absolute top-2 right-2 p-1.5 rounded-md transition-all duration-150 ease-in-out
+        className={`absolute top-2 right-2 p-1.5 rounded-md transition-all duration-200 ease-in-out
                     ${
                       isCopied
-                        ? 'opacity-100 bg-green-500 text-white'
-                        : 'opacity-0 group-hover:opacity-70 focus:opacity-100 hover:opacity-100 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-400 dark:hover:bg-gray-500 focus:!bg-gray-400 dark:focus:!bg-gray-500'
+                        ? 'opacity-100 bg-green-500 text-white scale-105 shadow-lg'
+                        : 'opacity-80 group-hover:opacity-100 focus-visible:opacity-100 hover:opacity-100 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-400 dark:hover:bg-gray-500 focus-visible:ring-2 focus-visible:ring-purple-500 dark:focus-visible:ring-purple-400'
                     }`}
       >
         {isCopied ? (
