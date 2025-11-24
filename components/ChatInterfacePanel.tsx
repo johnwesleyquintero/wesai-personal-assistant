@@ -167,7 +167,7 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = memo(
                 onClick={onClearChatInput}
                 title="Clear chat input"
                 aria-label="Clear chat input field"
-                className="absolute right-16 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 rounded-full focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="absolute right-16 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 rounded-full focus:outline-none focus:ring-1 focus:ring-blue-500 hover:bg-gray-200 dark:hover:bg-gray-700"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -319,8 +319,8 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = memo(
                               )}
                             </div>
                             <div className="text-xs text-gray-600 dark:text-gray-300">
-                              {new Date(s.timestamp).toLocaleString()} • {messageCount} msgs •{' '}
-                              {totalChars} chars • Last: {lastAuthor}
+                              {new Date(s.timestamp).toLocaleString()} • {messageCount} msgs • Last:{' '}
+                              {lastAuthor}
                             </div>
                             {snippet && (
                               <div className="mt-1 text-xs text-gray-700 dark:text-gray-200 line-clamp-2">

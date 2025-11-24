@@ -27,7 +27,7 @@ export const Header: React.FC<HeaderProps> = memo(
           <ThemeToggleButton currentTheme={currentTheme} toggleTheme={toggleTheme} />
           <button
             onClick={onSettingsClick}
-            className="p-2 text-purple-500 rounded-full hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 dark:text-purple-400 dark:hover:bg-gray-700 dark:focus:ring-purple-400"
+            className="p-2 text-purple-500 rounded-full hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 dark:text-purple-400 dark:hover:bg-gray-700 dark:focus:ring-purple-400 transition-colors duration-150"
             aria-label="Open settings"
             title="Open settings"
           >
