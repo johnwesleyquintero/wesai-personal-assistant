@@ -3,8 +3,8 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { LoadingSpinner } from './LoadingSpinner.tsx';
 import { ReactPreviewRenderer } from './ReactPreviewRenderer.tsx';
-import { ChatMessage } from '../types.ts';
 import { ErrorMessage } from './ErrorMessage.tsx';
+import type { ChatMessage } from '../types.ts';
 
 interface ChatInterfacePanelProps {
   chatMessages: ChatMessage[];
@@ -252,7 +252,11 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = memo(
                 <label className="text-xs text-gray-700 dark:text-gray-300">Sort:</label>
                 <select
                   value={savedSessionsSort}
-                  onChange={(e) => onSetSavedSessionsSort(e.target.value as any)}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                    onSetSavedSessionsSort(
+                      e.target.value as 'newest' | 'oldest' | 'name_asc' | 'name_desc',
+                    )
+                  }
                   className="p-2 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded"
                 >
                   <option value="newest">Newest</option>

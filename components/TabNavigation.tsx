@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActiveTab } from '../types.ts';
+import type { ActiveTab } from '../types.ts';
 
 interface TabNavigationProps {
   activeTab: ActiveTab;

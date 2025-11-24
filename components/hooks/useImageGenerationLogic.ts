@@ -1,6 +1,6 @@
 import { useAppStore } from '../../store';
 import { useCallback } from 'react';
-import { AspectRatio } from '../../types';
+import type { AspectRatio } from '../../types';
 
 export const useImageGenerationLogic = () => {
   const {

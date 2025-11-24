@@ -59,12 +59,14 @@ export default tseslint.config(
       'react/hook-use-state': ['warn'],
       'react/destructuring-assignment': ['warn', 'always'],
       '@typescript-eslint/consistent-type-imports': [
-        'warn',
+        'error',
         { prefer: 'type-imports', disallowTypeAnnotations: true },
       ],
       '@typescript-eslint/no-floating-promises': 'off',
-      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-explicit-any': 'warn',
       'react/react-in-jsx-scope': 'off',
+      'react/prop-types': 'off',
+      'react/display-name': 'off',
     },
   },
 
@@ -88,4 +90,14 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
 
   // ✅ Add the type-checked config ONLY for TS files (already scoped above)
+  {
+    settings: {
+      react: { version: 'detect' }, // Add this to resolve the React version warning
+    },
+    rules: {
+      'react/prop-types': 'off', // Explicitly turn off again after extends
+      'react/display-name': 'off', // Explicitly turn off again after extends
+      'react/react-in-jsx-scope': 'off', // Explicitly turn off again after extends
+    },
+  },
 );

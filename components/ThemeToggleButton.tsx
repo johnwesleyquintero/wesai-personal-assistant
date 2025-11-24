@@ -1,7 +1,7 @@
 import React from 'react';
 import { FaSun, FaMoon } from 'react-icons/fa';
 
-import { Theme } from '../types';
+import type { Theme } from '../types';
 
 interface ThemeToggleButtonProps {
   currentTheme: Theme;

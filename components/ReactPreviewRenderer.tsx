@@ -1,15 +1,17 @@
-import React, { useState, useEffect, useId, ReactNode, useRef } from 'react';
+import type { ReactNode } from 'react';
+import React, { useState, useEffect, useId, useRef } from 'react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
 // Declare `Worker` for TypeScript without needing a separate .d.ts file if targeting older TS versions
-declare global {
-  interface Window {
-    // If you are targeting ES6/ES2015 lib in tsconfig, Worker might already be declared.
-    // Otherwise, you might need to declare it explicitly for the global scope if not using 'webworker' lib.
-    // Worker: typeof Worker;
-  }
-}
+// Declare `Worker` for TypeScript without needing a separate .d.ts file if targeting older TS versions
+// If you are targeting ES6/ES2015 lib in tsconfig, Worker might already be declared.
+// Otherwise, you might need to declare it explicitly for the global scope if not using 'webworker' lib.
+// declare global {
+//   interface Window {
+//     Worker: typeof Worker;
+//   }
+// }
 
 // Simple Error Boundary component to catch rendering errors within the preview
 class PreviewErrorBoundary extends React.Component<
@@ -30,15 +32,18 @@ class PreviewErrorBoundary extends React.Component<
   }
 
   render() {
-    if (this.state.hasError) {
-      if (this.props.onErrorRender) {
-        return this.props.onErrorRender(this.state.error);
+    const { hasError, error } = this.state;
+    const { onErrorRender, children } = this.props;
+
+    if (hasError) {
+      if (onErrorRender) {
+        return onErrorRender(error);
       }
       const errorMessage =
-        this.state.error instanceof Error
-          ? this.state.error.message
-          : typeof this.state.error === 'string'
-            ? this.state.error
+        error instanceof Error
+          ? error.message
+          : typeof error === 'string'
+            ? error
             : 'An unknown rendering error occurred.';
 
       return (
@@ -48,7 +53,7 @@ class PreviewErrorBoundary extends React.Component<
         </div>
       );
     }
-    return this.props.children;
+    return children;
   }
 }
 
@@ -105,7 +110,7 @@ export const ReactPreviewRenderer: React.FC<ReactPreviewRendererProps> = ({
   onErrorRender,
   onLoadingRender,
   darkTheme,
-  showTranspiledCode = false, // Default to false
+  showTranspiledCode = false,
 }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [iframeLoaded, setIframeLoaded] = useState(false);
@@ -114,15 +119,13 @@ export const ReactPreviewRenderer: React.FC<ReactPreviewRendererProps> = ({
 
   const uniqueId = useId();
   const [transpiledCodeForDebug, setTranspiledCodeForDebug] = useState<string | null>(null);
-  const [transpilationError, setTranspilationError] = useState<unknown | null>(null);
+  const [transpilationError, setTranspilationError] = useState<unknown | null>(() =>
+    !code || code.trim() === '' ? 'No code provided for preview.' : null,
+  );
 
   // Effect to handle Babel transpilation
   useEffect(() => {
-    setTranspilationError(null);
-    setTranspiledCodeForDebug(null);
-
     if (!code || code.trim() === '') {
-      setTranspilationError('No code provided for preview.');
       return;
     }
 
@@ -135,10 +138,10 @@ export const ReactPreviewRenderer: React.FC<ReactPreviewRendererProps> = ({
       const { type, transpiledCode, error } = event.data;
       if (type === 'TRANSPILE_SUCCESS') {
         setTranspiledCodeForDebug(transpiledCode);
-        setTranspilationError(null);
+        setTranspilationError(null); // Clear any previous error on successful transpilation
       } else if (type === 'TRANSPILE_ERROR') {
         console.error('Error from Babel Web Worker:', error);
-        setTranspilationError(error);
+        setTranspilationError(error); // Set error on transpilation failure
       }
     };
 
@@ -163,9 +166,6 @@ export const ReactPreviewRenderer: React.FC<ReactPreviewRendererProps> = ({
 
   // Effect to manage iframe communication
   useEffect(() => {
-    setIframeError(null);
-    setIframeContent(null);
-
     const iframe = iframeRef.current;
     if (!iframe) return;
 
@@ -261,7 +261,7 @@ export const ReactPreviewRenderer: React.FC<ReactPreviewRendererProps> = ({
       // Attempt to stringify other types of errors
       try {
         message = `Unknown Error Type: ${JSON.stringify(caughtError)}`;
-      } catch (err) {
+      } catch (_err) {
         message = 'An unstringifiable unknown error occurred.';
       }
     }
@@ -302,11 +302,11 @@ export const ReactPreviewRenderer: React.FC<ReactPreviewRendererProps> = ({
     return renderErrorState(transpilationError);
   }
 
-  // If iframe has reported an error
   if (iframeError) {
     return renderErrorState(iframeError);
   }
 
+  // If iframe has reported an error
   // If iframe is not loaded or no content has been rendered yet
   if (!iframeLoaded || !iframeContent) {
     if (onLoadingRender) {

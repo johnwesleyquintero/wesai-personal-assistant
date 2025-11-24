@@ -1,4 +1,4 @@
-import { SavedChatSession, ChatMessage } from '../types.ts';
+import type { SavedChatSession, ChatMessage } from '../types.ts';
 
 /**
  * Generates a concise knowledge context string from an array of saved chat sessions.

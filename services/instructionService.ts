@@ -1,4 +1,4 @@
-import { CustomInstructionProfile } from '../types';
+import type { CustomInstructionProfile } from '../types';
 
 const STORAGE_KEY = 'customInstructionProfiles';
 

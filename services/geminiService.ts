@@ -1,6 +1,7 @@
-import { GoogleGenAI, GenerateContentResponse, Chat, Modality } from '@google/genai';
+import type { GenerateContentResponse, Chat } from '@google/genai';
+import { GoogleGenAI, Modality } from '@google/genai';
 import { getActiveInstructionProfile } from './instructionService';
-import { AspectRatio } from '../types'; // Assuming AspectRatio is defined in types.ts
+import type { AspectRatio } from '../types'; // Assuming AspectRatio is defined in types.ts
 
 let ai: GoogleGenAI | null = null;
 
@@ -57,14 +58,17 @@ const handleApiError = (error: unknown, context: string): Error => {
     | string
     | unknown;
   const message =
-    typeof e === 'object' && e && 'message' in e && typeof (e as any).message === 'string'
-      ? (e as any).message.toLowerCase()
+    typeof e === 'object' &&
+    e &&
+    'message' in e &&
+    typeof (e as { message?: string }).message === 'string'
+      ? (e as { message?: string }).message?.toLowerCase() // Safely call toLowerCase()
       : '';
   const status =
     typeof e === 'object' && e && 'status' in e
-      ? (e as any).status
-      : typeof (e as any)?.response === 'object'
-        ? (e as any).response?.status
+      ? (e as { status?: number }).status
+      : typeof (e as { response?: { status?: number } }).response === 'object'
+        ? (e as { response?: { status?: number } }).response?.status
         : undefined;
   const rawErrorText = (() => {
     try {
@@ -95,8 +99,8 @@ const handleApiError = (error: unknown, context: string): Error => {
   // 2. Authentication / API Key Issues
   if (
     status === 403 ||
-    message.includes('api key not valid') ||
-    message.includes('invalid api key')
+    (message && message.includes('api key not valid')) ||
+    (message && message.includes('invalid api key'))
   ) {
     return new Error('Authentication failed. Please check your API key configuration.', {
       cause: error,
@@ -104,7 +108,11 @@ const handleApiError = (error: unknown, context: string): Error => {
   }
 
   // 3. Model Not Found (Fixes your 404 issue)
-  if (status === 404 || message.includes('not found') || message.includes('unsupported model')) {
+  if (
+    status === 404 ||
+    (message && message.includes('not found')) ||
+    (message && message.includes('unsupported model'))
+  ) {
     return new Error(
       'The configured AI model is unavailable or deprecated. Please check model constants.',
       { cause: error },
@@ -112,7 +120,7 @@ const handleApiError = (error: unknown, context: string): Error => {
   }
 
   // 4. Safety/Content Policy Violations
-  if (message.includes('safety') || message.includes('blocked')) {
+  if (message && (message.includes('safety') || message.includes('blocked'))) {
     return new Error('The request was blocked due to safety settings.', { cause: error });
   }
 
@@ -553,7 +561,9 @@ export const sendMessageToChatStream = async (
     return stream;
   } catch (error: unknown) {
     // Check for both response status and raw status
-    const status = (error as any)?.status || (error as any)?.response?.status;
+    const status =
+      (error as { status?: number }).status ||
+      (error as { response?: { status?: number } }).response?.status;
 
     // Retry on Rate Limit (429) or Service Overload (503) if we haven't already
     if ((status === 429 || status === 503) && !useFallback) {

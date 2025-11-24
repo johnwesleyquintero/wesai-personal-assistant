@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { FaCog } from 'react-icons/fa';
-import { Theme } from '../types';
+import type { Theme } from '../types';
 import { ThemeToggleButton } from './ThemeToggleButton'; // Import ThemeToggleButton
 
 interface HeaderProps {

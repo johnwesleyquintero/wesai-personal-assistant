@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { CustomInstructionProfile } from '../types';
+import React, { useState, useCallback } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import {
   getProfiles,
   saveProfile,
@@ -7,26 +7,20 @@ import {
   setActiveProfile,
   getActiveInstructionProfile,
 } from '../services/instructionService';
-import { v4 as uuidv4 } from 'uuid'; // Assuming uuid is installed for unique IDs
+import type { CustomInstructionProfile } from '../types';
 
 const CustomInstructionsPanel: React.FC = () => {
-  const [profiles, setProfiles] = useState<CustomInstructionProfile[]>([]);
+  const [profiles, setProfiles] = useState<CustomInstructionProfile[]>(() => getProfiles());
   const [selectedProfile, setSelectedProfile] = useState<CustomInstructionProfile | null>(null);
   const [profileName, setProfileName] = useState('');
   const [instructions, setInstructions] = useState('');
-  const [activeProfileId, setActiveProfileId] = useState<string | null>(null);
+  const [activeProfileId, setActiveProfileId] = useState<string | null>(
+    () => getActiveInstructionProfile()?.id || null,
+  );
 
-  useEffect(() => {
-    loadProfiles();
-    const active = getActiveInstructionProfile();
-    if (active) {
-      setActiveProfileId(active.id);
-    }
-  }, []);
-
-  const loadProfiles = () => {
+  const loadProfiles = useCallback(() => {
     setProfiles(getProfiles());
-  };
+  }, []);
 
   const handleSaveProfile = () => {
     if (!profileName || !instructions) {
@@ -52,8 +46,7 @@ const CustomInstructionsPanel: React.FC = () => {
       }
       if (activeProfileId === id) {
         setActiveProfileId(null);
-        // Optionally set a default profile or clear active
-        setActiveProfile(''); // Clear active profile
+        setActiveProfile('');
       }
     }
   };
@@ -67,7 +60,7 @@ const CustomInstructionsPanel: React.FC = () => {
   const handleSetActive = (id: string) => {
     setActiveProfile(id);
     setActiveProfileId(id);
-    loadProfiles(); // Reload to update isActive status in the list
+    loadProfiles();
   };
 
   const resetForm = () => {
@@ -112,7 +105,7 @@ const CustomInstructionsPanel: React.FC = () => {
             value={instructions}
             onChange={(e) => setInstructions(e.target.value)}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-          ></textarea>
+          />
         </div>
         <div className="flex space-x-4">
           <button

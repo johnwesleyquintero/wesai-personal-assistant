@@ -1,5 +1,5 @@
 import React, { useState, memo } from 'react';
-import { ApiKeySource } from '../types.ts';
+import type { ApiKeySource } from '../types.ts';
 import { useAppStore } from '../store.ts';
 import CustomInstructionsPanel from './CustomInstructionsPanel';
 import { SVG_ICONS } from '../src/constants';
@@ -179,7 +179,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = memo(
                         htmlFor="toggleStreamNotes"
                         className="text-sm text-gray-700 dark:text-gray-300"
                       >
-                        Show "stream finished" annotations in chat
+                        Show &quot;stream finished&quot; annotations in chat
                       </label>
                     </div>
                   </div>
@@ -252,8 +252,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = memo(
                     review, refactoring, or generating new code snippets based on your requirements.
                   </li>
                   <li>
-                    <span className="font-bold">Custom Instructions:</span> Tailor the AI's behavior
-                    and responses to your specific needs for a more personalized experience.
+                    <span className="font-bold">Custom Instructions:</span> Tailor the AI&apos;s
+                    behavior and responses to your specific needs for a more personalized
+                    experience.
                   </li>
                 </ul>
                 <h4 className="text-lg font-semibold mt-4 mb-2">Getting Started:</h4>
@@ -271,32 +272,34 @@ export const SettingsModal: React.FC<SettingsModalProps> = memo(
                   <li>
                     <span className="font-bold">Settings & Customization:</span> Use the{' '}
                     <span className="font-bold">Settings</span> tab to manage your API key,
-                    customize chat behavior (like "Send on Enter"), and access this Help Center.
+                    customize chat behavior (like &quot;Send on Enter&quot;), and access this Help
+                    Center.
                   </li>
                 </ul>
                 <h4 className="text-lg font-semibold mt-4 mb-2">Troubleshooting Tips:</h4>
                 <ul className="list-disc list-inside space-y-1">
                   <li>
                     <span className="font-bold">API Key Issues:</span> If AI features are not
-                    working, double-check your API key in the Settings tab. Ensure it's valid and
-                    correctly entered.
+                    working, double-check your API key in the Settings tab. Ensure it&apos;s valid
+                    and correctly entered.
                   </li>
                   <li>
                     <span className="font-bold">Model Errors:</span> If you encounter messages about
-                    "Model unavailable" or "unsupported," try updating your model in settings or
-                    check the Gemini API documentation for available models.
+                    &quot;Model unavailable&quot; or &quot;unsupported,&quot; try updating your
+                    model in settings or check the Gemini API documentation for available models.
                   </li>
                   <li>
                     <span className="font-bold">Safety Blocks:</span> If a response is blocked due
-                    to "safety settings," try rephrasing your prompt to avoid sensitive topics.
+                    to &quot;safety settings,&quot; try rephrasing your prompt to avoid sensitive
+                    topics.
                   </li>
                   <li>
                     <span className="font-bold">General Issues:</span> For persistent problems,
-                    refer to the application's change log or restart the application.
+                    refer to the application&apos;s change log or restart the application.
                   </li>
                 </ul>
                 <p className="mt-4">
-                  For further assistance or to report bugs, please refer to the project's
+                  For further assistance or to report bugs, please refer to the project&apos;s
                   documentation or reach out through the appropriate support channels.
                 </p>
               </div>

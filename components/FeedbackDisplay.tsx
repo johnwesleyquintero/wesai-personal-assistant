@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
-import ReactMarkdown, { Components } from 'react-markdown';
+import type { Components } from 'react-markdown';
+import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
 interface FeedbackDisplayProps {
@@ -91,7 +92,7 @@ export const FeedbackDisplay: React.FC<FeedbackDisplayProps> = ({ feedback }) =>
           remarkPlugins={[remarkGfm]}
           components={
             {
-              code: ({ node, inline, className, children, ...rest }: CustomCodeRendererProps) => {
+              code: ({ _node, inline, className, children, ...rest }: CustomCodeRendererProps) => {
                 if (!inline) {
                   return (
                     <code className={`${className || ''} break-words`} {...rest}>

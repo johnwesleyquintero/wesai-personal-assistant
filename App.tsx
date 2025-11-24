@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
+import type { Theme } from './types';
 import { Header } from './components/Header.tsx';
 import { LoginPage } from './LoginPage.tsx';
 import { useAppStore, LS_KEY_LOGGED_IN } from './store.ts';
@@ -104,7 +105,7 @@ const App: React.FC = () => {
         <Header
           title="WesAI"
           toggleTheme={toggleTheme}
-          currentTheme={theme}
+          currentTheme={theme as Theme}
           onSettingsClick={handleOpenSettingsModal}
         />
 

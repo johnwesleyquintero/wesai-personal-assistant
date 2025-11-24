@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { LoadingSpinner } from './LoadingSpinner.tsx';
-import { AspectRatio } from '../types.ts'; // Import AspectRatio type
+import type { AspectRatio } from '../types.ts'; // Import AspectRatio type
 import { ErrorMessage } from './ErrorMessage.tsx';
 
 interface ImageGenerationPanelProps {
