@@ -56,7 +56,7 @@ Once you have the application files and your API key:
 
 ## Where to Find the Code
 
-- GitHub: [https://github.com/johnwesleyquintero/wesai](https://github.com/johnwesleyquintero/wesai).
+- GitHub: [https://github.com/johnwesleyquintero/wesai-personal-assistant](https://github.com/johnwesleyquintero/wesai-personal-assistant).
 
 ## Thanks To
 
