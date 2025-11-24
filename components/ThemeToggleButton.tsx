@@ -15,11 +15,15 @@ export const ThemeToggleButton: React.FC<ThemeToggleButtonProps> = ({
   return (
     <button
       onClick={toggleTheme}
-      className="p-2 rounded-full text-purple-500 dark:text-purple-400 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 transition-colors duration-150"
+      className="p-2 rounded-full text-purple-500 dark:text-purple-400 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 transition-all duration-200"
       aria-label={currentTheme === 'light' ? 'Toggle dark mode' : 'Toggle light mode'}
       title={currentTheme === 'light' ? 'Toggle dark mode' : 'Toggle light mode'}
     >
-      {currentTheme === 'light' ? <FaMoon className="w-6 h-6" /> : <FaSun className="w-6 h-6" />}
+      {currentTheme === 'light' ? (
+        <FaMoon className="w-6 h-6 transition-transform duration-200 hover:scale-110" />
+      ) : (
+        <FaSun className="w-6 h-6 transition-transform duration-200 hover:scale-110" />
+      )}
     </button>
   );
 };

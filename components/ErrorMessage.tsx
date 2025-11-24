@@ -52,7 +52,14 @@ export const ErrorMessage: React.FC<ErrorMessageProps> = memo(
             </span>
           )}
           <span className={`${isChatError ? 'ml-2' : ''}`}>
-            <strong>Error:</strong> {message}
+            <strong>Error:</strong>{' '}
+            {!(
+              message.toLowerCase().includes('safety') ||
+              message.toLowerCase().includes('blocked') ||
+              message.toLowerCase().includes('rate')
+            )
+              ? message
+              : 'See details for more information.'}
           </span>
         </div>
         {onRetry && (

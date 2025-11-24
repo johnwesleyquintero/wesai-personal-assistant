@@ -12,7 +12,7 @@ export const TabNavigation = forwardRef<HTMLDivElement, TabNavigationProps>(
     return (
       <div
         ref={ref}
-        className="mb-6 border-b border-gray-300 dark:border-gray-700 flex overflow-x-auto whitespace-nowrap scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800"
+        className="mb-6 border-b border-gray-300 dark:border-gray-700 flex overflow-x-auto whitespace-nowrap"
       >
         {tabs.map((tab) => (
           <button

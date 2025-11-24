@@ -28,14 +28,16 @@ export const PreWithCopyButton: React.FC<
     <div className="relative group my-4">
       <button
         onClick={onCopy}
-        title={isCopied ? 'Copied!' : 'Copy code'}
-        aria-label={isCopied ? 'Code copied to clipboard' : 'Copy code to clipboard'}
-        className={`absolute top-2 right-2 p-1.5 rounded-md transition-all duration-150 ease-in-out 
+        title={isCopied ? 'Copied! (Click to copy again if needed)' : 'Copy code to clipboard'}
+        aria-label={
+          isCopied ? 'Code copied successfully. Click to copy again.' : 'Copy code to clipboard'
+        }
+        className={`absolute top-2 right-2 p-1.5 rounded-md transition-all duration-150 ease-in-out
                     opacity-0 group-hover:opacity-70 focus:opacity-100 hover:opacity-100
                     ${
                       isCopied
                         ? 'bg-green-500 text-white'
-                        : 'bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-400 dark:hover:bg-gray-500'
+                        : 'bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-400 dark:hover:bg-gray-500 focus:!bg-gray-400 dark:focus:!bg-gray-500'
                     }`}
       >
         {isCopied ? (
