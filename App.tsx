@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import type { Theme } from './types';
 import { Header } from './components/Header.tsx';
 import { LoginPage } from './LoginPage.tsx';
@@ -18,6 +18,7 @@ import { ImageGenerationPanel } from './components/ImageGenerationPanel.tsx';
 const App: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const tabsRef = useRef<HTMLDivElement>(null);
 
   const handleOpenSettingsModal = useCallback(() => setIsSettingsModalOpen(true), []);
   const handleCloseSettingsModal = useCallback(() => setIsSettingsModalOpen(false), []);
@@ -120,6 +121,7 @@ const App: React.FC = () => {
         />
 
         <TabNavigation
+          ref={tabsRef}
           activeTab={activeTab}
           onTabChange={handleTabChange}
           tabs={[

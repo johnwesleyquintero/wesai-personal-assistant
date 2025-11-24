@@ -17,7 +17,7 @@ export const Header: React.FC<HeaderProps> = memo(
         <div className="flex items-center">
           {' '}
           {/* Group title to the left */}
-          <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 py-2 sm:text-5xl">
+          <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 sm:text-5xl">
             {title}
           </h1>
         </div>
