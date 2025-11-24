@@ -1,6 +1,13 @@
 import { create } from 'zustand';
 import { Chat } from '@google/genai';
-import { ActiveTab, ApiKeySource, Theme, ChatMessage, AspectRatio, SavedChatSession } from './types.ts';
+import {
+  ActiveTab,
+  ApiKeySource,
+  Theme,
+  ChatMessage,
+  AspectRatio,
+  SavedChatSession,
+} from './types.ts';
 import {
   reviewCodeWithGemini,
   refactorCodeWithGeminiStream,
@@ -225,7 +232,8 @@ export const useAppStore = create<AppState>((set, get) => ({
       localStorage.setItem(LS_KEY_SAVED_CHATS, JSON.stringify(updatedSessions));
       return {
         savedChatSessions: updatedSessions,
-        activeSavedChatSessionId: state.activeSavedChatSessionId === sessionId ? null : state.activeSavedChatSessionId,
+        activeSavedChatSessionId:
+          state.activeSavedChatSessionId === sessionId ? null : state.activeSavedChatSessionId,
       };
     });
   },
@@ -261,7 +269,8 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ savedSessionsSort: sort });
   },
 
-  setActiveSavedChatSessionId: (sessionId: string | null) => set({ activeSavedChatSessionId: sessionId }),
+  setActiveSavedChatSessionId: (sessionId: string | null) =>
+    set({ activeSavedChatSessionId: sessionId }),
 
   initializeActiveApiKey: () => {
     const storedKey = localStorage.getItem(LS_KEY_API);
@@ -379,11 +388,13 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ isLoading: true, chatError: null });
     try {
       const activeProfile = getActiveInstructionProfile();
-      let effectiveSystemInstruction = systemInstructionOverride || (activeProfile ? activeProfile.instructions : 'Hey there! 👋 How can I help you today?');
+      let effectiveSystemInstruction =
+        systemInstructionOverride ||
+        (activeProfile ? activeProfile.instructions : 'Hey there! 👋 How can I help you today?');
       let initialChatMessages: ChatMessage[] = [];
 
       if (savedChatId) {
-        const savedSession = savedChatSessions.find(s => s.id === savedChatId);
+        const savedSession = savedChatSessions.find((s) => s.id === savedChatId);
         if (savedSession) {
           initialChatMessages = savedSession.messages;
           set({ chatMessages: initialChatMessages }); // Update chatMessages state with loaded messages
@@ -399,10 +410,9 @@ export const useAppStore = create<AppState>((set, get) => ({
           parts: [{ text: msg.content }],
         })),
       ];
-      
+
       const session = await startChatSession(effectiveSystemInstruction, history);
       set({ activeChatSession: session, chatMessages: initialChatMessages }); // Set chat messages from loaded session
-
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
       set({ chatError: `Failed to start chat session: ${errorMessage}` });
@@ -428,7 +438,14 @@ export const useAppStore = create<AppState>((set, get) => ({
       }
 
       // Clear code input if switching to a non-code-related tab from a code-related tab
-      const codeRelatedTabs: ActiveTab[] = ['review', 'refactor', 'preview', 'generate', 'content', 'custom-instructions'];
+      const codeRelatedTabs: ActiveTab[] = [
+        'review',
+        'refactor',
+        'preview',
+        'generate',
+        'content',
+        'custom-instructions',
+      ];
       const wasCodeRelated = codeRelatedTabs.includes(state.activeTab);
       const isNowCodeRelated = codeRelatedTabs.includes(tab);
 
@@ -570,10 +587,9 @@ export const useAppStore = create<AppState>((set, get) => ({
                 msg.id === modelMessageId
                   ? {
                       ...msg,
-                      content:
-                        get().showStreamFinishNotes
-                          ? msg.content + `\n\n*(Stream finished: ${finishReason})*`
-                          : msg.content,
+                      content: get().showStreamFinishNotes
+                        ? msg.content + `\n\n*(Stream finished: ${finishReason})*`
+                        : msg.content,
                       componentCode: finalComponentCode,
                     }
                   : msg,
@@ -609,7 +625,12 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   handleNewChat: () => {
-    set({ chatMessages: [], activeChatSession: null, chatError: null, activeSavedChatSessionId: null });
+    set({
+      chatMessages: [],
+      activeChatSession: null,
+      chatError: null,
+      activeSavedChatSessionId: null,
+    });
     get().initializeChatSession(); // Initialize new session immediately
   },
 
@@ -671,10 +692,9 @@ export const useAppStore = create<AppState>((set, get) => ({
                 msg.id === modelMessageId
                   ? {
                       ...msg,
-                      content:
-                        get().showStreamFinishNotes
-                          ? msg.content + `\n\n*(Stream finished: ${finishReason})*`
-                          : msg.content,
+                      content: get().showStreamFinishNotes
+                        ? msg.content + `\n\n*(Stream finished: ${finishReason})*`
+                        : msg.content,
                       componentCode: finalComponentCode,
                     }
                   : msg,

@@ -161,7 +161,6 @@ export const ReactPreviewRenderer: React.FC<ReactPreviewRendererProps> = ({
     };
   }, [code, uniqueId]); // Depend on 'code' to re-run when the previewed code changes. uniqueId is stable.
 
-
   // Effect to manage iframe communication
   useEffect(() => {
     setIframeError(null);
@@ -210,11 +209,11 @@ export const ReactPreviewRenderer: React.FC<ReactPreviewRendererProps> = ({
         '*',
       );
     } else if (iframeLoaded && transpilationError) {
-        // If there's a transpilation error, clear iframe content and report error
-        iframe.contentWindow?.postMessage(
-            { type: 'PREVIEW_CODE', code: null, originalCode: code, darkTheme: darkTheme },
-            '*'
-        );
+      // If there's a transpilation error, clear iframe content and report error
+      iframe.contentWindow?.postMessage(
+        { type: 'PREVIEW_CODE', code: null, originalCode: code, darkTheme: darkTheme },
+        '*',
+      );
     }
 
     return () => {
@@ -223,7 +222,9 @@ export const ReactPreviewRenderer: React.FC<ReactPreviewRendererProps> = ({
   }, [iframeLoaded, transpiledCodeForDebug, code, darkTheme, transpilationError]);
 
   const renderErrorState = (caughtError: unknown): ReactNode => {
-    const isIframeError = (e: unknown): e is { message: string; stack?: string; transpiledCode?: string } => {
+    const isIframeError = (
+      e: unknown,
+    ): e is { message: string; stack?: string; transpiledCode?: string } => {
       return !!e && typeof e === 'object' && 'message' in e && 'transpiledCode' in e;
     };
     // Use the custom onErrorRender prop if provided by the user
@@ -283,7 +284,7 @@ export const ReactPreviewRenderer: React.FC<ReactPreviewRendererProps> = ({
             </pre>
           </details>
         )}
-        {!(stack) && !(debugCode || transpiledCodeForDebug) && (
+        {!stack && !(debugCode || transpiledCodeForDebug) && (
           <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
             Check the browser console for more details.
           </p>

@@ -82,7 +82,6 @@ const App: React.FC = () => {
     setImageError,
   } = useImageGenerationLogic();
 
-
   useEffect(() => {
     const loggedInStatus = localStorage.getItem(LS_KEY_LOGGED_IN);
     if (loggedInStatus === 'true') {
@@ -187,7 +186,6 @@ const App: React.FC = () => {
               onSetSavedSessionsSort={setSavedSessionsSort}
             />
           )}
-
         </main>
         <footer className="text-center mt-12 py-6 border-t border-gray-200 dark:border-gray-700">
           <p className="text-sm text-gray-500 dark:text-gray-400">

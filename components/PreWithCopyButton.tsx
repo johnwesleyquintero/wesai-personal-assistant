@@ -1,9 +1,8 @@
 import React, { useState, useCallback, useRef } from 'react';
 
-export const PreWithCopyButton: React.FC<React.HTMLAttributes<HTMLPreElement> & { node?: unknown }> = ({
-  children,
-  ...props
-}) => {
+export const PreWithCopyButton: React.FC<
+  React.HTMLAttributes<HTMLPreElement> & { node?: unknown }
+> = ({ children, ...props }) => {
   const [isCopied, setIsCopied] = useState(false);
   const preRef = useRef<HTMLPreElement>(null);
   const existingClassName = props.className || '';

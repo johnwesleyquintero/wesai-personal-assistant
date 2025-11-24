@@ -25,12 +25,6 @@ export const useCodeInteractionLogic = () => {
     );
   }, [activeTab]);
 
-  
-
-  
-
-  
-
   return {
     code,
     feedback,

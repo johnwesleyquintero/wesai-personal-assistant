@@ -7,6 +7,7 @@ This directory contains various services used throughout the WesAI application. 
 This service is responsible for handling interactions with the Google Gemini API. It abstracts away the complexities of API calls, ensuring that Gemini-related functionalities are centralized and easily manageable.
 
 **Key Responsibilities:**
+
 - Making requests to the Gemini API for generative AI tasks.
 - Handling API responses and potential errors.
 - Providing methods for different types of Gemini model interactions (e.g., text generation, chat, image understanding).
@@ -31,6 +32,7 @@ async function processUserQuery(query: string) {
 This service manages the application's instructions or prompts that guide the behavior of AI models or other system components. It provides a structured way to store, retrieve, and potentially modify these instructions.
 
 **Key Responsibilities:**
+
 - Storing and managing various sets of instructions.
 - Retrieving specific instructions based on context or type.
 - Potentially validating or transforming instructions.
@@ -42,3 +44,4 @@ import { getInstructions } from './instructionService';
 
 const systemInstructions = getInstructions('system_prompt');
 console.log('System Instructions:', systemInstructions);
+```

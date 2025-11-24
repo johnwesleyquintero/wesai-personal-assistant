@@ -26,21 +26,6 @@ export const useChatLogic = () => {
     setSavedSessionsSort,
   } = useAppStore();
 
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-
   return {
     chatMessages,
     chatInput,

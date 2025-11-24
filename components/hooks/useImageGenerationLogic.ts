@@ -15,17 +15,23 @@ export const useImageGenerationLogic = () => {
     setImageError,
   } = useAppStore();
 
-  const memoizedHandleImagePromptChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    handleImagePromptChange(e);
-  }, [handleImagePromptChange]);
+  const memoizedHandleImagePromptChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      handleImagePromptChange(e);
+    },
+    [handleImagePromptChange],
+  );
 
   const memoizedHandleClearImagePrompt = useCallback(() => {
     handleClearImagePrompt();
   }, [handleClearImagePrompt]);
 
-  const memoizedHandleImageGenerationSubmit = useCallback((aspectRatio: AspectRatio, negativePrompt: string) => {
-    handleImageGenerationSubmit(aspectRatio, negativePrompt);
-  }, [handleImageGenerationSubmit]);
+  const memoizedHandleImageGenerationSubmit = useCallback(
+    (aspectRatio: AspectRatio, negativePrompt: string) => {
+      handleImageGenerationSubmit(aspectRatio, negativePrompt);
+    },
+    [handleImageGenerationSubmit],
+  );
 
   return {
     imagePrompt,
