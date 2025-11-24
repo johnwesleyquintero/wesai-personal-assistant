@@ -67,6 +67,9 @@ const App: React.FC = () => {
     loadSavedChatSession,
     deleteSavedChatSession,
     renameSavedChatSession,
+    duplicateSavedChatSession,
+    savedSessionsSort,
+    setSavedSessionsSort,
   } = useChatLogic();
 
   const {
@@ -179,6 +182,9 @@ const App: React.FC = () => {
               onLoadSavedChatSession={loadSavedChatSession}
               onDeleteSavedChatSession={deleteSavedChatSession}
               onRenameSavedChatSession={renameSavedChatSession}
+              onDuplicateSavedChatSession={duplicateSavedChatSession}
+              savedSessionsSort={savedSessionsSort}
+              onSetSavedSessionsSort={setSavedSessionsSort}
             />
           )}
 

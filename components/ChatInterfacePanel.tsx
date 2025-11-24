@@ -28,6 +28,9 @@ interface ChatInterfacePanelProps {
   onLoadSavedChatSession: (sessionId: string) => void;
   onDeleteSavedChatSession: (sessionId: string) => void;
   onRenameSavedChatSession: (sessionId: string, newName: string) => void;
+  onDuplicateSavedChatSession: (sessionId: string, newName?: string) => void;
+  savedSessionsSort: 'newest' | 'oldest' | 'name_asc' | 'name_desc';
+  onSetSavedSessionsSort: (sort: 'newest' | 'oldest' | 'name_asc' | 'name_desc') => void;
 }
 
 export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = memo(({ 
@@ -52,6 +55,9 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = memo(({
   onLoadSavedChatSession,
   onDeleteSavedChatSession,
   onRenameSavedChatSession,
+  onDuplicateSavedChatSession,
+  savedSessionsSort,
+  onSetSavedSessionsSort,
 }) => {
   const chatMessagesEndRef = useRef<HTMLDivElement | null>(null);
   const [isSavedContextsOpen, setIsSavedContextsOpen] = useState(false);
@@ -232,6 +238,19 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = memo(({
                 Close
               </button>
             </div>
+            <div className="mt-3 flex items-center gap-2">
+              <label className="text-xs text-gray-700 dark:text-gray-300">Sort:</label>
+              <select
+                value={savedSessionsSort}
+                onChange={(e) => onSetSavedSessionsSort(e.target.value as any)}
+                className="p-2 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded"
+              >
+                <option value="newest">Newest</option>
+                <option value="oldest">Oldest</option>
+                <option value="name_asc">Name (A→Z)</option>
+                <option value="name_desc">Name (Z→A)</option>
+              </select>
+            </div>
             <div className="mt-3">
               <input
                 type="text"
@@ -245,7 +264,15 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = memo(({
               {savedChatSessions.length === 0 ? (
                 <div className="text-sm text-gray-600 dark:text-gray-300">No saved contexts yet.</div>
               ) : (
-                savedChatSessions
+                [...savedChatSessions]
+                  .sort((a, b) => {
+                    const an = a.name.toLowerCase();
+                    const bn = b.name.toLowerCase();
+                    if (savedSessionsSort === 'newest') return b.timestamp - a.timestamp;
+                    if (savedSessionsSort === 'oldest') return a.timestamp - b.timestamp;
+                    if (savedSessionsSort === 'name_asc') return an.localeCompare(bn);
+                    return bn.localeCompare(an);
+                  })
                   .filter((s) => s.name.toLowerCase().includes(searchTerm.toLowerCase()))
                   .map((s) => {
                     const allText = s.messages.map((m) => m.content || '').join(' ');
@@ -283,6 +310,12 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = memo(({
                             className="px-2 py-1 text-xs rounded bg-blue-600 hover:bg-blue-700 text-white"
                           >
                             Load
+                          </button>
+                          <button
+                            onClick={() => onDuplicateSavedChatSession(s.id)}
+                            className="px-2 py-1 text-xs rounded bg-indigo-600 hover:bg-indigo-700 text-white"
+                          >
+                            Duplicate
                           </button>
                           {renameMap[s.id] !== undefined ? (
                             <>

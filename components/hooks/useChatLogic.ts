@@ -21,6 +21,9 @@ export const useChatLogic = () => {
     loadSavedChatSession,
     deleteSavedChatSession,
     renameSavedChatSession,
+    duplicateSavedChatSession,
+    savedSessionsSort,
+    setSavedSessionsSort,
   } = useAppStore();
 
   
@@ -58,5 +61,8 @@ export const useChatLogic = () => {
     loadSavedChatSession,
     deleteSavedChatSession,
     renameSavedChatSession,
+    duplicateSavedChatSession,
+    savedSessionsSort,
+    setSavedSessionsSort,
   };
 };

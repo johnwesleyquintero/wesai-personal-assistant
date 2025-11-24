@@ -21,6 +21,7 @@ export const LS_KEY_LOGGED_IN = 'isWesAiUserLoggedIn';
 export const LS_KEY_STREAM_NOTES = 'showStreamFinishNotes';
 export const LS_KEY_SEND_ON_ENTER = 'sendOnEnter';
 export const LS_KEY_SAVED_CHATS = 'savedChatSessions'; // New local storage key
+export const LS_KEY_SAVED_CHATS_SORT = 'savedChatSessionsSort';
 
 interface AppState {
   // Global state
@@ -44,6 +45,7 @@ interface AppState {
   chatError: string | null;
   savedChatSessions: SavedChatSession[]; // New state for saved chat sessions
   activeSavedChatSessionId: string | null; // ID of the currently loaded saved chat
+  savedSessionsSort: 'newest' | 'oldest' | 'name_asc' | 'name_desc';
 
   // Image generation specific state
   imagePrompt: string;
@@ -98,6 +100,8 @@ interface AppState {
   deleteSavedChatSession: (sessionId: string) => void;
   renameSavedChatSession: (sessionId: string, newName: string) => void;
   setActiveSavedChatSessionId: (sessionId: string | null) => void;
+  duplicateSavedChatSession: (sessionId: string, newName?: string) => void;
+  setSavedSessionsSort: (sort: 'newest' | 'oldest' | 'name_asc' | 'name_desc') => void;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -131,6 +135,10 @@ export const useAppStore = create<AppState>((set, get) => ({
   chatError: null,
   savedChatSessions: [], // Initialize with empty array
   activeSavedChatSessionId: null, // Initialize as null
+  savedSessionsSort: (() => {
+    const v = localStorage.getItem(LS_KEY_SAVED_CHATS_SORT);
+    return v === 'oldest' || v === 'name_asc' || v === 'name_desc' ? (v as any) : 'newest';
+  })(),
 
   imagePrompt: '',
   generatedImageData: null,
@@ -230,6 +238,27 @@ export const useAppStore = create<AppState>((set, get) => ({
       localStorage.setItem(LS_KEY_SAVED_CHATS, JSON.stringify(updatedSessions));
       return { savedChatSessions: updatedSessions };
     });
+  },
+
+  duplicateSavedChatSession: (sessionId: string, newName?: string) => {
+    set((state) => {
+      const original = state.savedChatSessions.find((s) => s.id === sessionId);
+      if (!original) return {} as any;
+      const copy: SavedChatSession = {
+        id: `saved-${Date.now()}`,
+        name: newName && newName.trim() ? newName.trim() : `Copy of ${original.name}`,
+        timestamp: Date.now(),
+        messages: [...original.messages],
+      };
+      const updated = [...state.savedChatSessions, copy];
+      localStorage.setItem(LS_KEY_SAVED_CHATS, JSON.stringify(updated));
+      return { savedChatSessions: updated };
+    });
+  },
+
+  setSavedSessionsSort: (sort: 'newest' | 'oldest' | 'name_asc' | 'name_desc') => {
+    localStorage.setItem(LS_KEY_SAVED_CHATS_SORT, sort);
+    set({ savedSessionsSort: sort });
   },
 
   setActiveSavedChatSessionId: (sessionId: string | null) => set({ activeSavedChatSessionId: sessionId }),
