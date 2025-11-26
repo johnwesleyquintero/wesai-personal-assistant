@@ -1,117 +1,208 @@
-# WesAI
+# WesAI 🚀
 
-Your AI-powered personal assistant and creative partner.
+Your AI-powered personal assistant and creative partner with **cloud storage** and **cross-device sync**.
 
-WesAI is a product of [ScaleSmart](https://wescode.vercel.app/). It is a web application that uses Google's AI models (Gemini for text and Imagen for images) to help you with intelligent assistance, creating content, generating images, and having interactive conversations. It's designed with a focus on boosting your personal productivity and creativity.
-
-This document explains the WesAI application.
-
-![WesAI Screenshot](https://github.com/user-attachments/assets/df9ed07b-9e5d-416b-af24-c63e3f4be11a)
+WesAI is a product of [ScaleSmart](https://wescode.vercel.app/). It's a web application that uses Google's AI models (Gemini for text and Imagen for images) to help you with intelligent assistance, creating content, generating images, and having interactive conversations. Now with **persistent cloud storage** powered by Supabase!
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/2ec1707c-0c5a-49a4-821e-ee7d82bdd95d/deploy-status)](https://app.netlify.com/projects/wesai-pa/deploys)
 
-## What WesAI Can Do
+## 🌟 What's New - Cloud Storage & Sync!
 
-- **Secure Access:** A simple login page helps protect access to the application and your API key.
-- **API Key Management:** Safely save and remove your Google Gemini API key directly in your browser. Your key is stored securely in your browser's local storage and you'll be asked for confirmation before it's removed.
-- **Customizable Look:** Easily switch between light and dark themes for comfortable viewing, and the app remembers your preference.
+**🔄 Cross-Device Sync**: Your chat sessions now sync across all your devices when you log in
+**☁️ Cloud Persistence**: Never lose your chat history again - everything is stored securely in the cloud
+**🔐 Enhanced Security**: Row-level security ensures your data stays private and isolated
+**📱 Access Anywhere**: Start a conversation on your laptop, continue on your phone
 
-- **Create Written Content:** Generate various types of text, like blog posts, social media updates, documentation, or emails, just by describing what you need.
-- **Generate Images:** Create unique images from your descriptions using Google's Imagen model, with an option to download your creations.
-- **Interactive Chat:**
-  - Ask follow-up questions about the content or images the AI creates.
-  - Get general help with different tasks.
-  - See a live preview for some types of content generated in the chat, now with enhanced support for common styling utilities.
-- **Modern Design:** Enjoy a clean, responsive interface built with modern web technologies, featuring theme support and easy-to-use clear input buttons.
+## 🚀 What WesAI Can Do
 
-## Getting Started
+### Core Features
+- **🔐 Secure Access**: Google OAuth authentication with persistent sessions
+- **🔑 API Key Management**: Safely save and manage your Google Gemini API key
+- **🎨 Customizable Look**: Switch between light and dark themes
+- **🤖 AI-Powered Assistance**: 
+  - **Content Creation**: Generate blog posts, emails, documentation, social media content
+  - **Image Generation**: Create unique images from text descriptions
+  - **Interactive Chat**: Have conversations about your content with live previews
+- **💾 Cloud Storage**: All chat sessions automatically saved and synced
 
-To use WesAI, you will need:
+### Advanced Features
+- **📊 Session Management**: Save, rename, duplicate, and delete chat sessions
+- **🔄 Real-time Sync**: Changes appear instantly across all logged-in devices
+- **🔍 Search & Organize**: Find your conversations easily with organized session names
+- **📱 Responsive Design**: Works perfectly on desktop, tablet, and mobile
 
-- A modern web browser (like Chrome, Firefox, Edge, or Safari).
-- A **Google Gemini API Key**. You can get one from [Google AI Studio](https://aistudio.google.com/app/apikey). Make sure this key works for both the Gemini API (for text) and the Imagen API (for images).
+## 🛠️ Tech Stack
 
-Once you have the application files and your API key:
+- **Frontend**: React + TypeScript + Vite
+- **Styling**: Tailwind CSS with theme support
+- **AI Models**: Google Gemini API (text) + Imagen API (images)
+- **Backend**: Supabase (PostgreSQL + Authentication + Real-time)
+- **State Management**: Zustand with persistent storage
+- **Deployment**: Netlify
 
-1.  Open the application in your web browser.
-2.  You will see a login page. The user and password for local/personal use are **`demo`**, **`password`**.
-3.  After logging in, go to the "Manage Gemini API Key" section.
-4.  Enter your Google Gemini API Key into the input field and click "Save Key". Your key will be stored securely in your browser's local storage so you don't have to enter it every time.
+## 🚀 Getting Started
 
-**Important Security Note:** Storing API keys in your browser is convenient for personal tools but is not recommended for applications used by many people. For those cases, API keys should be handled on a secure server.
+### Prerequisites
+- Modern web browser (Chrome, Firefox, Edge, Safari)
+- Google Gemini API Key ([Get one here](https://aistudio.google.com/app/apikey))
 
-## How to Use
+### Quick Start
 
-1.  **Login** to the application.
-2.  **Set your API Key** if you haven't already.
-3.  **Change Theme (Optional):** Click the sun/moon icon in the top bar to switch between light and dark modes.
-4.  **Choose what you want to do:**
-    - **Content:** Describe the text you want to create (like a blog post or email) and click "Create Content."
-    - **Image:** Type a description (a "prompt") for the image you want and click "Generate Image." You can then download the image.
-    - **Chat:** Click the "Chat" tab to ask questions about previous AI outputs or get general help. Some content types will show a live preview here.
-5.  **See the Results:** The generated text, images, or chat responses will appear on the screen.
-6.  **Copy Output:** Use the copy buttons next to the generated content or chat messages.
-7.  **Clear Inputs:** Click the "X" icon next to the input boxes to quickly clear them.
-8.  **Logout:** Click the "Logout" button in the API key management section. This will also remove your API key from the browser.
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/johnwesleyquintero/wesai-personal-assistant.git
+   cd wesai-personal-assistant
+   ```
 
-## Where to Find the Code
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-- GitHub: [https://github.com/johnwesleyquintero/wesai-personal-assistant](https://github.com/johnwesleyquintero/wesai-personal-assistant).
+3. **Set up environment variables**
+   Create a `.env` file in the root directory:
+   ```bash
+   VITE_SUPABASE_URL=your_supabase_url
+   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
 
-## Thanks To
+4. **Start the development server**
+   ```bash
+   npm run dev
+   ```
 
-- Powered by the Google Gemini and Imagen APIs.
-- Built with React.
-- Styled with Tailwind CSS.
-- Developed using Vite.
+5. **Open your browser**
+   Navigate to `http://localhost:5173`
 
-## Privacy Policy
+### Supabase Setup (For Cloud Storage)
 
-Your privacy is important. Here's how WesAI handles your data:
+1. **Create a Supabase project** at [supabase.com](https://supabase.com)
+2. **Run the database schema** using the provided `supabase_schema.sql` file
+3. **Configure Google OAuth** in your Supabase project settings
+4. **Update your environment variables** with your Supabase credentials
 
-- **API Keys:** Your Gemini API key is stored only in your browser's local storage. It is never sent to our servers or shared with anyone else. You can save or remove your key whenever you want.
-- **Your Inputs:** Any text or image descriptions you enter are sent directly to the Google Gemini API for processing. We do not save, record, or look at this information ourselves. Google's rules apply to how they use data from the API.
-- **Local Storage:** Besides your API key, your preference for light or dark mode is also saved in your browser's local storage.
-- **No Tracking:** WesAI does not use any third-party tracking, cookies, or analytics.
+Detailed setup instructions are in [`SUPABASE_SETUP.md`](SUPABASE_SETUP.md)
 
-## Terms of Service
+## 📖 How to Use
 
-By using WesAI, you agree to these terms:
+### For New Users
+1. **Login**: Use Google OAuth or demo credentials (user: `demo`, password: `password`)
+2. **Set API Key**: Add your Google Gemini API key in settings
+3. **Choose Your Mode**:
+   - **Content**: Generate written content
+   - **Image**: Create images from descriptions
+   - **Chat**: Interactive conversations
+4. **Save Sessions**: Your work is automatically saved to the cloud
 
-- **API Key:** You are responsible for getting and managing your own Google Gemini API key. Your use of the Gemini API must follow Google's Terms of Service.
-- **No Guarantees:** WesAI is provided "as is," without any promises or guarantees. We cannot guarantee that the AI-generated content or code will be accurate or complete.
-- **Limited Responsibility:** We are not responsible for any problems or damages that happen from using or not being able to use this application.
-- **Personal Use:** This application is meant for personal and learning use. It is not built for important or production systems.
-- **Changes:** We might change or stop offering the application at any time without telling you first.
+### For Power Users
+- **Session Management**: Right-click on chat sessions to rename, duplicate, or delete
+- **Theme Toggle**: Click the sun/moon icon for light/dark mode
+- **Keyboard Shortcuts**: Enter to send messages, Ctrl+Enter for new lines
+- **Export**: Copy generated content with one click
 
-## License
+## 🏗️ Architecture Overview
 
-This project is licensed under the MIT License.
-
+### Cloud Storage Architecture
 ```
-MIT License
-
-Copyright (c) 2025 John Wesley Quintero
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Your Device   │    │   Supabase      │    │   Google APIs   │
+│                 │◄──►│   PostgreSQL    │    │   Gemini/Imagen │
+│  React + TS     │    │   Authentication│◄──►│                 │
+│  Zustand Store  │    │   Row Level     │    │                 │
+│  Local Storage  │    │   Security      │    │                 │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
-For any questions about privacy or terms, please check the Google Gemini API documentation or contact us through the GitHub repository.
+### Data Flow
+1. **Authentication**: Google OAuth → Supabase Auth → Session Management
+2. **Chat Storage**: User Input → Zustand → Supabase → Cross-device Sync
+3. **AI Processing**: User Input → Gemini API → Response → Cloud Storage
 
-**Happy Creating with WesAI!**
+## 🔒 Security & Privacy
+
+### Data Protection
+- **Row Level Security**: Users can only access their own data
+- **Encrypted Storage**: All data encrypted at rest in PostgreSQL
+- **Secure Authentication**: Google OAuth with JWT tokens
+- **API Key Isolation**: API keys never touch our servers
+
+### Privacy Policy
+- **No Data Mining**: We don't analyze or sell your data
+- **No Tracking**: No analytics, cookies, or third-party tracking
+- **Local First**: API keys stored only in your browser
+- **User Control**: You can delete all your data at any time
+
+## 🚀 Deployment
+
+### Netlify Deployment
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/johnwesleyquintero/wesai-personal-assistant)
+
+### Manual Deployment
+1. **Build the project**
+   ```bash
+   npm run build
+   ```
+
+2. **Deploy to your hosting provider**
+   - Upload the `dist` folder to your web server
+   - Configure environment variables
+   - Set up your Supabase project
+
+See [`DEPLOYMENT_CHECKLIST.md`](DEPLOYMENT_CHECKLIST.md) for detailed deployment instructions.
+
+## 🧪 Development
+
+### Code Quality
+```bash
+# Run all checks
+npm run check
+
+# Individual checks
+npm run lint      # ESLint
+npm run typecheck # TypeScript
+npm run format    # Prettier
+```
+
+### Project Structure
+```
+wesai-personal-assistant/
+├── src/                    # Source code
+│   ├── components/          # React components
+│   ├── services/           # API and Supabase services
+│   ├── hooks/              # Custom React hooks
+│   └── types/              # TypeScript type definitions
+├── public/                 # Static assets
+├── supabase_schema.sql     # Database schema
+└── docs/                   # Documentation
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- **Google AI**: Gemini and Imagen APIs for AI capabilities
+- **Supabase**: PostgreSQL database and authentication
+- **React Community**: Excellent ecosystem and tools
+- **Tailwind CSS**: Beautiful, utility-first CSS framework
+
+## 📞 Support
+
+- **Issues**: [GitHub Issues](https://github.com/johnwesleyquintero/wesai-personal-assistant/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/johnwesleyquintero/wesai-personal-assistant/discussions)
+- **Email**: Contact through GitHub profile
+
+---
+
+**🌟 Star this repo if you find it helpful!**
+
+**Happy Creating with WesAI! 🚀**
