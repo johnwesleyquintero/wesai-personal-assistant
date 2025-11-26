@@ -13,7 +13,7 @@ This file provides guidance to agents when working with code in this repository.
 ## Custom Utilities or Patterns
 
 - **Environment Variables**: Environment variables are managed centrally through [`utils/env.ts`](utils/env.ts), providing a single source of truth for configuration.
-- **API Service Interaction**: Interactions with the Gemini API (and potentially other external services) are encapsulated within `services/*` files, specifically following patterns established in [`services/geminiService.ts`](services/geminiService.ts).
+- **API Service Interaction**: Interactions with external services like Gemini and Supabase are encapsulated within `services/*` files. Specifically, patterns are established in [`services/geminiService.ts`](services/geminiService.ts) for Gemini API interactions and [`services/supabaseService.ts`](services/supabaseService.ts) for Supabase authentication and database interactions.
 
 ## Non-Obvious Aspects
 

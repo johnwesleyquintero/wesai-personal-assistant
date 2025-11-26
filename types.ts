@@ -35,3 +35,66 @@ export interface CustomInstructionProfile {
 }
 
 export type AspectRatio = '1:1' | '16:9' | '4:3' | '3:2' | '2:3' | '9:16' | '3:4';
+
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
+
+export type Database = {
+  public: {
+    Tables: {
+      chat_sessions: {
+        Row: {
+          id: string;
+          user_id: string;
+          name: string;
+          created_at: string;
+          messages: ChatMessage[]; // Changed from Json to ChatMessage[]
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          name: string;
+          created_at?: string;
+          messages?: ChatMessage[]; // Changed from Json to ChatMessage[]
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          name?: string;
+          created_at?: string;
+          messages?: ChatMessage[]; // Changed from Json to ChatMessage[]
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'chat_sessions_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+    };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      [_ in never]: never;
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
+      [_ in never]: never;
+    };
+  };
+};
+
+type PublicSchema = Database[Extract<keyof Database, 'public'>];
+
+export type Tables<T extends keyof PublicSchema['Tables']> = PublicSchema['Tables'][T]['Row'];
+export type TablesInsert<T extends keyof PublicSchema['Tables']> =
+  PublicSchema['Tables'][T]['Insert'];
+export type TablesUpdate<T extends keyof PublicSchema['Tables']> =
+  PublicSchema['Tables'][T]['Update'];
+
+export type Enums<T extends keyof PublicSchema['Enums']> = PublicSchema['Enums'][T];
