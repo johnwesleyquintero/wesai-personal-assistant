@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { signInWithGoogle, getSession, getSupabaseClient } from './services/supabaseService';
+import WesAILogo from './components/WesAILogo';
 
 interface LoginPageProps {
   onLoginSuccess: () => void;
@@ -60,20 +61,111 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
       {/* Left: Mini Landing / Hero */}
-      <div className="md:w-1/2 flex flex-col justify-center bg-gradient-to-tr from-blue-400 to-purple-600 text-white p-8">
-        <h1 className="text-4xl md:text-5xl font-bold mb-4">Welcome to WesAI</h1>
-        <p className="mb-6 text-lg leading-relaxed">
-          Your AI co-pilot for strategy, creativity, and operations. Transform complexity into
-          actionable insights and streamline your workflow like a pro.
-        </p>
-        <ul className="space-y-2 mb-6">
-          <li>• Executive-level decision support</li>
-          <li>• Creative ideation & content assistance</li>
-          <li>• Seamless operational guidance</li>
-        </ul>
-        <p className="text-sm opacity-80">
-          Already have an account? Sign In to get started instantly.
-        </p>
+      <div className="md:w-1/2 flex flex-col justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-8 relative overflow-hidden">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          {/* Floating AI Particles */}
+          <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-blue-400 rounded-full opacity-60 animate-pulse"></div>
+          <div className="absolute top-1/3 right-1/4 w-3 h-3 bg-purple-400 rounded-full opacity-40 animate-bounce"></div>
+          <div className="absolute bottom-1/3 left-1/3 w-1 h-1 bg-pink-400 rounded-full opacity-80 animate-ping"></div>
+          <div className="absolute bottom-1/4 right-1/3 w-2 h-2 bg-cyan-400 rounded-full opacity-50 animate-pulse"></div>
+
+          {/* Neural Network Lines */}
+          <svg
+            className="absolute inset-0 w-full h-full opacity-20"
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
+          >
+            <defs>
+              <linearGradient id="network-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#60A5FA" stopOpacity="0.3" />
+                <stop offset="50%" stopColor="#A78BFA" stopOpacity="0.5" />
+                <stop offset="100%" stopColor="#EC4899" stopOpacity="0.3" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M10,10 L30,25 L50,15 L70,30 L90,20"
+              stroke="url(#network-gradient)"
+              strokeWidth="0.5"
+              fill="none"
+              className="animate-pulse"
+            />
+            <path
+              d="M20,40 L40,35 L60,45 L80,40"
+              stroke="url(#network-gradient)"
+              strokeWidth="0.5"
+              fill="none"
+              className="animate-pulse"
+              style={{ animationDelay: '0.5s' }}
+            />
+            <path
+              d="M15,70 L35,65 L55,75 L75,70"
+              stroke="url(#network-gradient)"
+              strokeWidth="0.5"
+              fill="none"
+              className="animate-pulse"
+              style={{ animationDelay: '1s' }}
+            />
+          </svg>
+
+          {/* Gradient Orbs */}
+          <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-blue-500 to-transparent rounded-full opacity-10 blur-3xl animate-pulse"></div>
+          <div
+            className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-tl from-purple-500 to-transparent rounded-full opacity-10 blur-3xl animate-pulse"
+            style={{ animationDelay: '2s' }}
+          ></div>
+        </div>
+
+        {/* Main Content */}
+        <div className="relative z-10">
+          {/* WesAI Logo */}
+          <div className="mb-8">
+            <div className="relative mb-6">
+              {/* Glowing background effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 rounded-2xl blur-xl animate-pulse"></div>
+
+              {/* Logo with enhanced styling */}
+              <div className="relative">
+                <WesAILogo size="large" className="drop-shadow-2xl" />
+              </div>
+            </div>
+          </div>
+
+          <p className="text-xl mb-8 leading-relaxed text-gray-200">
+            Your AI co-pilot for strategy, creativity, and operations. Transform complexity into
+            actionable insights and streamline your workflow like a pro.
+          </p>
+
+          {/* Feature Cards */}
+          <div className="space-y-4 mb-8">
+            <div className="flex items-center space-x-3 p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
+              <div className="w-3 h-3 bg-blue-400 rounded-full animate-pulse"></div>
+              <span className="text-gray-200">Executive-level decision support</span>
+            </div>
+            <div className="flex items-center space-x-3 p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
+              <div
+                className="w-3 h-3 bg-purple-400 rounded-full animate-pulse"
+                style={{ animationDelay: '0.5s' }}
+              ></div>
+              <span className="text-gray-200">Creative ideation & content assistance</span>
+            </div>
+            <div className="flex items-center space-x-3 p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
+              <div
+                className="w-3 h-3 bg-pink-400 rounded-full animate-pulse"
+                style={{ animationDelay: '1s' }}
+              ></div>
+              <span className="text-gray-200">Seamless operational guidance</span>
+            </div>
+          </div>
+
+          {/* Call to Action */}
+          <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+            <p className="text-white font-medium mb-2">🚀 Now with Cloud Storage</p>
+            <p className="text-gray-300 text-sm">
+              Your conversations sync across all devices. Never lose your insights again.
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Right: Login Form */}

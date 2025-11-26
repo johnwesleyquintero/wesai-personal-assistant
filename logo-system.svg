@@ -1,0 +1,99 @@
+<!-- WesAI Logo System -->
+<!-- Main Logo - Use this in your Header/Navigation -->
+<svg width="120" height="40" viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="wesai-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#60A5FA" />
+      <stop offset="50%" stopColor="#A78BFA" />
+      <stop offset="100%" stopColor="#EC4899" />
+    </linearGradient>
+    <linearGradient id="wesai-gradient-dark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#3B82F6" />
+      <stop offset="50%" stopColor="#8B5CF6" />
+      <stop offset="100%" stopColor="#DB2777" />
+    </linearGradient>
+  </defs>
+  
+  <!-- AI Brain Icon -->
+  <path d="M15 8C15 6.89543 15.8954 6 17 6H23C24.1046 6 25 6.89543 25 8V12C25 13.1046 24.1046 14 23 14H17C15.8954 14 15 13.1046 15 12V8Z" fill="url(#wesai-gradient)" opacity="0.8"/>
+  
+  <!-- Neural Network Nodes -->
+  <circle cx="12" cy="20" r="2" fill="url(#wesai-gradient)" opacity="0.6"/>
+  <circle cx="20" cy="20" r="3" fill="url(#wesai-gradient)"/>
+  <circle cx="28" cy="20" r="2" fill="url(#wesai-gradient)" opacity="0.6"/>
+  
+  <!-- Connecting Lines -->
+  <path d="M14 20H18M22 20H26" stroke="url(#wesai-gradient)" strokeWidth="1.5" strokeLinecap="round" opacity="0.7"/>
+  
+  <!-- Text: WesAI -->
+  <text x="35" y="25" fontFamily="system-ui, -apple-system, sans-serif" fontSize="24" fontWeight="700" fill="url(#wesai-gradient)">WesAI</text>
+</svg>
+
+<!-- Favicon Versions -->
+
+<!-- Favicon 32x32 - Light Mode -->
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="favicon-gradient-light" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#3B82F6" />
+      <stop offset="50%" stopColor="#8B5CF6" />
+      <stop offset="100%" stopColor="#DB2777" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background Circle -->
+  <circle cx="16" cy="16" r="15" fill="white" stroke="url(#favicon-gradient-light)" strokeWidth="1"/>
+  
+  <!-- AI Brain Icon -->
+  <path d="M12 10C12 9.44772 12.4477 9 13 9H19C19.5523 9 20 9.44772 20 10V14C20 14.5523 19.5523 15 19 15H13C12.4477 15 12 14.5523 12 14V10Z" fill="url(#favicon-gradient-light)" opacity="0.9"/>
+  
+  <!-- Neural Nodes -->
+  <circle cx="10" cy="20" r="1.5" fill="url(#favicon-gradient-light)" opacity="0.7"/>
+  <circle cx="16" cy="20" r="2" fill="url(#favicon-gradient-light)"/>
+  <circle cx="22" cy="20" r="1.5" fill="url(#favicon-gradient-light)" opacity="0.7"/>
+  
+  <!-- Connections -->
+  <path d="M11.5 20H14.5M17.5 20H20.5" stroke="url(#favicon-gradient-light)" strokeWidth="1" strokeLinecap="round" opacity="0.8"/>
+</svg>
+
+<!-- Favicon 32x32 - Dark Mode -->
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="favicon-gradient-dark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#60A5FA" />
+      <stop offset="50%" stopColor="#A78BFA" />
+      <stop offset="100%" stopColor="#EC4899" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background Circle -->
+  <circle cx="16" cy="16" r="15" fill="#1F2937" stroke="url(#favicon-gradient-dark)" strokeWidth="1"/>
+  
+  <!-- AI Brain Icon -->
+  <path d="M12 10C12 9.44772 12.4477 9 13 9H19C19.5523 9 20 9.44772 20 10V14C20 14.5523 19.5523 15 19 15H13C12.4477 15 12 14.5523 12 14V10Z" fill="url(#favicon-gradient-dark)" opacity="0.9"/>
+  
+  <!-- Neural Nodes -->
+  <circle cx="10" cy="20" r="1.5" fill="url(#favicon-gradient-dark)" opacity="0.7"/>
+  <circle cx="16" cy="20" r="2" fill="url(#favicon-gradient-dark)"/>
+  <circle cx="22" cy="20" r="1.5" fill="url(#favicon-gradient-dark)" opacity="0.7"/>
+  
+  <!-- Connections -->
+  <path d="M11.5 20H14.5M17.5 20H20.5" stroke="url(#favicon-gradient-dark)" strokeWidth="1" strokeLinecap="round" opacity="0.8"/>
+</svg>
+
+<!-- Minimal Favicon 16x16 -->
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="minimal-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#3B82F6" />
+      <stop offset="100%" stopColor="#8B5CF6" />
+    </linearGradient>
+  </defs>
+  
+  <!-- AI Brain -->
+  <rect x="5" y="5" width="6" height="4" rx="1" fill="url(#minimal-gradient)"/>
+  <circle cx="4" cy="10" r="1" fill="url(#minimal-gradient)"/>
+  <circle cx="8" cy="10" r="1.5" fill="url(#minimal-gradient)"/>
+  <circle cx="12" cy="10" r="1" fill="url(#minimal-gradient)"/>
+  <path d="M5 10H7M9 10H11" stroke="url(#minimal-gradient)" strokeWidth="0.8" strokeLinecap="round"/>
+</svg>

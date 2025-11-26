@@ -16,16 +16,18 @@ WesAI is a product of [ScaleSmart](https://wescode.vercel.app/). It's a web appl
 ## 🚀 What WesAI Can Do
 
 ### Core Features
+
 - **🔐 Secure Access**: Google OAuth authentication with persistent sessions
 - **🔑 API Key Management**: Safely save and manage your Google Gemini API key
 - **🎨 Customizable Look**: Switch between light and dark themes
-- **🤖 AI-Powered Assistance**: 
+- **🤖 AI-Powered Assistance**:
   - **Content Creation**: Generate blog posts, emails, documentation, social media content
   - **Image Generation**: Create unique images from text descriptions
   - **Interactive Chat**: Have conversations about your content with live previews
 - **💾 Cloud Storage**: All chat sessions automatically saved and synced
 
 ### Advanced Features
+
 - **📊 Session Management**: Save, rename, duplicate, and delete chat sessions
 - **🔄 Real-time Sync**: Changes appear instantly across all logged-in devices
 - **🔍 Search & Organize**: Find your conversations easily with organized session names
@@ -43,30 +45,35 @@ WesAI is a product of [ScaleSmart](https://wescode.vercel.app/). It's a web appl
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Modern web browser (Chrome, Firefox, Edge, Safari)
 - Google Gemini API Key ([Get one here](https://aistudio.google.com/app/apikey))
 
 ### Quick Start
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/johnwesleyquintero/wesai-personal-assistant.git
    cd wesai-personal-assistant
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Set up environment variables**
    Create a `.env` file in the root directory:
+
    ```bash
    VITE_SUPABASE_URL=your_supabase_url
    VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
    ```
 
 4. **Start the development server**
+
    ```bash
    npm run dev
    ```
@@ -86,6 +93,7 @@ Detailed setup instructions are in [`SUPABASE_SETUP.md`](SUPABASE_SETUP.md)
 ## 📖 How to Use
 
 ### For New Users
+
 1. **Login**: Use Google OAuth or demo credentials (user: `demo`, password: `password`)
 2. **Set API Key**: Add your Google Gemini API key in settings
 3. **Choose Your Mode**:
@@ -95,6 +103,7 @@ Detailed setup instructions are in [`SUPABASE_SETUP.md`](SUPABASE_SETUP.md)
 4. **Save Sessions**: Your work is automatically saved to the cloud
 
 ### For Power Users
+
 - **Session Management**: Right-click on chat sessions to rename, duplicate, or delete
 - **Theme Toggle**: Click the sun/moon icon for light/dark mode
 - **Keyboard Shortcuts**: Enter to send messages, Ctrl+Enter for new lines
@@ -103,6 +112,7 @@ Detailed setup instructions are in [`SUPABASE_SETUP.md`](SUPABASE_SETUP.md)
 ## 🏗️ Architecture Overview
 
 ### Cloud Storage Architecture
+
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Your Device   │    │   Supabase      │    │   Google APIs   │
@@ -114,6 +124,7 @@ Detailed setup instructions are in [`SUPABASE_SETUP.md`](SUPABASE_SETUP.md)
 ```
 
 ### Data Flow
+
 1. **Authentication**: Google OAuth → Supabase Auth → Session Management
 2. **Chat Storage**: User Input → Zustand → Supabase → Cross-device Sync
 3. **AI Processing**: User Input → Gemini API → Response → Cloud Storage
@@ -121,12 +132,14 @@ Detailed setup instructions are in [`SUPABASE_SETUP.md`](SUPABASE_SETUP.md)
 ## 🔒 Security & Privacy
 
 ### Data Protection
+
 - **Row Level Security**: Users can only access their own data
 - **Encrypted Storage**: All data encrypted at rest in PostgreSQL
 - **Secure Authentication**: Google OAuth with JWT tokens
 - **API Key Isolation**: API keys never touch our servers
 
 ### Privacy Policy
+
 - **No Data Mining**: We don't analyze or sell your data
 - **No Tracking**: No analytics, cookies, or third-party tracking
 - **Local First**: API keys stored only in your browser
@@ -135,10 +148,13 @@ Detailed setup instructions are in [`SUPABASE_SETUP.md`](SUPABASE_SETUP.md)
 ## 🚀 Deployment
 
 ### Netlify Deployment
+
 [![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/johnwesleyquintero/wesai-personal-assistant)
 
 ### Manual Deployment
+
 1. **Build the project**
+
    ```bash
    npm run build
    ```
@@ -153,6 +169,7 @@ See [`DEPLOYMENT_CHECKLIST.md`](DEPLOYMENT_CHECKLIST.md) for detailed deployment
 ## 🧪 Development
 
 ### Code Quality
+
 ```bash
 # Run all checks
 npm run check
@@ -164,6 +181,7 @@ npm run format    # Prettier
 ```
 
 ### Project Structure
+
 ```
 wesai-personal-assistant/
 ├── src/                    # Source code
