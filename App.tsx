@@ -105,7 +105,6 @@ const App: React.FC = () => {
     <div className="min-h-screen flex flex-col items-center px-4 pt-0 sm:px-6">
       <div className="w-full sm:max-w-5xl">
         <Header
-          title="WesAI"
           toggleTheme={toggleTheme}
           currentTheme={theme as Theme}
           onSettingsClick={handleOpenSettingsModal}

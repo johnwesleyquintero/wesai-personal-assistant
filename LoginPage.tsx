@@ -65,10 +65,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         {/* Animated Background Elements */}
         <div className="absolute inset-0 overflow-hidden">
           {/* Floating AI Particles */}
-          <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-blue-400 rounded-full opacity-60 animate-pulse"></div>
-          <div className="absolute top-1/3 right-1/4 w-3 h-3 bg-purple-400 rounded-full opacity-40 animate-bounce"></div>
-          <div className="absolute bottom-1/3 left-1/3 w-1 h-1 bg-pink-400 rounded-full opacity-80 animate-ping"></div>
-          <div className="absolute bottom-1/4 right-1/3 w-2 h-2 bg-cyan-400 rounded-full opacity-50 animate-pulse"></div>
+          <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-blue-400 rounded-full opacity-60 animate-pulse" />
+          <div className="absolute top-1/3 right-1/4 w-3 h-3 bg-purple-400 rounded-full opacity-40 animate-bounce" />
+          <div className="absolute bottom-1/3 left-1/3 w-1 h-1 bg-pink-400 rounded-full opacity-80 animate-ping" />
+          <div className="absolute bottom-1/4 right-1/3 w-2 h-2 bg-cyan-400 rounded-full opacity-50 animate-pulse" />
 
           {/* Neural Network Lines */}
           <svg
@@ -109,11 +109,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
           </svg>
 
           {/* Gradient Orbs */}
-          <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-blue-500 to-transparent rounded-full opacity-10 blur-3xl animate-pulse"></div>
+          <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-blue-500 to-transparent rounded-full opacity-10 blur-3xl animate-pulse" />
           <div
             className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-tl from-purple-500 to-transparent rounded-full opacity-10 blur-3xl animate-pulse"
             style={{ animationDelay: '2s' }}
-          ></div>
+          />
         </div>
 
         {/* Main Content */}
@@ -122,7 +122,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
           <div className="mb-8">
             <div className="relative mb-6">
               {/* Glowing background effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 rounded-2xl blur-xl animate-pulse"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 rounded-2xl blur-xl animate-pulse" />
 
               {/* Logo with enhanced styling */}
               <div className="relative">
@@ -139,21 +139,21 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
           {/* Feature Cards */}
           <div className="space-y-4 mb-8">
             <div className="flex items-center space-x-3 p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
-              <div className="w-3 h-3 bg-blue-400 rounded-full animate-pulse"></div>
+              <div className="w-3 h-3 bg-blue-400 rounded-full animate-pulse" />
               <span className="text-gray-200">Executive-level decision support</span>
             </div>
             <div className="flex items-center space-x-3 p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
               <div
                 className="w-3 h-3 bg-purple-400 rounded-full animate-pulse"
                 style={{ animationDelay: '0.5s' }}
-              ></div>
+              />
               <span className="text-gray-200">Creative ideation & content assistance</span>
             </div>
             <div className="flex items-center space-x-3 p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
               <div
                 className="w-3 h-3 bg-pink-400 rounded-full animate-pulse"
                 style={{ animationDelay: '1s' }}
-              ></div>
+              />
               <span className="text-gray-200">Seamless operational guidance</span>
             </div>
           </div>
