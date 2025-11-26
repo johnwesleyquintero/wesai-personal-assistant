@@ -18,12 +18,9 @@ export const Header: React.FC<HeaderProps> = memo(
           {' '}
           {/* Group logo to the left */}
           <div className="relative">
-            {/* Glowing background effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 rounded-xl blur-lg animate-pulse" />
-
             {/* Logo with enhanced styling */}
             <div className="relative">
-              <WesAILogo size="large" className="drop-shadow-2xl" />
+              <WesAILogo size="large" />
             </div>
           </div>
         </div>
