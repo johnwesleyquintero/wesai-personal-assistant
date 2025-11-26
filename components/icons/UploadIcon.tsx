@@ -1,12 +1,12 @@
 import React from 'react';
 
-export const DownloadIcon: React.FC = () => (
+export const UploadIcon: React.FC = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="currentColor"
     className="w-3.5 h-3.5"
   >
-    <path d="M12 16l4-5h-3V4h-2v7H8l4 5zm8 3H4v-2h16v2z" />
+    <path d="M12 8l-4 5h3v7h2v-7h3l-4-5zm-8 11v-2h16v2H4z" />
   </svg>
 );
