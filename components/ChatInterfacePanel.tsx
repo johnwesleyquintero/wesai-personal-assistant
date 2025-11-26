@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, memo, useState } from 'react';
+import React, { useRef, useEffect, memo, useState, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { LoadingSpinner } from './LoadingSpinner.tsx';
@@ -66,12 +66,85 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = memo(
     const [saveName, setSaveName] = useState('');
     const [renameMap, setRenameMap] = useState<Record<string, string>>({});
     const [searchTerm, setSearchTerm] = useState('');
+    const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+    const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
+    const [exportFormat, setExportFormat] = useState<'markdown' | 'json' | 'txt'>('markdown');
 
     const scrollToBottom = () => {
       chatMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
 
     useEffect(scrollToBottom, [chatMessages]);
+
+    // Filter messages based on search term
+    const filteredMessages = useMemo(() => {
+      if (!searchTerm.trim()) return chatMessages;
+
+      const searchLower = searchTerm.toLowerCase().trim();
+      return chatMessages.filter(
+        (msg) =>
+          msg.content.toLowerCase().includes(searchLower) ||
+          (msg.role === 'user' && 'user'.includes(searchLower)) ||
+          (msg.role === 'model' && 'assistant wesai'.includes(searchLower)),
+      );
+    }, [chatMessages, searchTerm]);
+
+    // Export functionality
+    const handleExportChat = () => {
+      const messagesToExport = searchTerm.trim() ? filteredMessages : chatMessages;
+      const timestamp = new Date().toISOString().split('T')[0];
+      const filename = `wesai-chat-${timestamp}`;
+
+      let content = '';
+      let mimeType = 'text/plain';
+
+      switch (exportFormat) {
+        case 'markdown':
+          content = messagesToExport
+            .map((msg) => {
+              const role = msg.role === 'user' ? '👤 User' : '🤖 WesAI';
+              return `### ${role}\n${msg.content}\n\n---\n\n`;
+            })
+            .join('');
+          mimeType = 'text/markdown';
+          break;
+
+        case 'json':
+          content = JSON.stringify(
+            {
+              exportDate: new Date().toISOString(),
+              messageCount: messagesToExport.length,
+              searchTerm: searchTerm.trim() || null,
+              messages: messagesToExport,
+            },
+            null,
+            2,
+          );
+          mimeType = 'application/json';
+          break;
+
+        case 'txt':
+          content = messagesToExport
+            .map((msg) => {
+              const role = msg.role === 'user' ? '[USER]' : '[WESAI]';
+              return `${role}\n${msg.content}\n\n`;
+            })
+            .join('');
+          break;
+      }
+
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${filename}.${exportFormat}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      setIsExportDialogOpen(false);
+    };
 
     useEffect(() => {
       if (isSavedContextsOpen) {
@@ -102,8 +175,57 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = memo(
     return (
       <div className="flex flex-col h-[60vh] bg-gray-50 dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden">
         <div className="flex justify-between items-center p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Chat</h3>
+          <div className="flex items-center gap-3">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Chat</h3>
+
+            {/* Search functionality */}
+            <div className="relative">
+              <button
+                onClick={() => setIsSearchExpanded(!isSearchExpanded)}
+                className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                title="Search messages"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </button>
+
+              {isSearchExpanded && (
+                <div className="absolute top-full left-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-3 z-10">
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Search messages..."
+                    className="w-full p-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    autoFocus
+                  />
+                  {searchTerm && (
+                    <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">
+                      Found {filteredMessages.length} of {chatMessages.length} messages
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
           <div className="flex items-center gap-2">
+            {/* Export button */}
+            <button
+              onClick={() => setIsExportDialogOpen(true)}
+              className="px-3 py-1 bg-orange-600 text-white text-sm rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              disabled={isLoading || chatMessages.length === 0}
+              title="Export conversation"
+            >
+              Export
+            </button>
+
             <button
               onClick={() => setIsSavedContextsOpen(true)}
               className="px-3 py-1 bg-purple-600 text-white text-sm rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
@@ -129,15 +251,40 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = memo(
         </div>
         <ErrorMessage message={error} onRetry={onRetryChat} isChatError />
         <div className="flex-grow p-4 space-y-4 overflow-y-auto">
-          {chatMessages.map((msg) => (
-            <ChatMessageItem
-              key={msg.id}
-              msg={msg}
-              copiedMessageId={copiedMessageId}
-              onTogglePreview={onTogglePreview}
-              onCopyChatMessage={onCopyChatMessage}
-            />
-          ))}
+          {searchTerm.trim() && filteredMessages.length === 0 ? (
+            <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+              <svg
+                className="w-12 h-12 mx-auto mb-4 opacity-50"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+              <p>No messages found matching &quot;{searchTerm}&quot;</p>
+              <button
+                onClick={() => setSearchTerm('')}
+                className="mt-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-sm"
+              >
+                Clear search
+              </button>
+            </div>
+          ) : (
+            filteredMessages.map((msg) => (
+              <ChatMessageItem
+                key={msg.id}
+                msg={msg}
+                copiedMessageId={copiedMessageId}
+                onTogglePreview={onTogglePreview}
+                onCopyChatMessage={onCopyChatMessage}
+              />
+            ))
+          )}
           <div ref={chatMessagesEndRef} />
         </div>
         <form
@@ -228,6 +375,93 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = memo(
                   disabled={!saveName.trim()}
                 >
                   Save
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Export Dialog */}
+        {isExportDialogOpen && (
+          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md">
+              <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+                Export Conversation
+              </h4>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Export Format
+                  </label>
+                  <div className="space-y-2">
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        value="markdown"
+                        checked={exportFormat === 'markdown'}
+                        onChange={(e) =>
+                          setExportFormat(e.target.value as 'markdown' | 'json' | 'txt')
+                        }
+                        className="mr-2"
+                      />
+                      <span className="text-sm">Markdown (formatted for readability)</span>
+                    </label>
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        value="json"
+                        checked={exportFormat === 'json'}
+                        onChange={(e) =>
+                          setExportFormat(e.target.value as 'markdown' | 'json' | 'txt')
+                        }
+                        className="mr-2"
+                      />
+                      <span className="text-sm">JSON (structured data)</span>
+                    </label>
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        value="txt"
+                        checked={exportFormat === 'txt'}
+                        onChange={(e) =>
+                          setExportFormat(e.target.value as 'markdown' | 'json' | 'txt')
+                        }
+                        className="mr-2"
+                      />
+                      <span className="text-sm">Plain Text (simple format)</span>
+                    </label>
+                  </div>
+                </div>
+
+                {searchTerm.trim() && (
+                  <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                    <p className="text-sm text-blue-700 dark:text-blue-300">
+                      ⚡ Exporting filtered results ({filteredMessages.length} messages)
+                    </p>
+                  </div>
+                )}
+
+                <div className="text-xs text-gray-600 dark:text-gray-400">
+                  {chatMessages.length} total messages available for export
+                </div>
+              </div>
+
+              <div className="mt-6 flex justify-end gap-3">
+                <button
+                  onClick={() => {
+                    setIsExportDialogOpen(false);
+                    setExportFormat('markdown');
+                  }}
+                  className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleExportChat}
+                  className="px-4 py-2 rounded bg-orange-600 hover:bg-orange-700 text-white font-medium transition-colors"
+                >
+                  Export {exportFormat.toUpperCase()}
                 </button>
               </div>
             </div>
