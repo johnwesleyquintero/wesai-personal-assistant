@@ -75,18 +75,17 @@ export const FeedbackDisplay: React.FC<FeedbackDisplayProps> = ({ feedback }) =>
         <span className="sr-only">{isCopied ? 'Copied!' : 'Copy'}</span>
       </button>
       <div
-        className="prose prose-sm sm:prose-base max-w-none dark:prose-invert 
-                      prose-headings:text-slate-800 dark:prose-headings:text-slate-200 
-                      prose-p:text-slate-700 dark:prose-p:text-slate-300 
+        className="prose prose-sm sm:prose-base max-w-none dark:prose-invert
+                      prose-headings:text-slate-800 dark:prose-headings:text-slate-200
+                      prose-p:text-slate-700 dark:prose-p:text-slate-300
                       prose-li:text-slate-700 dark:prose-li:text-slate-300
-                      prose-strong:text-slate-900 dark:prose-strong:text-slate-100 
-                      prose-code:text-pink-600 dark:prose-code:text-pink-400 
-                      prose-code:bg-slate-100 dark:prose-code:bg-slate-700 
-                      prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded 
-                      prose-pre:bg-slate-100 dark:prose-pre:bg-slate-700 
-                      prose-pre:p-4 prose-pre:rounded-md 
-                      prose-pre:text-slate-800 dark:prose-pre:text-slate-200
-                      pt-8 sm:pt-4"
+                      prose-strong:text-slate-900 dark:prose-strong:text-slate-100
+                      prose-code:text-pink-600 dark:prose-code:text-pink-400
+                      prose-code:bg-slate-100 dark:prose-code:bg-slate-700
+                      prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded
+                      prose-pre:bg-slate-200 dark:prose-pre:bg-gray-800
+                      prose-pre:p-4 prose-pre:rounded-md
+                      prose-pre:text-slate-800 dark:prose-pre:text-slate-200"
       >
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}

@@ -259,7 +259,8 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = memo(
                   }
                   className="p-2 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded"
                 >
-                  <option value="newest">Newest</option>
+                  <option value="newest">Recently Created</option>
+                  <option value="recently_used">Recently Used</option>
                   <option value="oldest">Oldest</option>
                   <option value="name_asc">Name (A→Z)</option>
                   <option value="name_desc">Name (Z→A)</option>

@@ -24,6 +24,7 @@ export interface SavedChatSession {
   name: string;
   timestamp: number; // Unix timestamp for when the session was saved
   messages: ChatMessage[];
+  customInstructionProfileId?: string | null; // Optional: Link to a CustomInstructionProfile by ID
 }
 
 export interface CustomInstructionProfile {

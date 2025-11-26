@@ -15,7 +15,7 @@ export const PreWithCopyButton: React.FC<
           .writeText(codeElement.innerText)
           .then(() => {
             setIsCopied(true);
-            setTimeout(() => setIsCopied(false), 2000);
+            setTimeout(() => setIsCopied(false), 1500);
           })
           .catch((err) => {
             console.error('Failed to copy documentation code: ', err);
@@ -28,10 +28,8 @@ export const PreWithCopyButton: React.FC<
     <div className="relative group my-4">
       <button
         onClick={onCopy}
-        title={isCopied ? 'Copied! (Click to copy again if needed)' : 'Copy code to clipboard'}
-        aria-label={
-          isCopied ? 'Code copied successfully. Click to copy again.' : 'Copy code to clipboard'
-        }
+        title={isCopied ? 'Copied! Click to copy again' : 'Copy code to clipboard'}
+        aria-label={isCopied ? 'Code copied. Click to copy again.' : 'Copy code to clipboard'}
         className={`absolute top-2 right-2 p-1.5 rounded-md transition-all duration-200 ease-in-out
                     ${
                       isCopied
