@@ -215,6 +215,7 @@ export const CodeInteractionPanel: React.FC<CodeInteractionPanelProps> = React.m
           <CodeInput
             value={code}
             onChange={onCodeChange}
+            onClearInput={onClearInput}
             disabled={isLoading || !isApiKeyConfigured}
             placeholder={getInputPlaceholder()}
           />
