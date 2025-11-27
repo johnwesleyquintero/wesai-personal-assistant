@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { LoadingSpinner } from './LoadingSpinner.tsx';
 import type { AspectRatio } from '../types.ts'; // Import AspectRatio type
 import { ErrorMessage } from './ErrorMessage.tsx';
+import { useCopyImageToClipboard } from '../hooks/useCopyImageToClipboard';
 
 interface ImageGenerationPanelProps {
   prompt: string;
@@ -28,7 +29,7 @@ export const ImageGenerationPanel: React.FC<ImageGenerationPanelProps> = React.m
     setError,
   }) => {
     const [downloadName, setDownloadName] = useState('generated-image.jpg');
-    const [isCopied, setIsCopied] = useState(false);
+    const { isCopied, copyImageToClipboard } = useCopyImageToClipboard(2000);
     const [aspectRatio, setAspectRatio] = useState<AspectRatio>('1:1'); // Default aspect ratio
     const [negativePrompt, setNegativePrompt] = useState<string>(''); // New state for negative prompt
 
@@ -37,22 +38,7 @@ export const ImageGenerationPanel: React.FC<ImageGenerationPanelProps> = React.m
     const handleCopyImage = async () => {
       if (!imageData) return;
       try {
-        // Decode base64 image data to a Blob
-        const byteCharacters = atob(imageData.split(',')[1]); // Remove "data:image/jpeg;base64," prefix if present
-        const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
-          byteNumbers[i] = byteCharacters.charCodeAt(i);
-        }
-        const byteArray = new Uint8Array(byteNumbers);
-        const blob = new Blob([byteArray], { type: 'image/jpeg' }); // Ensure correct MIME type
-
-        await navigator.clipboard.write([
-          new ClipboardItem({
-            [blob.type]: blob,
-          }),
-        ]);
-        setIsCopied(true);
-        setTimeout(() => setIsCopied(false), 2000); // Reset after 2 seconds
+        await copyImageToClipboard(imageData);
       } catch (err) {
         console.error('Failed to copy image: ', err);
         setError('Failed to copy image to clipboard.');

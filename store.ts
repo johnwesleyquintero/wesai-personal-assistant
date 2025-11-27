@@ -26,6 +26,7 @@ import { getActiveInstructionProfile } from './services/instructionService.ts';
 import { getEnvVariable } from './utils/env.ts';
 import { generateKnowledgeContext } from './services/knowledgeBaseService.ts';
 import { signOut, initializeSupabaseClient, getSupabaseClient } from './services/supabaseService';
+import { updateChatMessageById } from './utils/storeUtils';
 
 export const LS_KEY_API = 'geminiApiKey';
 export const LS_KEY_STREAM_NOTES = 'showStreamFinishNotes';
@@ -712,38 +713,35 @@ export const useAppStore = create<AppState>((set, get) => ({
           currentModelContent += chunkText;
           const componentCode = extractCode(currentModelContent);
           set((state: AppState) => ({
-            chatMessages: state.chatMessages.map((msg: ChatMessage) =>
-              msg.id === modelMessageId
-                ? { ...msg, content: currentModelContent, componentCode: componentCode }
-                : msg,
-            ),
+            chatMessages: updateChatMessageById(state.chatMessages, modelMessageId, {
+              content: currentModelContent,
+              componentCode: componentCode,
+            }),
           }));
         }
         if (finishReason) {
           console.warn('Chat stream finished:', finishReason, safetyRatings);
           const finalComponentCode = extractCode(currentModelContent);
           if (finishReason !== 'STOP' && finishReason !== 'MAX_TOKENS') {
+            const currentMsg = get().chatMessages.find((msg) => msg.id === modelMessageId);
+            const updatedContent = get().showStreamFinishNotes
+              ? (currentMsg?.content || '') + `\n\n*(Stream finished: ${finishReason})*`
+              : currentMsg?.content || '';
+
             set((state: AppState) => ({
-              chatMessages: state.chatMessages.map((msg: ChatMessage) =>
-                msg.id === modelMessageId
-                  ? {
-                      ...msg,
-                      content: get().showStreamFinishNotes
-                        ? msg.content + `\n\n*(Stream finished: ${finishReason})*`
-                        : msg.content,
-                      componentCode: finalComponentCode,
-                    }
-                  : msg,
-              ),
+              chatMessages: updateChatMessageById(state.chatMessages, modelMessageId, {
+                content: updatedContent,
+                componentCode: finalComponentCode,
+              }),
             }));
             if (finishReason === 'SAFETY') {
               set({ chatError: 'The response was blocked due to safety settings.' });
             }
           } else {
             set((state: AppState) => ({
-              chatMessages: state.chatMessages.map((msg: ChatMessage) =>
-                msg.id === modelMessageId ? { ...msg, componentCode: finalComponentCode } : msg,
-              ),
+              chatMessages: updateChatMessageById(state.chatMessages, modelMessageId, {
+                componentCode: finalComponentCode,
+              }),
             }));
           }
           break;
@@ -754,11 +752,10 @@ export const useAppStore = create<AppState>((set, get) => ({
       set({ chatError: `Chat error: ${errorMessage}` });
       console.error('Chat submit error:', err);
       set((state: AppState) => ({
-        chatMessages: state.chatMessages.map((msg: ChatMessage) =>
-          msg.id === modelMessageId
-            ? { ...msg, content: `*(Error: ${errorMessage})*`, componentCode: null }
-            : msg,
-        ),
+        chatMessages: updateChatMessageById(state.chatMessages, modelMessageId, {
+          content: `*(Error: ${errorMessage})*`,
+          componentCode: null,
+        }),
       }));
     } finally {
       set({ isLoading: false });
@@ -817,38 +814,35 @@ export const useAppStore = create<AppState>((set, get) => ({
           currentModelContent += chunkText;
           const componentCode = extractCode(currentModelContent);
           set((state: AppState) => ({
-            chatMessages: state.chatMessages.map((msg: ChatMessage) =>
-              msg.id === modelMessageId
-                ? { ...msg, content: currentModelContent, componentCode: componentCode }
-                : msg,
-            ),
+            chatMessages: updateChatMessageById(state.chatMessages, modelMessageId, {
+              content: currentModelContent,
+              componentCode: componentCode,
+            }),
           }));
         }
         if (finishReason) {
           console.warn('Chat stream finished (retry):', finishReason, safetyRatings);
           const finalComponentCode = extractCode(currentModelContent);
           if (finishReason !== 'STOP' && finishReason !== 'MAX_TOKENS') {
+            const currentMsg = get().chatMessages.find((msg) => msg.id === modelMessageId);
+            const updatedContent = get().showStreamFinishNotes
+              ? (currentMsg?.content || '') + `\n\n*(Stream finished: ${finishReason})*`
+              : currentMsg?.content || '';
+
             set((state: AppState) => ({
-              chatMessages: state.chatMessages.map((msg: ChatMessage) =>
-                msg.id === modelMessageId
-                  ? {
-                      ...msg,
-                      content: get().showStreamFinishNotes
-                        ? msg.content + `\n\n*(Stream finished: ${finishReason})*`
-                        : msg.content,
-                      componentCode: finalComponentCode,
-                    }
-                  : msg,
-              ),
+              chatMessages: updateChatMessageById(state.chatMessages, modelMessageId, {
+                content: updatedContent,
+                componentCode: finalComponentCode,
+              }),
             }));
             if (finishReason === 'SAFETY') {
               set({ chatError: 'The response was blocked due to safety settings during retry.' });
             }
           } else {
             set((state: AppState) => ({
-              chatMessages: state.chatMessages.map((msg: ChatMessage) =>
-                msg.id === modelMessageId ? { ...msg, componentCode: finalComponentCode } : msg,
-              ),
+              chatMessages: updateChatMessageById(state.chatMessages, modelMessageId, {
+                componentCode: finalComponentCode,
+              }),
             }));
           }
           break;
@@ -859,11 +853,10 @@ export const useAppStore = create<AppState>((set, get) => ({
       set({ chatError: `Retry chat error: ${errorMessage}` });
       console.error('Retry chat submit error:', err);
       set((state: AppState) => ({
-        chatMessages: state.chatMessages.map((msg: ChatMessage) =>
-          msg.id === modelMessageId
-            ? { ...msg, content: `*(Error: ${errorMessage})*`, componentCode: null }
-            : msg,
-        ),
+        chatMessages: updateChatMessageById(state.chatMessages, modelMessageId, {
+          content: `*(Error: ${errorMessage})*`,
+          componentCode: null,
+        }),
       }));
     } finally {
       set({ isLoading: false });
@@ -884,10 +877,11 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   handleTogglePreview: (messageId: string) => {
+    const currentMsg = get().chatMessages.find((msg) => msg.id === messageId);
     set((state) => ({
-      chatMessages: state.chatMessages.map((msg) =>
-        msg.id === messageId ? { ...msg, showPreview: !msg.showPreview } : msg,
-      ),
+      chatMessages: updateChatMessageById(state.chatMessages, messageId, {
+        showPreview: !currentMsg?.showPreview,
+      }),
     }));
   },
 }));

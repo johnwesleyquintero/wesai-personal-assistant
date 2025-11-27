@@ -1,4 +1,5 @@
-import React, { useState, useCallback } from 'react';
+import React from 'react';
+import { useCopyToClipboard } from '../hooks/useCopyToClipboard';
 import type { Components } from 'react-markdown';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -16,22 +17,12 @@ interface CustomCodeRendererProps {
 }
 
 export const FeedbackDisplay: React.FC<FeedbackDisplayProps> = ({ feedback }) => {
-  const [isCopied, setIsCopied] = useState(false);
-
-  const handleCopy = useCallback(async () => {
-    try {
-      await navigator.clipboard.writeText(feedback || ''); // Ensure string for clipboard
-      setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2000);
-    } catch (err) {
-      console.error('Failed to copy feedback: ', err);
-    }
-  }, [feedback]);
+  const { isCopied, copyToClipboard } = useCopyToClipboard(2000);
 
   return (
     <div className="bg-gray-50 dark:bg-gray-700 p-4 md:p-6 rounded-lg shadow-inner relative">
       <button
-        onClick={handleCopy}
+        onClick={() => copyToClipboard(feedback || '')}
         title={isCopied ? 'Copied!' : 'Copy feedback'}
         aria-label={isCopied ? 'Feedback copied to clipboard' : 'Copy feedback to clipboard'}
         className={`absolute top-3 right-3 p-2 rounded-md transition-colors duration-150 ease-in-out

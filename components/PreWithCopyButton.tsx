@@ -1,28 +1,21 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useRef } from 'react';
+import { useCopyToClipboard } from '../hooks/useCopyToClipboard';
 
 export const PreWithCopyButton: React.FC<
   React.HTMLAttributes<HTMLPreElement> & { node?: unknown }
 > = ({ children, ...props }) => {
-  const [isCopied, setIsCopied] = useState(false);
+  const { isCopied, copyToClipboard } = useCopyToClipboard(1500);
   const preRef = useRef<HTMLPreElement>(null);
   const existingClassName = props.className || '';
 
-  const onCopy = useCallback(() => {
+  const onCopy = () => {
     if (preRef.current) {
       const codeElement = preRef.current.querySelector('code');
       if (codeElement && codeElement.innerText) {
-        navigator.clipboard
-          .writeText(codeElement.innerText)
-          .then(() => {
-            setIsCopied(true);
-            setTimeout(() => setIsCopied(false), 1500);
-          })
-          .catch((err) => {
-            console.error('Failed to copy documentation code: ', err);
-          });
+        copyToClipboard(codeElement.innerText);
       }
     }
-  }, []);
+  };
 
   return (
     <div className="relative group my-4">
