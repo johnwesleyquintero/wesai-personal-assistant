@@ -160,7 +160,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
           {/* Call to Action */}
           <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-            <p className="text-white font-medium mb-2">🚀 Now with Cloud Storage</p>
+            <p className="text-white font-medium mb-2">Now with Cloud Storage</p>
             <p className="text-gray-300 text-sm">
               Your conversations sync across all devices. Never lose your insights again.
             </p>
