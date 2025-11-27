@@ -189,8 +189,23 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             onClick={handleGoogleSignIn}
             className="w-full flex justify-center items-center py-2.5 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-100 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800 transition duration-150"
           >
-            <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
-              {/* SVG paths */}
+            <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
+              <path
+                d="M22.46 12.21c0-.75-.06-1.5-.18-2.2H12v4.18h5.92a5.05 5.05 0 0 1-2.19 3.32v2.7h3.48c2.04-1.88 3.22-4.7 3.22-8.08z"
+                fill="#4285F4"
+              />
+              <path
+                d="M12 23c3.24 0 5.92-1.07 7.89-2.91l-3.48-2.7c-.96.64-2.18 1.02-4.41 1.02-3.41 0-6.3-2.3-7.37-5.42H.93v2.79C2.93 20.67 7.15 23 12 23z"
+                fill="#34A853"
+              />
+              <path
+                d="M4.63 13.91a7.33 7.33 0 0 1 0-4.82V6.3H.93A11.97 11.97 0 0 0 0 12c0 2.45.6 4.77 1.63 6.7z"
+                fill="#FBBC04"
+              />
+              <path
+                d="M12 4.58c1.77 0 3.34.61 4.59 1.79l3.07-3.07C17.92 1.48 15.17 0 12 0 7.15 0 2.93 2.33.93 6.3l3.7 2.91c1.07-3.12 3.96-5.43 7.37-5.43z"
+                fill="#EA4335"
+              />
             </svg>
             Sign in with Google
           </button>

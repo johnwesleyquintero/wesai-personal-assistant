@@ -233,7 +233,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = memo(
                   application is designed to help you with a variety of tasks, from brainstorming
                   and content generation to code assistance and image creation.
                 </p>
-                
+
                 <h4 className="text-lg font-semibold mt-4 mb-2">Core Features:</h4>
                 <ul className="list-disc list-inside space-y-1">
                   <li>
@@ -243,19 +243,33 @@ export const SettingsModal: React.FC<SettingsModalProps> = memo(
                   </li>
                   <li>
                     <span className="font-bold">Generate Content:</span> Create various forms of
-                    textual content, from creative writing to technical descriptions and marketing copy.
+                    textual content, from creative writing to technical descriptions and marketing
+                    copy.
                   </li>
                   <li>
                     <span className="font-bold">Image Generation:</span> Create images directly from
                     your text prompts using AI-powered generation.
                   </li>
                   <li>
-                    <span className="font-bold">Code Interaction:</span> Comprehensive code assistance including:
+                    <span className="font-bold">Code Interaction:</span> Comprehensive code
+                    assistance including:
                     <ul className="list-disc list-inside ml-4 mt-1">
-                      <li><span className="font-bold">Review:</span> Analyze code for bugs, security issues, and best practices</li>
-                      <li><span className="font-bold">Refactor:</span> Improve code structure, readability, and performance</li>
-                      <li><span className="font-bold">Generate:</span> Create new code from requirements or specifications</li>
-                      <li><span className="font-bold">Preview:</span> Test and visualize React components</li>
+                      <li>
+                        <span className="font-bold">Review:</span> Analyze code for bugs, security
+                        issues, and best practices
+                      </li>
+                      <li>
+                        <span className="font-bold">Refactor:</span> Improve code structure,
+                        readability, and performance
+                      </li>
+                      <li>
+                        <span className="font-bold">Generate:</span> Create new code from
+                        requirements or specifications
+                      </li>
+                      <li>
+                        <span className="font-bold">Preview:</span> Test and visualize React
+                        components
+                      </li>
                     </ul>
                   </li>
                   <li>
@@ -268,8 +282,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = memo(
                 <h4 className="text-lg font-semibold mt-4 mb-2">Authentication & Security:</h4>
                 <ul className="list-disc list-inside space-y-1">
                   <li>
-                    <span className="font-bold">Login System:</span> Secure authentication to protect
-                    your API keys and chat history.
+                    <span className="font-bold">Login System:</span> Secure authentication to
+                    protect your API keys and chat history.
                   </li>
                   <li>
                     <span className="font-bold">Session Management:</span> Your sessions persist
@@ -300,7 +314,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = memo(
                     export generated content.
                   </li>
                 </ul>
-                
+
                 <h4 className="text-lg font-semibold mt-4 mb-2">Getting Started:</h4>
                 <ul className="list-disc list-inside space-y-1">
                   <li>
@@ -309,16 +323,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = memo(
                   </li>
                   <li>
                     <span className="font-bold">API Key Setup:</span> Configure your Gemini API key
-                    in the <span className="font-bold">Settings</span> tab. You can provide it via an
-                    environment variable or save it directly within the UI.
+                    in the <span className="font-bold">Settings</span> tab. You can provide it via
+                    an environment variable or save it directly within the UI.
                   </li>
                   <li>
-                    <span className="font-bold">Navigation:</span> Switch between Chat, Generate Content,
-                    and Image Generation tabs based on your needs.
+                    <span className="font-bold">Navigation:</span> Switch between Chat, Generate
+                    Content, and Image Generation tabs based on your needs.
                   </li>
                   <li>
-                    <span className="font-bold">Code Tools:</span> Access code-specific features through
-                    the dedicated Code Interaction panel with Review, Refactor, Generate, and Preview modes.
+                    <span className="font-bold">Code Tools:</span> Access code-specific features
+                    through the dedicated Code Interaction panel with Review, Refactor, Generate,
+                    and Preview modes.
                   </li>
                   <li>
                     <span className="font-bold">Settings & Customization:</span> Use the{' '}
@@ -326,7 +341,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = memo(
                     customize chat behavior, set custom instructions, and access this Help Center.
                   </li>
                 </ul>
-                
+
                 <h4 className="text-lg font-semibold mt-4 mb-2">Pro Tips:</h4>
                 <ul className="list-disc list-inside space-y-1">
                   <li>
@@ -335,18 +350,19 @@ export const SettingsModal: React.FC<SettingsModalProps> = memo(
                   </li>
                   <li>
                     <span className="font-bold">Custom Instructions:</span> Set up personalized
-                    instructions in Settings to get more tailored responses for your specific use cases.
+                    instructions in Settings to get more tailored responses for your specific use
+                    cases.
                   </li>
                   <li>
                     <span className="font-bold">Code Preview:</span> Use the Preview mode to test
                     React components before implementing them in your projects.
                   </li>
                   <li>
-                    <span className="font-bold">Image Prompts:</span> Be specific and detailed
-                    in your image generation prompts for better results.
+                    <span className="font-bold">Image Prompts:</span> Be specific and detailed in
+                    your image generation prompts for better results.
                   </li>
                 </ul>
-                
+
                 <h4 className="text-lg font-semibold mt-4 mb-2">Troubleshooting:</h4>
                 <ul className="list-disc list-inside space-y-1">
                   <li>
@@ -365,19 +381,19 @@ export const SettingsModal: React.FC<SettingsModalProps> = memo(
                     topics.
                   </li>
                   <li>
-                    <span className="font-bold">Login Issues:</span> If you can&apos;t log in,
-                    check your credentials and ensure your account is properly configured.
+                    <span className="font-bold">Login Issues:</span> If you can&apos;t log in, check
+                    your credentials and ensure your account is properly configured.
                   </li>
                   <li>
                     <span className="font-bold">Session Loss:</span> If chat history disappears,
                     check if you&apos;re logged in and try refreshing the page.
                   </li>
                   <li>
-                    <span className="font-bold">General Issues:</span> For persistent problems,
-                    try logging out and back in, or restart the application.
+                    <span className="font-bold">General Issues:</span> For persistent problems, try
+                    logging out and back in, or restart the application.
                   </li>
                 </ul>
-                
+
                 <p className="mt-4">
                   For further assistance or to report bugs, please refer to the project&apos;s
                   documentation or reach out through the appropriate support channels.
