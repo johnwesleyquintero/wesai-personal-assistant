@@ -175,7 +175,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 py-2">
               Sign In
             </h2>
-            <p className="text-gray-500 dark:text-gray-400 mt-1">Log in to continue</p>
+            <p className="text-gray-500 dark:text-gray-400 mt-1">Sign in to continue</p>
           </header>
 
           {error && (
