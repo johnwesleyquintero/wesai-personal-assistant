@@ -218,26 +218,27 @@ export const SettingsModal: React.FC<SettingsModalProps> = memo(
               <div className="p-4 text-gray-700 dark:text-gray-300">
                 <h3 className="text-xl font-semibold mb-4">WesAI Help Center</h3>
                 <p className="mb-2">
-                  Welcome to WesAI, your personal AI assistant powered by Google Gemini! This
-                  application is designed to help you with a variety of tasks, from brainstorming
-                  and content generation to code assistance and image creation.
+                  Welcome to WesAI, the ultimate platform to build, deploy, and optimize your AI
+                  agents. Powered by Google Gemini, WesAI empowers you to streamline professional
+                  workflows and automate complex tasks with specialized intelligence.
                 </p>
 
                 <h4 className="text-lg font-semibold mt-4 mb-2">Core Features:</h4>
                 <ul className="list-disc list-inside space-y-1">
                   <li>
+                    <span className="font-bold">AI Agent Builder:</span> Create and configure custom
+                    AI agents with specialized system instructions using Markdown. Tailor your
+                    agents for specific roles like strategy, coding, or operations.
+                  </li>
+                  <li>
+                    <span className="font-bold">Workflow Optimization:</span> Leverage your custom
+                    agents to automate repetitive tasks and streamline complex professional
+                    workflows.
+                  </li>
+                  <li>
                     <span className="font-bold">Chat Interface:</span> Engage in dynamic
-                    conversations with AI, ask questions, get explanations, and brainstorm ideas.
-                    Save, rename, duplicate, and manage multiple chat sessions.
-                  </li>
-                  <li>
-                    <span className="font-bold">Generate Content:</span> Create various forms of
-                    textual content, from creative writing to technical descriptions and marketing
-                    copy.
-                  </li>
-                  <li>
-                    <span className="font-bold">Image Generation:</span> Create images directly from
-                    your text prompts using AI-powered generation.
+                    conversations with your agents, ask questions, and get actionable insights.
+                    Save, rename, and manage multiple chat sessions locally.
                   </li>
                   <li>
                     <span className="font-bold">Code Interaction:</span> Comprehensive code
@@ -245,148 +246,72 @@ export const SettingsModal: React.FC<SettingsModalProps> = memo(
                     <ul className="list-disc list-inside ml-4 mt-1">
                       <li>
                         <span className="font-bold">Review:</span> Analyze code for bugs, security
-                        issues, and best practices
+                        issues, and best practices.
                       </li>
                       <li>
                         <span className="font-bold">Refactor:</span> Improve code structure,
-                        readability, and performance
+                        readability, and performance.
                       </li>
                       <li>
                         <span className="font-bold">Generate:</span> Create new code from
-                        requirements or specifications
+                        requirements or specifications.
                       </li>
                       <li>
                         <span className="font-bold">Preview:</span> Test and visualize React
-                        components
+                        components in real-time.
                       </li>
                     </ul>
                   </li>
-                  <li>
-                    <span className="font-bold">Custom Instructions:</span> Tailor the AI&apos;s
-                    behavior and responses to your specific needs for a more personalized
-                    experience.
-                  </li>
                 </ul>
 
-                <h4 className="text-lg font-semibold mt-4 mb-2">Authentication & Security:</h4>
+                <h4 className="text-lg font-semibold mt-4 mb-2">Privacy & Security:</h4>
                 <ul className="list-disc list-inside space-y-1">
                   <li>
-                    <span className="font-bold">Login System:</span> Secure authentication to
-                    protect your API keys and chat history.
+                    <span className="font-bold">Local-First Storage:</span> Your agents,
+                    conversations, and configurations are stored securely on your device. No cloud
+                    database is used.
                   </li>
                   <li>
-                    <span className="font-bold">Session Management:</span> Your sessions persist
-                    across browser refreshes and can be managed through the interface.
-                  </li>
-                </ul>
-
-                <h4 className="text-lg font-semibold mt-4 mb-2">Advanced Features:</h4>
-                <ul className="list-disc list-inside space-y-1">
-                  <li>
-                    <span className="font-bold">Chat Session Management:</span> Save conversations,
-                    rename sessions, duplicate important chats, and organize your work.
-                  </li>
-                  <li>
-                    <span className="font-bold">Theme Support:</span> Switch between light and dark
-                    themes for comfortable viewing in any environment.
-                  </li>
-                  <li>
-                    <span className="font-bold">Stream Annotations:</span> Optional visual
-                    indicators when AI responses complete streaming.
-                  </li>
-                  <li>
-                    <span className="font-bold">Flexible Input:</span> Choose between Enter-to-send
-                    or manual send with Shift+Enter for multiline messages.
-                  </li>
-                  <li>
-                    <span className="font-bold">Copy & Export:</span> Easily copy AI responses and
-                    export generated content.
+                    <span className="font-bold">Secure Access:</span> Google-styled authentication
+                    protects your local session and API keys.
                   </li>
                 </ul>
 
                 <h4 className="text-lg font-semibold mt-4 mb-2">Getting Started:</h4>
                 <ul className="list-disc list-inside space-y-1">
                   <li>
-                    <span className="font-bold">Login:</span> Use your credentials to access the
-                    application securely.
+                    <span className="font-bold">Login:</span> Sign in to enter your private
+                    workspace.
                   </li>
                   <li>
                     <span className="font-bold">API Key Setup:</span> Configure your Gemini API key
-                    in the <span className="font-bold">Settings</span> tab. You can provide it via
-                    an environment variable or save it directly within the UI.
+                    in the <span className="font-bold">Settings</span> tab to activate AI features.
                   </li>
                   <li>
-                    <span className="font-bold">Navigation:</span> Switch between Chat, Generate
-                    Content, and Image Generation tabs based on your needs.
+                    <span className="font-bold">Build Your Agent:</span> Use the AI Agent Builder to
+                    define your first specialized assistant.
                   </li>
                   <li>
-                    <span className="font-bold">Code Tools:</span> Access code-specific features
-                    through the dedicated Code Interaction panel with Review, Refactor, Generate,
-                    and Preview modes.
-                  </li>
-                  <li>
-                    <span className="font-bold">Settings & Customization:</span> Use the{' '}
-                    <span className="font-bold">Settings</span> tab to manage your API key,
-                    customize chat behavior, set custom instructions, and access this Help Center.
+                    <span className="font-bold">Start Chatting:</span> Select an agent and start a
+                    conversation to optimize your workflow.
                   </li>
                 </ul>
 
                 <h4 className="text-lg font-semibold mt-4 mb-2">Pro Tips:</h4>
                 <ul className="list-disc list-inside space-y-1">
                   <li>
-                    <span className="font-bold">Chat Sessions:</span> Save important conversations
-                    and use descriptive names for easy retrieval later.
+                    <span className="font-bold">Markdown Instructions:</span> Use rich Markdown in
+                    your agent instructions to define complex behaviors and output formats.
                   </li>
                   <li>
-                    <span className="font-bold">Custom Instructions:</span> Set up personalized
-                    instructions in Settings to get more tailored responses for your specific use
-                    cases.
+                    <span className="font-bold">Session Management:</span> Keep your workspace
+                    organized by renaming and duplicating chat sessions for different projects.
                   </li>
                   <li>
-                    <span className="font-bold">Code Preview:</span> Use the Preview mode to test
-                    React components before implementing them in your projects.
-                  </li>
-                  <li>
-                    <span className="font-bold">Image Prompts:</span> Be specific and detailed in
-                    your image generation prompts for better results.
+                    <span className="font-bold">Code Preview:</span> Use the Preview mode to rapidly
+                    prototype React components before integration.
                   </li>
                 </ul>
-
-                <h4 className="text-lg font-semibold mt-4 mb-2">Troubleshooting:</h4>
-                <ul className="list-disc list-inside space-y-1">
-                  <li>
-                    <span className="font-bold">API Key Issues:</span> If AI features are not
-                    working, double-check your API key in Settings. Ensure it&apos;s valid and
-                    correctly entered.
-                  </li>
-                  <li>
-                    <span className="font-bold">Model Errors:</span> If you encounter messages about
-                    &quot;Model unavailable&quot; or &quot;unsupported,&quot; try updating your
-                    model in settings or check the Gemini API documentation for available models.
-                  </li>
-                  <li>
-                    <span className="font-bold">Safety Blocks:</span> If a response is blocked due
-                    to &quot;safety settings,&quot; try rephrasing your prompt to avoid sensitive
-                    topics.
-                  </li>
-                  <li>
-                    <span className="font-bold">Login Issues:</span> If you can&apos;t log in, check
-                    your credentials and ensure your account is properly configured.
-                  </li>
-                  <li>
-                    <span className="font-bold">Session Loss:</span> If chat history disappears,
-                    check if you&apos;re logged in and try refreshing the page.
-                  </li>
-                  <li>
-                    <span className="font-bold">General Issues:</span> For persistent problems, try
-                    logging out and back in, or restart the application.
-                  </li>
-                </ul>
-
-                <p className="mt-4">
-                  For further assistance or to report bugs, please refer to the project&apos;s
-                  documentation or reach out through the appropriate support channels.
-                </p>
               </div>
             )}
           </div>
