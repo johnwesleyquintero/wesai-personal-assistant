@@ -5,6 +5,21 @@ import { LoadingSpinner } from './LoadingSpinner.tsx';
 import { ReactPreviewRenderer } from './ReactPreviewRenderer.tsx';
 import { ErrorMessage } from './ErrorMessage.tsx';
 import type { ChatMessage } from '../types.ts';
+import {
+  FaMagnifyingGlass,
+  FaPaperclip,
+  FaPaperPlane,
+  FaPlus,
+  FaFloppyDisk,
+  FaClockRotateLeft,
+  FaDownload,
+  FaCopy,
+  FaCheck,
+  FaXmark,
+  FaFileExport,
+  FaCode,
+  FaEye,
+} from 'react-icons/fa6';
 
 interface ChatInterfacePanelProps {
   chatMessages: ChatMessage[];
@@ -199,47 +214,53 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = memo(
       return 'How can I help you today?...';
     };
 
-    const getButtonText = (): string => {
-      if (isLoading) return 'Sending...';
-      return 'Send';
-    };
-
     return (
-      <div className="flex flex-col h-[60vh] bg-gray-50 dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden">
-        <div className="flex justify-between items-center p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800">
-          <div className="flex items-center gap-3">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Chat</h3>
+      <div className="flex flex-col h-[70vh] bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 overflow-hidden transition-all duration-300">
+        {/* Header */}
+        <header className="flex justify-between items-center px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md z-10">
+          <div className="flex items-center gap-4">
+            <div className="flex flex-col">
+              <h3 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">
+                Wesai Chat
+              </h3>
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                <span className="text-[10px] uppercase tracking-wider font-bold text-gray-500 dark:text-gray-400">
+                  {isLoading ? 'Processing...' : 'Active Session'}
+                </span>
+              </div>
+            </div>
 
-            {/* Search functionality */}
-            <div className="relative">
+            {/* Search Toggle */}
+            <div className="relative ml-2">
               <button
                 onClick={() => setIsSearchExpanded(!isSearchExpanded)}
-                className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                title="Search messages"
+                className={`p-2 rounded-xl transition-all duration-200 ${
+                  isSearchExpanded
+                    ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+                    : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+                }`}
+                title="Search conversation"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
+                <FaMagnifyingGlass className="w-4 h-4" />
               </button>
 
               {isSearchExpanded && (
-                <div className="absolute top-full left-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-3 z-10">
-                  <input
-                    type="text"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Search messages..."
-                    className="w-full p-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    autoFocus
-                  />
+                <div className="absolute top-full left-0 mt-3 w-80 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 p-4 z-20 animate-in fade-in slide-in-from-top-2">
+                  <div className="relative">
+                    <FaMagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
+                    <input
+                      type="text"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      placeholder="Search messages..."
+                      className="w-full pl-9 pr-4 py-2 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
+                      autoFocus
+                    />
+                  </div>
                   {searchTerm && (
-                    <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">
-                      Found {filteredMessages.length} of {chatMessages.length} messages
+                    <div className="mt-2 text-[11px] font-medium text-gray-500 dark:text-gray-400 px-1">
+                      Showing {filteredMessages.length} of {chatMessages.length} results
                     </div>
                   )}
                 </div>
@@ -248,62 +269,63 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = memo(
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Export button */}
             <button
               onClick={() => setIsExportDialogOpen(true)}
-              className="px-3 py-1 bg-orange-600 text-white text-sm rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="p-2 text-gray-500 hover:text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-xl transition-all group"
               disabled={isLoading || chatMessages.length === 0}
               title="Export conversation"
             >
-              Export
+              <FaFileExport className="w-4 h-4" />
             </button>
 
             <button
               onClick={() => setIsSavedContextsOpen(true)}
-              className="px-3 py-1 bg-purple-600 text-white text-sm rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="p-2 text-gray-500 hover:text-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-xl transition-all"
               disabled={isLoading}
+              title="Saved Contexts"
             >
-              Saved Contexts
+              <FaClockRotateLeft className="w-4 h-4" />
             </button>
+
             <button
               onClick={() => setIsSaveDialogOpen(true)}
-              className="px-3 py-1 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="p-2 text-gray-500 hover:text-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-xl transition-all"
               disabled={isLoading}
+              title="Save current chat"
             >
-              Save Chat
+              <FaFloppyDisk className="w-4 h-4" />
             </button>
+
+            <div className="h-6 w-px bg-gray-200 dark:bg-gray-700 mx-1" />
+
             <button
               onClick={onNewChat}
-              className="px-3 py-1 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl shadow-lg shadow-blue-500/30 transition-all active:scale-95 disabled:opacity-50"
               disabled={isLoading}
             >
-              New Chat
+              <FaPlus className="w-3 h-3" />
+              <span className="hidden sm:inline">New Chat</span>
             </button>
           </div>
-        </div>
+        </header>
+
         <ErrorMessage message={error} onRetry={onRetryChat} isChatError />
-        <div className="flex-grow p-4 space-y-4 overflow-y-auto">
+
+        {/* Messages Area */}
+        <div className="flex-grow p-6 space-y-6 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-800 scrollbar-track-transparent">
           {searchTerm.trim() && filteredMessages.length === 0 ? (
-            <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-              <svg
-                className="w-12 h-12 mx-auto mb-4 opacity-50"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-              <p>No messages found matching &quot;{searchTerm}&quot;</p>
+            <div className="flex flex-col items-center justify-center h-full text-center py-12">
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-full mb-4">
+                <FaMagnifyingGlass className="w-8 h-8 text-gray-300 dark:text-gray-600" />
+              </div>
+              <p className="text-gray-500 dark:text-gray-400 font-medium">
+                No messages found matching &quot;{searchTerm}&quot;
+              </p>
               <button
                 onClick={() => setSearchTerm('')}
-                className="mt-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-sm"
+                className="mt-4 text-blue-600 hover:text-blue-700 dark:text-blue-400 font-bold text-sm"
               >
-                Clear search
+                Clear search filter
               </button>
             </div>
           ) : (
@@ -319,127 +341,108 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = memo(
           )}
           <div ref={chatMessagesEndRef} />
         </div>
-        <form
-          onSubmit={handleSubmit}
-          className="p-3 border-t border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800"
-        >
-          {chatImage && (
-            <div className="mb-2 relative inline-block">
-              <img
-                src={chatImage}
-                alt="Selected"
-                className="h-20 w-auto rounded border border-gray-300 dark:border-gray-600"
+
+        {/* Input Area */}
+        <footer className="p-4 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
+          <form onSubmit={handleSubmit} className="max-w-4xl mx-auto relative">
+            {chatImage && (
+              <div className="absolute bottom-full mb-4 left-0 animate-in slide-in-from-bottom-2 fade-in">
+                <div className="relative p-1 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 group">
+                  <img
+                    src={chatImage}
+                    alt="Selected"
+                    className="h-24 w-auto rounded-xl object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => onChatImageChange(null)}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1.5 hover:bg-red-600 shadow-xl transition-transform hover:scale-110"
+                    title="Remove image"
+                  >
+                    <FaXmark className="w-3 h-3" />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div className="flex items-end gap-3 p-2 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-200 dark:border-gray-700 focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 transition-all">
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleImageUpload}
+                accept="image/*"
+                className="hidden"
               />
               <button
                 type="button"
-                onClick={() => onChatImageChange(null)}
-                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5 hover:bg-red-600 shadow-sm"
-                title="Remove image"
+                onClick={() => fileInputRef.current?.click()}
+                className="p-3 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-white dark:hover:bg-gray-700 rounded-xl transition-all"
+                title="Attach image"
+                disabled={isLoading || !isApiKeyConfigured || !isChatSessionActive}
               >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+                <FaPaperclip className="w-5 h-5" />
               </button>
-            </div>
-          )}
-          <div className="flex items-center space-x-2 relative">
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleImageUpload}
-              accept="image/*"
-              className="hidden"
-            />
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
-              title="Attach image"
-              disabled={isLoading || !isApiKeyConfigured || !isChatSessionActive}
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
-              </svg>
-            </button>
-            <textarea
-              value={chatInput}
-              onChange={(e) => onChatInputChange(e.target.value)}
-              onPaste={handlePaste}
-              onKeyDown={(e) => {
-                if (sendOnEnter && e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  if (
-                    !isLoading &&
-                    isApiKeyConfigured &&
-                    isChatSessionActive &&
-                    (chatInput.trim() || chatImage)
-                  ) {
-                    onChatSubmit();
+
+              <textarea
+                value={chatInput}
+                onChange={(e) => onChatInputChange(e.target.value)}
+                onPaste={handlePaste}
+                onKeyDown={(e) => {
+                  if (sendOnEnter && e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    if (
+                      !isLoading &&
+                      isApiKeyConfigured &&
+                      isChatSessionActive &&
+                      (chatInput.trim() || chatImage)
+                    ) {
+                      onChatSubmit();
+                    }
                   }
-                }
-              }}
-              placeholder={getInputPlaceholder()}
-              disabled={isLoading || !isApiKeyConfigured || !isChatSessionActive}
-              className="flex-grow p-2.5 pr-6 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 text-sm resize-none min-h-[44px] max-h-32 overflow-y-auto"
-              aria-label="Chat input"
-            />
-            {chatInput && !isLoading && (
-              <button
-                type="button" // Important: type="button" to prevent form submission
-                onClick={onClearChatInput}
-                title="Clear chat input"
-                aria-label="Clear chat input field"
-                className="absolute right-16 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 rounded-full focus:outline-none focus:ring-1 focus:ring-blue-500 hover:bg-gray-200 dark:hover:bg-gray-700"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-4 h-4"
+                }}
+                placeholder={getInputPlaceholder()}
+                disabled={isLoading || !isApiKeyConfigured || !isChatSessionActive}
+                className="flex-grow py-3 bg-transparent text-gray-900 dark:text-gray-100 border-none focus:ring-0 text-sm resize-none min-h-[44px] max-h-40 overflow-y-auto"
+                aria-label="Chat input"
+              />
+
+              <div className="flex items-center gap-2 pr-1 pb-1">
+                {chatInput && !isLoading && (
+                  <button
+                    type="button"
+                    onClick={onClearChatInput}
+                    title="Clear input"
+                    className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-white dark:hover:bg-gray-700 transition-all"
+                  >
+                    <FaXmark className="w-4 h-4" />
+                  </button>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={
+                    isLoading ||
+                    !isApiKeyConfigured ||
+                    !isChatSessionActive ||
+                    (!chatInput.trim() && !chatImage)
+                  }
+                  className={`p-3 rounded-xl transition-all flex items-center justify-center ${
+                    (!chatInput.trim() && !chatImage) || isLoading
+                      ? 'bg-gray-200 dark:bg-gray-700 text-gray-400'
+                      : 'bg-blue-600 text-white shadow-lg shadow-blue-500/30 hover:bg-blue-700 active:scale-95'
+                  }`}
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-                </svg>
-              </button>
-            )}
-            <button
-              type="submit"
-              disabled={
-                isLoading ||
-                !isApiKeyConfigured ||
-                !isChatSessionActive ||
-                (!chatInput.trim() && !chatImage)
-              }
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-lg shadow-md transition duration-150 ease-in-out disabled:opacity-60 disabled:cursor-not-allowed flex items-center whitespace-nowrap"
-            >
-              {isLoading && <LoadingSpinner />}
-              {getButtonText()}
-            </button>
-          </div>
-        </form>
+                  {isLoading ? <LoadingSpinner /> : <FaPaperPlane className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+            <p className="mt-2 text-[10px] text-center text-gray-400 dark:text-gray-500 font-medium uppercase tracking-widest">
+              {sendOnEnter
+                ? 'Press Enter to send, Shift+Enter for new line'
+                : 'Click the plane to send your message'}
+            </p>
+          </form>
+        </footer>
         {isSaveDialogOpen && (
           <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-4 w-full max-w-md">
@@ -746,6 +749,8 @@ interface ChatMessageItemProps {
 
 const ChatMessageItem: React.FC<ChatMessageItemProps> = memo(
   ({ msg, copiedMessageId, onTogglePreview, onCopyChatMessage }) => {
+    const isUser = msg.role === 'user';
+
     const getDownloadName = (code: string, fallbackId: string) => {
       const s = code;
       const m1 = s.match(/export\s+default\s+function\s+([A-Za-z_][A-Za-z0-9_]*)/);
@@ -758,134 +763,84 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = memo(
       if (m4 && s.includes(`export default ${m4[1]}`)) return `${m4[1]}.tsx`;
       return `component-${fallbackId}.tsx`;
     };
+
     return (
-      <div className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+      <div
+        className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} group animate-in fade-in slide-in-from-bottom-2`}
+      >
+        <div className={`flex items-center gap-2 mb-1 px-1`}>
+          <span
+            className={`text-[10px] font-bold uppercase tracking-widest ${isUser ? 'text-blue-600 dark:text-blue-400' : 'text-purple-600 dark:text-purple-400'}`}
+          >
+            {isUser ? 'You' : 'Wesai'}
+          </span>
+          <span className="text-[10px] text-gray-400 dark:text-gray-500 font-medium">
+            {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </span>
+        </div>
+
         <div
-          className={`max-w-xl lg:max-w-2xl p-3 rounded-xl shadow fade-in ${
-            msg.role === 'user'
-              ? 'bg-blue-600 text-white'
-              : 'bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-100 relative group'
+          className={`relative max-w-[85%] sm:max-w-[75%] p-4 rounded-2xl transition-all duration-200 ${
+            isUser
+              ? 'bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-lg shadow-blue-500/20 rounded-tr-none'
+              : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 shadow-sm border border-gray-100 dark:border-gray-700 rounded-tl-none hover:shadow-md'
           }`}
         >
           {msg.role === 'model' && msg.componentCode && (
-            <div className="mb-2 flex items-center space-x-2 justify-end pr-8">
-              <span className="text-xs font-medium text-gray-600 dark:text-gray-300">View:</span>
+            <div className="flex items-center gap-1 mb-3 p-1 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-100 dark:border-gray-700 w-fit ml-auto">
               <button
                 onClick={() => onTogglePreview(msg.id)}
-                disabled={!msg.showPreview}
-                className={`px-2 py-0.5 text-xs rounded ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold rounded-lg transition-all ${
                   !msg.showPreview
-                    ? 'bg-blue-500 text-white font-semibold ring-1 ring-blue-600 dark:ring-blue-400'
-                    : 'bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-400 dark:hover:bg-gray-500'
-                } disabled:opacity-70 disabled:cursor-default`}
-                aria-pressed={!msg.showPreview}
+                    ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                }`}
               >
-                Code
+                <FaCode className="w-3 h-3" />
+                CODE
               </button>
               <button
                 onClick={() => onTogglePreview(msg.id)}
-                disabled={msg.showPreview}
-                className={`px-2 py-0.5 text-xs rounded ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold rounded-lg transition-all ${
                   msg.showPreview
-                    ? 'bg-blue-500 text-white font-semibold ring-1 ring-blue-600 dark:ring-blue-400'
-                    : 'bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-400 dark:hover:bg-gray-500'
-                } disabled:opacity-70 disabled:cursor-default`}
-                aria-pressed={!!msg.showPreview}
+                    ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                }`}
               >
-                Preview
+                <FaEye className="w-3 h-3" />
+                PREVIEW
               </button>
             </div>
           )}
 
           {msg.imageContent && (
-            <div className="mb-2">
+            <div className="mb-3 overflow-hidden rounded-xl border border-black/5 dark:border-white/5 shadow-inner">
               <img
                 src={msg.imageContent}
-                alt="Shared content"
-                className="max-h-64 w-auto rounded-lg shadow-sm border border-gray-200 dark:border-gray-600"
+                alt="Uploaded content"
+                className="max-h-80 w-auto object-contain bg-black/5 dark:bg-white/5"
               />
             </div>
           )}
 
           {msg.showPreview && msg.componentCode ? (
-            <ReactPreviewRenderer code={msg.componentCode} />
+            <div className="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-inner">
+              <ReactPreviewRenderer code={msg.componentCode} />
+            </div>
           ) : (
             <div
               className={`prose prose-sm sm:prose-base max-w-none 
-                        ${msg.role === 'user' ? 'prose-invert-user-bubble' : 'dark:prose-invert'}
-                        prose-p:my-2 prose-li:my-1
-                        ${msg.role === 'model' ? 'pr-6 pt-1' : ''}
+                        ${isUser ? 'prose-invert text-white' : 'dark:prose-invert text-gray-800 dark:text-gray-100'}
+                        prose-p:leading-relaxed prose-pre:bg-gray-900 prose-pre:text-gray-100
                         `}
             >
               <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content || ''}</ReactMarkdown>
             </div>
           )}
-          {msg.role === 'model' && msg.content.trim() && (
-            <>
-              <button
-                onClick={() =>
-                  onCopyChatMessage(
-                    msg.showPreview && msg.componentCode ? msg.componentCode : msg.content,
-                    msg.id,
-                  )
-                }
-                title={
-                  copiedMessageId === msg.id
-                    ? 'Copied!'
-                    : msg.showPreview && msg.componentCode
-                      ? 'Copy Component Code'
-                      : 'Copy Markdown'
-                }
-                aria-label={
-                  copiedMessageId === msg.id
-                    ? 'Content copied to clipboard'
-                    : msg.showPreview && msg.componentCode
-                      ? 'Copy component source code to clipboard'
-                      : 'Copy Markdown to clipboard'
-                }
-                className={`absolute top-1.5 right-1.5 p-1 rounded-md transition-all duration-150 ease-in-out 
-                        opacity-60 focus:opacity-100 hover:opacity-100
-                        ${
-                          copiedMessageId === msg.id
-                            ? 'bg-green-500 text-white'
-                            : 'bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-400 dark:hover:bg-gray-500'
-                        }`}
-              >
-                {copiedMessageId === msg.id ? (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={2}
-                    stroke="currentColor"
-                    className="w-3.5 h-3.5"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                  </svg>
-                ) : (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="w-3.5 h-3.5"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184"
-                    />
-                  </svg>
-                )}
-                <span className="sr-only">
-                  {copiedMessageId === msg.id
-                    ? 'Copied!'
-                    : msg.showPreview && msg.componentCode
-                      ? 'Copy Code'
-                      : 'Copy Markdown'}
-                </span>
-              </button>
+
+          {/* Action Buttons for Model Messages */}
+          {!isUser && msg.content.trim() && (
+            <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
               {msg.componentCode && (
                 <button
                   onClick={() => {
@@ -900,21 +855,33 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = memo(
                     document.body.removeChild(a);
                     URL.revokeObjectURL(url);
                   }}
-                  title="Download Component"
-                  aria-label="Download component code as TSX file"
-                  className="absolute top-1.5 right-9 p-1 rounded-md transition-all duration-150 ease-in-out opacity-60 group-hover:opacity-100 focus:opacity-100 hover:opacity-100 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-400 dark:hover:bg-gray-500"
+                  title="Download TSX"
+                  className="p-2 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 transition-all"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                    className="w-3.5 h-3.5"
-                  >
-                    <path d="M12 16l4-5h-3V4h-2v7H8l4 5zm8 3H4v-2h16v2z" />
-                  </svg>
+                  <FaDownload className="w-3 h-3" />
                 </button>
               )}
-            </>
+              <button
+                onClick={() =>
+                  onCopyChatMessage(
+                    msg.showPreview && msg.componentCode ? msg.componentCode : msg.content,
+                    msg.id,
+                  )
+                }
+                className={`p-2 backdrop-blur-sm rounded-lg shadow-sm border transition-all ${
+                  copiedMessageId === msg.id
+                    ? 'bg-green-500 text-white border-green-400'
+                    : 'bg-white/80 dark:bg-gray-900/80 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 border-gray-100 dark:border-gray-700'
+                }`}
+                title={copiedMessageId === msg.id ? 'Copied!' : 'Copy to clipboard'}
+              >
+                {copiedMessageId === msg.id ? (
+                  <FaCheck className="w-3 h-3" />
+                ) : (
+                  <FaCopy className="w-3 h-3" />
+                )}
+              </button>
+            </div>
           )}
         </div>
       </div>

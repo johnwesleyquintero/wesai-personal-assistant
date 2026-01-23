@@ -13,7 +13,7 @@ import { SettingsModal } from './components/SettingsModal.tsx';
 import { TabNavigation } from './components/TabNavigation.tsx';
 import { CodeInteractionPanel } from './components/CodeInteractionPanel.tsx';
 import { ChatInterfacePanel } from './components/ChatInterfacePanel.tsx';
-import AiAgentsPanel from './components/AiAgentsPanel.tsx';
+import { AiAgentsPanel } from './components/AiAgentsPanel.tsx';
 
 const App: React.FC = () => {
   const { theme, toggleTheme } = useTheme();

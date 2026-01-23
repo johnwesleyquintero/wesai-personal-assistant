@@ -1,7 +1,15 @@
 import React, { useState, memo } from 'react';
 import type { ApiKeySource } from '../types.ts';
 import { useAppStore } from '../store.ts';
-import { SVG_ICONS } from '../src/constants';
+import {
+  FaXmark,
+  FaTriangleExclamation,
+  FaCheck,
+  FaTrash,
+  FaArrowRightFromBracket,
+  FaGear,
+  FaCircleInfo,
+} from 'react-icons/fa6';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -44,307 +52,301 @@ export const SettingsModal: React.FC<SettingsModalProps> = memo(
       setShowConfirmRemove(true);
     };
 
+    const handleConfirmRemove = () => {
+      onRemoveKey();
+      setShowConfirmRemove(false);
+    };
+
     return (
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 dark:bg-gray-900/75"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm dark:bg-gray-900/80 animate-in fade-in duration-300"
         onClick={onClose}
       >
         <div
-          className="relative w-full max-w-2xl rounded-lg bg-white p-6 shadow-xl dark:bg-gray-900 flex flex-col"
-          style={{ maxHeight: '80vh' }}
+          className="relative w-full max-w-2xl rounded-2xl bg-white p-0 shadow-2xl dark:bg-gray-900 flex flex-col overflow-hidden animate-in zoom-in-95 duration-300"
+          style={{ maxHeight: '85vh' }}
           onClick={(e) => e.stopPropagation()}
         >
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 z-10"
-            aria-label="Close settings modal"
-          >
-            {SVG_ICONS.CLOSE}
-          </button>
-
-          <div className="flex border-b border-gray-200 dark:border-gray-700 mb-4">
+          {/* Header */}
+          <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                <FaGear className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+              </div>
+              <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">
+                Application Settings
+              </h2>
+            </div>
             <button
-              onClick={() => setActiveTab('settings')}
-              className={`px-4 py-2 text-sm font-medium ${
-                activeTab === 'settings'
-                  ? 'border-b-2 border-purple-500 text-purple-600 dark:text-purple-400'
-                  : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
-              }`}
+              onClick={onClose}
+              className="p-2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+              aria-label="Close settings modal"
             >
-              Settings
-            </button>
-            <button
-              onClick={() => setActiveTab('helpCenter')}
-              className={`px-4 py-2 text-sm font-medium ${
-                activeTab === 'helpCenter'
-                  ? 'border-b-2 border-purple-500 text-purple-600 dark:text-purple-400'
-                  : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
-              }`}
-            >
-              Help Center
+              <FaXmark className="w-5 h-5" />
             </button>
           </div>
 
-          <div className="overflow-y-auto">
+          {/* Tabs */}
+          <div className="flex px-6 border-b border-gray-100 dark:border-gray-800">
+            <button
+              onClick={() => setActiveTab('settings')}
+              className={`flex items-center gap-2 px-6 py-4 text-sm font-semibold transition-all relative ${
+                activeTab === 'settings'
+                  ? 'text-purple-600 dark:text-purple-400'
+                  : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+              }`}
+            >
+              <FaGear className="w-4 h-4" />
+              Settings
+              {activeTab === 'settings' && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-purple-500 rounded-full" />
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab('helpCenter')}
+              className={`flex items-center gap-2 px-6 py-4 text-sm font-semibold transition-all relative ${
+                activeTab === 'helpCenter'
+                  ? 'text-purple-600 dark:text-purple-400'
+                  : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+              }`}
+            >
+              <FaCircleInfo className="w-4 h-4" />
+              Help Center
+              {activeTab === 'helpCenter' && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-purple-500 rounded-full" />
+              )}
+            </button>
+          </div>
+
+          {/* Content */}
+          <div className="flex-grow overflow-y-auto p-8 custom-scrollbar">
             {activeTab === 'settings' && (
-              <div className="space-y-4">
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-                  <div className="flex items-center">
-                    <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mr-2">
-                      Manage Gemini API Key
-                    </h2>
+              <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-300">
+                {/* Gemini API Key Section */}
+                <section className="space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                    <div className="space-y-1">
+                      <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">
+                        Gemini API Key
+                      </h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Required for generating content and AI interactions.
+                      </p>
+                    </div>
                     {isKeySet && (
                       <span
-                        className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                        className={`inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full ${
                           currentKeySource === 'env'
-                            ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300'
-                            : 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300'
+                            ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400'
+                            : 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400'
                         }`}
                       >
-                        {currentKeySource === 'env' ? 'ENVIRONMENT KEY ACTIVE' : 'UI KEY ACTIVE'}
+                        <div
+                          className={`w-1.5 h-1.5 rounded-full ${currentKeySource === 'env' ? 'bg-green-500' : 'bg-blue-500'}`}
+                        />
+                        {currentKeySource === 'env' ? 'Environment' : 'Browser Storage'}
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center space-x-2">
+
+                  <div className="space-y-3">
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <div className="relative flex-grow">
+                        <input
+                          type="password"
+                          id="apiKeyInput"
+                          value={apiKeyInput}
+                          onChange={(e) => setApiKeyInput(e.target.value)}
+                          placeholder={
+                            isKeySet ? '••••••••••••••••••••••••' : 'Enter your Gemini API Key'
+                          }
+                          className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 outline-none transition-all"
+                        />
+                      </div>
+                      <button
+                        onClick={handleSave}
+                        disabled={!apiKeyInput.trim()}
+                        className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-3 px-6 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-purple-500/20"
+                      >
+                        <FaCheck className="w-4 h-4" />
+                        Save
+                      </button>
+                      {isKeySet && !showConfirmRemove && (
+                        <button
+                          onClick={handleRemove}
+                          className="inline-flex items-center justify-center gap-2 bg-white dark:bg-gray-800 text-red-500 hover:text-red-600 border border-red-100 dark:border-red-900/30 font-bold py-3 px-6 rounded-xl transition-all"
+                        >
+                          <FaTrash className="w-4 h-4" />
+                          Remove
+                        </button>
+                      )}
+                    </div>
+
+                    {showConfirmRemove && (
+                      <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 rounded-xl animate-in fade-in slide-in-from-top-2">
+                        <div className="flex items-center gap-3">
+                          <FaTriangleExclamation className="text-red-500 w-5 h-5" />
+                          <p className="text-sm font-medium text-red-700 dark:text-red-400">
+                            Are you sure you want to remove the API key?
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => setShowConfirmRemove(false)}
+                            className="text-xs font-bold px-3 py-1.5 text-gray-500 hover:text-gray-700 dark:text-gray-400"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={handleConfirmRemove}
+                            className="text-xs font-bold px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                          >
+                            Confirm
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </section>
+
+                {/* Chat Behavior Section */}
+                <section className="space-y-6">
+                  <div className="space-y-1">
+                    <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">
+                      Chat Preferences
+                    </h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Customize how you interact with the AI.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div
+                      className={`p-4 rounded-2xl border transition-all cursor-pointer ${
+                        showStreamFinishNotes
+                          ? 'bg-purple-50/50 dark:bg-purple-900/10 border-purple-200 dark:border-purple-800/50'
+                          : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700'
+                      }`}
+                      onClick={() => setShowStreamFinishNotes(!showStreamFinishNotes)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-1">
+                          <p className="font-bold text-gray-800 dark:text-gray-100">Stream Notes</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            Show &quot;stream finished&quot; labels
+                          </p>
+                        </div>
+                        <div
+                          className={`w-10 h-6 rounded-full relative transition-colors ${showStreamFinishNotes ? 'bg-purple-600' : 'bg-gray-300 dark:bg-gray-600'}`}
+                        >
+                          <div
+                            className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${showStreamFinishNotes ? 'left-5' : 'left-1'}`}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div
+                      className={`p-4 rounded-2xl border transition-all cursor-pointer ${
+                        sendOnEnter
+                          ? 'bg-purple-50/50 dark:bg-purple-900/10 border-purple-200 dark:border-purple-800/50'
+                          : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700'
+                      }`}
+                      onClick={() => setSendOnEnter(!sendOnEnter)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-1">
+                          <p className="font-bold text-gray-800 dark:text-gray-100">Quick Send</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            Send message on Enter key
+                          </p>
+                        </div>
+                        <div
+                          className={`w-10 h-6 rounded-full relative transition-colors ${sendOnEnter ? 'bg-purple-600' : 'bg-gray-300 dark:bg-gray-600'}`}
+                        >
+                          <div
+                            className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${sendOnEnter ? 'left-5' : 'left-1'}`}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                {/* Account Section */}
+                <section className="pt-4 border-t border-gray-100 dark:border-gray-800">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">
+                        Session Management
+                      </h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Sign out of your current session.
+                      </p>
+                    </div>
                     {onLogout && (
                       <button
                         onClick={onLogout}
-                        className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-3 rounded-lg shadow-md text-sm"
+                        className="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold py-2.5 px-5 rounded-xl transition-all"
                       >
+                        <FaArrowRightFromBracket className="w-4 h-4" />
                         Logout
                       </button>
                     )}
                   </div>
-                </div>
-
-                <div className="space-y-4 pt-2">
-                  <div className="space-y-2">
-                    <label
-                      htmlFor="apiKeyInput"
-                      className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                    >
-                      Enter your Gemini API Key:
-                    </label>
-                    <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-                      <input
-                        type="password"
-                        id="apiKeyInput"
-                        value={apiKeyInput}
-                        onChange={(e) => setApiKeyInput(e.target.value)}
-                        placeholder={isKeySet ? 'Enter new key to override' : 'Your Gemini API Key'}
-                        className="flex-grow p-2.5 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 border rounded-lg"
-                      />
-                      <button
-                        onClick={handleSave}
-                        disabled={!apiKeyInput.trim()}
-                        className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 px-4 rounded-lg disabled:opacity-60"
-                      >
-                        Save Key
-                      </button>
-                      {isKeySet && (
-                        <button
-                          onClick={handleRemove}
-                          className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 px-4 rounded-lg"
-                        >
-                          Remove Key
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Chat Stream Notes
-                    </label>
-                    <div className="flex items-center space-x-2">
-                      <input
-                        id="toggleStreamNotes"
-                        type="checkbox"
-                        checked={showStreamFinishNotes}
-                        onChange={(e) => setShowStreamFinishNotes(e.target.checked)}
-                        className="h-4 w-4"
-                      />
-                      <label
-                        htmlFor="toggleStreamNotes"
-                        className="text-sm text-gray-700 dark:text-gray-300"
-                      >
-                        Show &quot;stream finished&quot; annotations in chat
-                      </label>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Chat Input Behavior
-                    </label>
-                    <div className="flex items-center space-x-2">
-                      <input
-                        id="toggleSendOnEnter"
-                        type="checkbox"
-                        checked={sendOnEnter}
-                        onChange={(e) => setSendOnEnter(e.target.checked)}
-                        className="h-4 w-4"
-                      />
-                      <label
-                        htmlFor="toggleSendOnEnter"
-                        className="text-sm text-gray-700 dark:text-gray-300"
-                      >
-                        Send on Enter (use Shift+Enter for newline)
-                      </label>
-                    </div>
-                  </div>
-
-                  {showSavedMessage && (
-                    <p className="text-sm text-green-500 dark:text-green-400">
-                      API Key saved successfully! Closing modal...
-                    </p>
-                  )}
-
-                  {!isKeySet && currentKeySource === 'none' && (
-                    <p className="text-sm text-yellow-600 dark:text-yellow-400">
-                      No API key is currently active. Please enter and save your key.
-                    </p>
-                  )}
-
-                  {currentKeySource === 'env' && isKeySet && (
-                    <p className="text-sm text-green-600 dark:text-green-400">
-                      An environment variable API key is active. You can override it here.
-                    </p>
-                  )}
-                </div>
+                </section>
               </div>
             )}
+
             {activeTab === 'helpCenter' && (
-              <div className="p-4 text-gray-700 dark:text-gray-300">
-                <h3 className="text-xl font-semibold mb-4">WesAI Help Center</h3>
-                <p className="mb-2">
-                  Welcome to WesAI, the ultimate platform to build, deploy, and optimize your AI
-                  agents. Powered by Google Gemini, WesAI empowers you to streamline professional
-                  workflows and automate complex tasks with specialized intelligence.
-                </p>
+              <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-300">
+                <div className="p-6 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-blue-100 dark:border-blue-900/30">
+                  <h3 className="text-lg font-bold text-blue-800 dark:text-blue-300 mb-2">
+                    How to get an API Key?
+                  </h3>
+                  <p className="text-blue-700 dark:text-blue-400 text-sm leading-relaxed">
+                    To use WesAI, you need a Gemini API key. You can get one for free from the
+                    Google AI Studio.
+                  </p>
+                  <a
+                    href="https://aistudio.google.com/app/apikey"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 mt-4 text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline"
+                  >
+                    Go to Google AI Studio
+                    <FaArrowRightFromBracket className="w-3 h-3 rotate-[-45deg]" />
+                  </a>
+                </div>
 
-                <h4 className="text-lg font-semibold mt-4 mb-2">Core Features:</h4>
-                <ul className="list-disc list-inside space-y-1">
-                  <li>
-                    <span className="font-bold">AI Agent Builder:</span> Create and configure custom
-                    AI agents with specialized system instructions using Markdown. Tailor your
-                    agents for specific roles like strategy, coding, or operations.
-                  </li>
-                  <li>
-                    <span className="font-bold">Workflow Optimization:</span> Leverage your custom
-                    agents to automate repetitive tasks and streamline complex professional
-                    workflows.
-                  </li>
-                  <li>
-                    <span className="font-bold">Chat Interface:</span> Engage in dynamic
-                    conversations with your agents, ask questions, and get actionable insights.
-                    Save, rename, and manage multiple chat sessions locally.
-                  </li>
-                  <li>
-                    <span className="font-bold">Code Interaction:</span> Comprehensive code
-                    assistance including:
-                    <ul className="list-disc list-inside ml-4 mt-1">
-                      <li>
-                        <span className="font-bold">Review:</span> Analyze code for bugs, security
-                        issues, and best practices.
-                      </li>
-                      <li>
-                        <span className="font-bold">Refactor:</span> Improve code structure,
-                        readability, and performance.
-                      </li>
-                      <li>
-                        <span className="font-bold">Generate:</span> Create new code from
-                        requirements or specifications.
-                      </li>
-                      <li>
-                        <span className="font-bold">Preview:</span> Test and visualize React
-                        components in real-time.
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
-
-                <h4 className="text-lg font-semibold mt-4 mb-2">Privacy & Security:</h4>
-                <ul className="list-disc list-inside space-y-1">
-                  <li>
-                    <span className="font-bold">Local-First Storage:</span> Your agents,
-                    conversations, and configurations are stored securely on your device. No cloud
-                    database is used.
-                  </li>
-                  <li>
-                    <span className="font-bold">Secure Access:</span> Google-styled authentication
-                    protects your local session and API keys.
-                  </li>
-                </ul>
-
-                <h4 className="text-lg font-semibold mt-4 mb-2">Getting Started:</h4>
-                <ul className="list-disc list-inside space-y-1">
-                  <li>
-                    <span className="font-bold">Login:</span> Sign in to enter your private
-                    workspace.
-                  </li>
-                  <li>
-                    <span className="font-bold">API Key Setup:</span> Configure your Gemini API key
-                    in the <span className="font-bold">Settings</span> tab to activate AI features.
-                  </li>
-                  <li>
-                    <span className="font-bold">Build Your Agent:</span> Use the AI Agent Builder to
-                    define your first specialized assistant.
-                  </li>
-                  <li>
-                    <span className="font-bold">Start Chatting:</span> Select an agent and start a
-                    conversation to optimize your workflow.
-                  </li>
-                </ul>
-
-                <h4 className="text-lg font-semibold mt-4 mb-2">Pro Tips:</h4>
-                <ul className="list-disc list-inside space-y-1">
-                  <li>
-                    <span className="font-bold">Markdown Instructions:</span> Use rich Markdown in
-                    your agent instructions to define complex behaviors and output formats.
-                  </li>
-                  <li>
-                    <span className="font-bold">Session Management:</span> Keep your workspace
-                    organized by renaming and duplicating chat sessions for different projects.
-                  </li>
-                  <li>
-                    <span className="font-bold">Code Preview:</span> Use the Preview mode to rapidly
-                    prototype React components before integration.
-                  </li>
-                </ul>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700">
+                    <h4 className="font-bold text-gray-800 dark:text-gray-100 mb-1">
+                      Local Storage
+                    </h4>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                      Your API key is stored securely in your browser&apos;s local storage and is
+                      never sent to our servers.
+                    </p>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700">
+                    <h4 className="font-bold text-gray-800 dark:text-gray-100 mb-1">
+                      Privacy First
+                    </h4>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                      All interactions are direct between your browser and the Gemini API.
+                    </p>
+                  </div>
+                </div>
               </div>
             )}
           </div>
 
-          {showConfirmRemove && (
-            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-md">
-                <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                  Remove API Key?
-                </h4>
-                <p className="text-sm text-gray-700 dark:text-gray-300 mt-2">
-                  This clears the saved key and session content, and features will be disabled if no
-                  environment key is active.
-                </p>
-                <div className="mt-4 flex justify-end space-x-2">
-                  <button
-                    onClick={() => setShowConfirmRemove(false)}
-                    className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={() => {
-                      onRemoveKey();
-                      setApiKeyInput('');
-                      setShowConfirmRemove(false);
-                    }}
-                    className="px-4 py-2 rounded bg-red-600 hover:bg-red-700 text-white"
-                  >
-                    Confirm
-                  </button>
-                </div>
-              </div>
+          {/* Footer Status */}
+          {showSavedMessage && (
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-full shadow-xl animate-in fade-in slide-in-from-bottom-4 flex items-center gap-2">
+              <FaCheck className="w-4 h-4" />
+              <span className="font-bold text-sm">Settings Saved Successfully!</span>
             </div>
           )}
         </div>

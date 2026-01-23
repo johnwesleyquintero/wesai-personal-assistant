@@ -1,4 +1,15 @@
 import React from 'react';
+import {
+  FaTerminal,
+  FaCode,
+  FaEye,
+  FaWandMagicSparkles,
+  FaFileLines,
+  FaEraser,
+  FaPlay,
+  FaCircleInfo,
+  FaTriangleExclamation,
+} from 'react-icons/fa6';
 import { CodeInput } from './CodeInput.tsx';
 import { FeedbackDisplay } from './FeedbackDisplay.tsx';
 import { LoadingSpinner } from './LoadingSpinner.tsx';
@@ -73,6 +84,40 @@ export const CodeInteractionPanel: React.FC<CodeInteractionPanelProps> = React.m
       return 'process';
     }, [activeTab]);
 
+    const getTabIcon = () => {
+      switch (activeTab) {
+        case 'review':
+          return <FaEye className="w-5 h-5" />;
+        case 'refactor':
+          return <FaCode className="w-5 h-5" />;
+        case 'preview':
+          return <FaPlay className="w-5 h-5" />;
+        case 'generate':
+          return <FaWandMagicSparkles className="w-5 h-5" />;
+        case 'content':
+          return <FaFileLines className="w-5 h-5" />;
+        default:
+          return <FaTerminal className="w-5 h-5" />;
+      }
+    };
+
+    const getTabColor = () => {
+      switch (activeTab) {
+        case 'review':
+          return 'from-amber-500 to-orange-600';
+        case 'refactor':
+          return 'from-emerald-500 to-teal-600';
+        case 'preview':
+          return 'from-blue-500 to-indigo-600';
+        case 'generate':
+          return 'from-purple-500 to-pink-600';
+        case 'content':
+          return 'from-cyan-500 to-blue-600';
+        default:
+          return 'from-blue-600 to-indigo-700';
+      }
+    };
+
     const getButtonText = (): string => {
       if (isLoading) {
         if (activeTab === 'review') return 'Reviewing...';
@@ -91,35 +136,36 @@ export const CodeInteractionPanel: React.FC<CodeInteractionPanelProps> = React.m
     };
 
     const getFeedbackTitle = (): string => {
-      if (activeTab === 'review') return 'Review Feedback:';
-      if (activeTab === 'refactor') return 'Refactoring Result:';
-      if (activeTab === 'preview') return 'Component Preview:';
-      if (activeTab === 'generate') return 'Generated Code:';
-      if (activeTab === 'content') return 'Generated Content:';
-      return 'Result:';
+      if (activeTab === 'review') return 'Review Feedback';
+      if (activeTab === 'refactor') return 'Refactoring Result';
+      if (activeTab === 'preview') return 'Component Preview';
+      if (activeTab === 'generate') return 'Generated Code';
+      if (activeTab === 'content') return 'Generated Content';
+      return 'Result';
     };
 
     const getLoadingMessage = (): string => {
-      if (activeTab === 'review') return 'Generating review, please wait...';
-      if (activeTab === 'refactor') return 'Generating refactoring results, please wait...';
-      if (activeTab === 'preview') return 'Generating preview description, please wait...';
-      if (activeTab === 'generate') return 'Generating your code, please wait...';
-      if (activeTab === 'content') return 'Generating content, please wait...';
+      if (activeTab === 'review')
+        return 'Analyzing code for best practices and potential issues...';
+      if (activeTab === 'refactor') return 'Optimizing and restructuring your code...';
+      if (activeTab === 'preview') return 'Building visual representation and description...';
+      if (activeTab === 'generate') return 'Crafting your requested code snippet...';
+      if (activeTab === 'content') return 'Composing your requested content...';
       return 'Processing, please wait...';
     };
 
     const getInputPlaceholder = (): string => {
       if (activeTab === 'generate')
-        return "Describe the code you want to generate (e.g., 'a React component that fetches and displays a list of users', or 'a TypeScript function to sort an array by a property')...";
+        return "Describe the code you want to generate (e.g., 'a React component that fetches and displays a list of users')...";
       if (activeTab === 'content')
-        return "Describe the content you want to create (e.g., 'a short blog post about AI ethics', 'a tweet announcing a new product feature', 'an outline for a documentation page on user authentication')...";
+        return "Describe the content you want to create (e.g., 'a short blog post about AI ethics')...";
       return 'Paste your code here...';
     };
 
     const getInputLabel = (): string => {
-      if (activeTab === 'generate') return `Describe the code you want to ${getActionVerb()}:`;
-      if (activeTab === 'content') return `Describe the content you want to ${getActionVerb()}:`;
-      return `Enter React/TypeScript component code to ${getActionVerb()}:`;
+      if (activeTab === 'generate') return `Describe the code to ${getActionVerb()}`;
+      if (activeTab === 'content') return `Describe the content to ${getActionVerb()}`;
+      return `Enter React/TypeScript code to ${getActionVerb()}`;
     };
 
     const handleSubmitClick = React.useCallback(() => {
@@ -141,129 +187,171 @@ export const CodeInteractionPanel: React.FC<CodeInteractionPanelProps> = React.m
       onSubmit();
     }, [activeTab, code, isApiKeyConfigured, setError, onSubmit, getActionVerb]);
 
-    // Helper function to render the feedback section based on activeTab and parsed data
+    // Helper function to render the feedback section
     const renderFeedback = () => {
-      if (!feedback || isLoading) {
-        return null; // Don't show feedback if loading or no feedback is present
-      }
+      if (!feedback || isLoading) return null;
 
       const feedbackTitle = getFeedbackTitle();
 
-      if (activeTab === 'refactor') {
-        const { summary, refactoredCode } = parsedRefactorFeedback;
-
-        // If neither summary nor code were successfully parsed, show the raw feedback
-        if (!summary && !refactoredCode) {
-          return (
-            <div className="mt-6">
-              <h2 className="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-200">
-                {feedbackTitle} (Could not parse structured output)
-              </h2>
-              <FeedbackDisplay feedback={feedback} />
+      return (
+        <div className="flex flex-col h-full animate-in fade-in slide-in-from-right-4 duration-500">
+          <div className="flex items-center gap-2 mb-4">
+            <div
+              className={`p-2 rounded-lg bg-gradient-to-br ${getTabColor()} text-white shadow-lg shadow-blue-500/10`}
+            >
+              {getTabIcon()}
             </div>
-          );
-        }
+            <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400">
+              {feedbackTitle}
+            </h2>
+          </div>
 
-        // Show structured feedback if parsed successfully
-        return (
-          <div className="mt-6">
-            <h2 className="text-xl font-semibold mb-3 text-gray-800 dark:text-gray-200">
-              {feedbackTitle}
-            </h2>
-            {summary && (
-              <div className="mb-6 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg shadow">
-                <h3 className="text-lg font-semibold mb-2 text-gray-700 dark:text-gray-300">
-                  Refactoring Summary:
-                </h3>
-                <FeedbackDisplay feedback={summary} />
+          <div className="flex-grow overflow-auto pr-2 custom-scrollbar">
+            {activeTab === 'refactor' ? (
+              <div className="space-y-6">
+                {parsedRefactorFeedback.summary && (
+                  <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5 transition-all hover:shadow-md">
+                    <div className="flex items-center gap-2 mb-3 text-emerald-600 dark:text-emerald-400 font-bold text-sm uppercase tracking-wider">
+                      <FaCircleInfo className="w-4 h-4" />
+                      Summary
+                    </div>
+                    <FeedbackDisplay feedback={parsedRefactorFeedback.summary} />
+                  </div>
+                )}
+                {parsedRefactorFeedback.refactoredCode && (
+                  <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden transition-all hover:shadow-md">
+                    <div className="flex items-center justify-between px-5 py-3 border-b border-gray-50 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
+                      <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-bold text-sm uppercase tracking-wider">
+                        <FaCode className="w-4 h-4" />
+                        Refactored Code
+                      </div>
+                    </div>
+                    <div className="p-2">
+                      <FeedbackDisplay
+                        feedback={`\`\`\`typescript\n${parsedRefactorFeedback.refactoredCode}\n\`\`\``}
+                      />
+                    </div>
+                  </div>
+                )}
+                {!parsedRefactorFeedback.summary && !parsedRefactorFeedback.refactoredCode && (
+                  <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
+                    <div className="flex items-center gap-2 mb-3 text-amber-600 dark:text-amber-400 font-bold text-sm uppercase tracking-wider">
+                      <FaTriangleExclamation className="w-4 h-4" />
+                      Unstructured Output
+                    </div>
+                    <FeedbackDisplay feedback={feedback} />
+                  </div>
+                )}
               </div>
-            )}
-            {refactoredCode && (
-              <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg shadow">
-                <h3 className="text-lg font-semibold mb-2 text-gray-700 dark:text-gray-300">
-                  Refactored Code:
-                </h3>
-                {/* Wrap code in markdown code block format for FeedbackDisplay */}
-                <FeedbackDisplay feedback={`\`\`\`typescript\n${refactoredCode}\n\`\`\``} />
+            ) : (
+              <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5 transition-all hover:shadow-md">
+                <FeedbackDisplay feedback={feedback} />
               </div>
             )}
           </div>
-        );
-      } else {
-        // Display raw feedback for all other tabs
-        return (
-          <div className="mt-6">
-            <h2 className="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-200">
-              {feedbackTitle}
-            </h2>
-            <FeedbackDisplay feedback={feedback} />
-          </div>
-        );
-      }
+        </div>
+      );
     };
 
     return (
-      <>
-        {/* Input Section */}
-        <div className="relative">
-          <label
-            htmlFor="codeInput"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-          >
-            {getInputLabel()}
-          </label>
-          <CodeInput
-            value={code}
-            onChange={onCodeChange}
-            onClearInput={onClearInput}
-            disabled={isLoading || !isApiKeyConfigured}
-            placeholder={getInputPlaceholder()}
-          />
-          {code && !isLoading && (
-            <button
-              onClick={onClearInput}
-              title="Clear input"
-              aria-label="Clear input field"
-              className="absolute top-8 right-2 p-1.5 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 rounded-full focus:outline-none focus:ring-1 focus:ring-blue-500"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-4 h-4"
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-250px)] min-h-[500px]">
+        {/* Input Column */}
+        <div className="flex flex-col gap-4 h-full">
+          <div className="flex flex-col flex-grow bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-xl overflow-hidden transition-all duration-300">
+            <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-gray-50/50 dark:bg-gray-800/30">
+              <div className="flex items-center gap-3">
+                <div
+                  className={`p-2 rounded-lg bg-gradient-to-br ${getTabColor()} text-white shadow-md`}
+                >
+                  {getTabIcon()}
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-gray-900 dark:text-white leading-tight uppercase tracking-wider">
+                    {activeTab}
+                  </h3>
+                  <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">
+                    {getInputLabel()}
+                  </p>
+                </div>
+              </div>
+              {code && !isLoading && (
+                <button
+                  onClick={onClearInput}
+                  className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all"
+                  title="Clear Input"
+                >
+                  <FaEraser className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+
+            <div className="flex-grow p-4 relative flex flex-col">
+              <CodeInput
+                value={code}
+                onChange={onCodeChange}
+                onClearInput={onClearInput}
+                disabled={isLoading || !isApiKeyConfigured}
+                placeholder={getInputPlaceholder()}
+              />
+            </div>
+
+            <div className="p-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50/30 dark:bg-gray-800/20">
+              <button
+                onClick={handleSubmitClick}
+                disabled={isLoading || !isApiKeyConfigured || !code.trim()}
+                className={`w-full flex items-center justify-center gap-2 bg-gradient-to-r ${getTabColor()} hover:opacity-90 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg transition-all transform active:scale-[0.98] disabled:opacity-40 disabled:grayscale disabled:cursor-not-allowed`}
               >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-              </svg>
-            </button>
-          )}
+                {isLoading ? (
+                  <div className="flex items-center gap-3">
+                    <LoadingSpinner />
+                    <span>Processing...</span>
+                  </div>
+                ) : (
+                  <>
+                    <FaPlay className="w-4 h-4" />
+                    <span>{getButtonText()}</span>
+                  </>
+                )}
+              </button>
+
+              <ErrorMessage message={error} />
+            </div>
+          </div>
         </div>
 
-        {/* Submit Button */}
-        <button
-          onClick={handleSubmitClick}
-          disabled={isLoading || !isApiKeyConfigured || !code.trim()}
-          className="w-full flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-lg shadow-md transition duration-150 ease-in-out disabled:opacity-60 disabled:cursor-not-allowed"
-        >
-          {isLoading && <LoadingSpinner />}
-          {getButtonText()}
-        </button>
-
-        {/* Error Message */}
-        <ErrorMessage message={error} />
-
-        {/* Loading State Display */}
-        {isLoading && (
-          <div className="mt-6 flex flex-col items-center justify-center p-6 bg-gray-50 dark:bg-gray-800/30 rounded-lg shadow-md">
-            <LoadingSpinner />
-            <p className="mt-2 text-gray-600 dark:text-gray-300">{getLoadingMessage()}</p>
-          </div>
-        )}
-
-        {/* Feedback Display (rendered by the helper function) */}
-        {!isLoading && renderFeedback()}
-      </>
+        {/* Output Column */}
+        <div className="flex flex-col h-full">
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center h-full bg-gray-50/50 dark:bg-gray-900/30 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-800 p-10 text-center animate-pulse">
+              <div
+                className={`p-6 rounded-full bg-gradient-to-br ${getTabColor()} text-white mb-6 shadow-2xl shadow-blue-500/20`}
+              >
+                <LoadingSpinner />
+              </div>
+              <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">
+                Generating Magic...
+              </h3>
+              <p className="text-gray-500 dark:text-gray-400 max-w-xs mx-auto">
+                {getLoadingMessage()}
+              </p>
+            </div>
+          ) : feedback ? (
+            renderFeedback()
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full bg-gray-50/50 dark:bg-gray-900/30 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-800 p-10 text-center group transition-colors hover:border-blue-300 dark:hover:border-blue-900/50">
+              <div className="p-6 rounded-full bg-white dark:bg-gray-800 text-gray-300 dark:text-gray-700 mb-6 shadow-sm group-hover:scale-110 transition-transform duration-500">
+                <FaTerminal className="w-12 h-12" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-400 dark:text-gray-600 mb-2">
+                Waiting for input
+              </h3>
+              <p className="text-gray-400 dark:text-gray-500 max-w-xs mx-auto text-sm">
+                Enter your code or description on the left to see the AI magic happen here.
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
     );
   },
 );

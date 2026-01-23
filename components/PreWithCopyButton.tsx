@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { useCopyToClipboard } from '../hooks/useCopyToClipboard';
+import { FaCheck, FaClipboard } from 'react-icons/fa6';
 
 export const PreWithCopyButton: React.FC<
   React.HTMLAttributes<HTMLPreElement> & { node?: unknown }
@@ -23,43 +24,17 @@ export const PreWithCopyButton: React.FC<
         onClick={onCopy}
         title={isCopied ? 'Copied! Click to copy again' : 'Copy code to clipboard'}
         aria-label={isCopied ? 'Code copied. Click to copy again.' : 'Copy code to clipboard'}
-        className={`absolute top-2 right-2 p-1.5 rounded-md transition-all duration-200 ease-in-out
+        className={`absolute top-3 right-3 p-2 rounded-xl transition-all duration-300 ease-in-out z-10
                     ${
                       isCopied
-                        ? 'opacity-100 bg-green-500 text-white scale-105 shadow-lg'
-                        : 'opacity-80 group-hover:opacity-100 focus-visible:opacity-100 hover:opacity-100 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-400 dark:hover:bg-gray-500 focus-visible:ring-2 focus-visible:ring-purple-500 dark:focus-visible:ring-purple-400'
+                        ? 'bg-green-500 text-white shadow-lg shadow-green-500/20 scale-105'
+                        : 'bg-white/80 dark:bg-gray-800/80 text-gray-600 dark:text-gray-300 backdrop-blur-sm border border-gray-200 dark:border-gray-700 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 hover:bg-white dark:hover:bg-gray-700 shadow-sm'
                     }`}
       >
-        {isCopied ? (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={2}
-            stroke="currentColor"
-            className="w-4 h-4"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-          </svg>
-        ) : (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="w-4 h-4"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184"
-            />
-          </svg>
-        )}
+        {isCopied ? <FaCheck className="w-3.5 h-3.5" /> : <FaClipboard className="w-3.5 h-3.5" />}
         <span className="sr-only">{isCopied ? 'Copied!' : 'Copy code'}</span>
       </button>
-      <pre {...props} ref={preRef} className={existingClassName}>
+      <pre {...props} ref={preRef} className={`${existingClassName} rounded-2xl overflow-hidden`}>
         {children}
       </pre>
     </div>

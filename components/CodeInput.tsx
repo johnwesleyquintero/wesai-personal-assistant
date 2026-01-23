@@ -1,5 +1,5 @@
 import React from 'react';
-import { ClearIcon } from './icons/ClearIcon';
+import { FaXmark } from 'react-icons/fa6';
 
 interface CodeInputProps {
   value: string;
@@ -35,7 +35,7 @@ export const CodeInput: React.FC<CodeInputProps> = ({
           aria-label="Clear code input field"
           className="absolute top-2.5 right-2.5 p-1.5 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 rounded-full focus:outline-none focus:ring-1 focus:ring-blue-500 hover:bg-gray-200 dark:hover:bg-gray-700"
         >
-          <ClearIcon className="w-4 h-4" />
+          <FaXmark className="w-4 h-4" />
         </button>
       )}
     </div>

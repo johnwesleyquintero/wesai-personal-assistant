@@ -1,5 +1,5 @@
 import React from 'react';
-import { LoadingIcon } from './icons/LoadingIcon';
+import { FaSpinner } from 'react-icons/fa6';
 
 interface LoadingSpinnerProps {
   className?: string;
@@ -8,8 +8,10 @@ interface LoadingSpinnerProps {
 export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ className }) => {
   return (
     <div className="flex items-center justify-center">
-      <LoadingIcon
-        className={className || 'animate-spin -ml-1 mr-3 h-5 w-5 text-gray-700 dark:text-white'}
+      <FaSpinner
+        className={
+          className || 'animate-spin -ml-1 mr-3 h-5 w-5 text-purple-600 dark:text-purple-400'
+        }
       />
     </div>
   );

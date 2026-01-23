@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { FaCog } from 'react-icons/fa';
+import { FaGear } from 'react-icons/fa6';
 import type { Theme } from '../types';
 import { ThemeToggleButton } from './ThemeToggleButton'; // Import ThemeToggleButton
 import { WesAILogo } from './WesAILogo'; // Import WesAILogo
@@ -36,7 +36,7 @@ export const Header: React.FC<HeaderProps> = memo(
               aria-label="Open settings"
               title="Open settings"
             >
-              <FaCog className="w-5 h-5" />
+              <FaGear className="w-5 h-5" />
             </button>
           </div>
         </div>
