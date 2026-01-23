@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import type { Theme } from './types';
 import { Header } from './components/Header.tsx';
 import { LoginPage } from './LoginPage.tsx';
@@ -10,7 +10,7 @@ import { useCodeInteractionLogic } from './components/hooks/useCodeInteractionLo
 
 // Import new components
 import { SettingsModal } from './components/SettingsModal.tsx';
-import { TabNavigation } from './components/TabNavigation.tsx';
+import { ResourcesModal, type ResourceType } from './components/ResourcesModal.tsx';
 import { CodeInteractionPanel } from './components/CodeInteractionPanel.tsx';
 import { ChatInterfacePanel } from './components/ChatInterfacePanel.tsx';
 import { AiAgentsPanel } from './components/AiAgentsPanel.tsx';
@@ -18,10 +18,21 @@ import { AiAgentsPanel } from './components/AiAgentsPanel.tsx';
 const App: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
-  const tabsRef = useRef<HTMLDivElement>(null);
+  const [resourcesModal, setResourcesModal] = useState<{ isOpen: boolean; type: ResourceType }>({
+    isOpen: false,
+    type: 'getting-started',
+  });
 
   const handleOpenSettingsModal = useCallback(() => setIsSettingsModalOpen(true), []);
   const handleCloseSettingsModal = useCallback(() => setIsSettingsModalOpen(false), []);
+
+  const handleOpenResourcesModal = useCallback((type: ResourceType) => {
+    setResourcesModal({ isOpen: true, type });
+  }, []);
+
+  const handleCloseResourcesModal = useCallback(() => {
+    setResourcesModal((prev) => ({ ...prev, isOpen: false }));
+  }, []);
 
   const {
     apiKeySource,
@@ -93,86 +104,90 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center px-4 pt-0 sm:px-6">
-      <div className="w-full sm:max-w-5xl">
-        <Header
-          toggleTheme={toggleTheme}
-          currentTheme={theme as Theme}
-          onSettingsClick={handleOpenSettingsModal}
-        />
+    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-[#0B0F1A] transition-colors duration-300">
+      <Header
+        toggleTheme={toggleTheme}
+        currentTheme={theme as Theme}
+        onSettingsClick={handleOpenSettingsModal}
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+        tabs={[
+          { id: 'chat', label: 'Chat Assistant' },
+          { id: 'content', label: 'Code Studio' },
+          { id: 'ai-agents', label: 'AI Agents' },
+        ]}
+      />
 
-        <SettingsModal
-          isOpen={isSettingsModalOpen}
-          onClose={handleCloseSettingsModal}
-          onSaveKey={handleSaveApiKey}
-          onRemoveKey={handleRemoveApiKey}
-          isKeySet={isApiKeyConfigured}
-          currentKeySource={apiKeySource}
-          onLogout={handleLogout}
-        />
+      <SettingsModal
+        isOpen={isSettingsModalOpen}
+        onClose={handleCloseSettingsModal}
+        onSaveKey={handleSaveApiKey}
+        onRemoveKey={handleRemoveApiKey}
+        isKeySet={isApiKeyConfigured}
+        currentKeySource={apiKeySource}
+        onLogout={handleLogout}
+      />
 
-        <TabNavigation
-          ref={tabsRef}
-          activeTab={activeTab}
-          onTabChange={handleTabChange}
-          tabs={[
-            { id: 'chat', label: 'Chat' },
-            { id: 'content', label: 'Generate Content' },
-            { id: 'ai-agents', label: 'AI Agents' },
-          ]}
-        />
+      <ResourcesModal
+        isOpen={resourcesModal.isOpen}
+        onClose={handleCloseResourcesModal}
+        type={resourcesModal.type}
+      />
 
-        <main className="space-y-6 flex-grow">
-          {codeInteractionActive && (
-            <CodeInteractionPanel
-              activeTab={activeTab as 'review' | 'refactor' | 'preview' | 'generate' | 'content'}
-              code={code}
-              onCodeChange={handleCodeChange}
-              onClearInput={handleClearCodeInput}
-              onSubmit={handleSubmitCodeInteraction}
-              isLoading={isLoading}
-              isApiKeyConfigured={isApiKeyConfigured}
-              feedback={feedback}
-              error={error}
-              setError={setError}
-            />
-          )}
+      <div className="flex-grow flex flex-col">
+        <main className="flex-grow w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="h-full animate-in fade-in slide-in-from-bottom-4 duration-700">
+            {codeInteractionActive && (
+              <CodeInteractionPanel
+                activeTab={activeTab as 'review' | 'refactor' | 'preview' | 'generate' | 'content'}
+                code={code}
+                onCodeChange={handleCodeChange}
+                onClearInput={handleClearCodeInput}
+                onSubmit={handleSubmitCodeInteraction}
+                isLoading={isLoading}
+                isApiKeyConfigured={isApiKeyConfigured}
+                feedback={feedback}
+                error={error}
+                setError={setError}
+              />
+            )}
 
-          {activeTab === 'ai-agents' && <AiAgentsPanel />}
+            {activeTab === 'ai-agents' && <AiAgentsPanel />}
 
-          {activeTab === 'chat' && (
-            <ChatInterfacePanel
-              chatMessages={chatMessages}
-              chatInput={chatInput}
-              chatImage={chatImage}
-              onChatImageChange={setChatImage}
-              onChatInputChange={handleChatInputChange}
-              onClearChatInput={handleClearChatInput}
-              onChatSubmit={handleChatSubmit}
-              isLoading={isLoading}
-              isApiKeyConfigured={isApiKeyConfigured}
-              isChatSessionActive={!!activeChatSession}
-              onCopyChatMessage={handleCopyChatMessage}
-              onTogglePreview={handleTogglePreview}
-              copiedMessageId={copiedMessageId}
-              error={chatError}
-              onNewChat={handleNewChat}
-              onRetryChat={handleRetryChat}
-              sendOnEnter={sendOnEnter}
-              savedChatSessions={savedChatSessions}
-              onInitializeSavedChatSessions={initializeSavedChatSessions}
-              onSaveChatSession={saveChatSession}
-              onLoadSavedChatSession={loadSavedChatSession}
-              onDeleteSavedChatSession={deleteSavedChatSession}
-              onRenameSavedChatSession={renameSavedChatSession}
-              onDuplicateSavedChatSession={duplicateSavedChatSession}
-              savedSessionsSort={savedSessionsSort}
-              onSetSavedSessionsSort={setSavedSessionsSort}
-            />
-          )}
+            {activeTab === 'chat' && (
+              <ChatInterfacePanel
+                chatMessages={chatMessages}
+                chatInput={chatInput}
+                chatImage={chatImage}
+                onChatImageChange={setChatImage}
+                onChatInputChange={handleChatInputChange}
+                onClearChatInput={handleClearChatInput}
+                onChatSubmit={handleChatSubmit}
+                isLoading={isLoading}
+                isApiKeyConfigured={isApiKeyConfigured}
+                isChatSessionActive={!!activeChatSession}
+                onCopyChatMessage={handleCopyChatMessage}
+                onTogglePreview={handleTogglePreview}
+                copiedMessageId={copiedMessageId}
+                error={chatError}
+                onNewChat={handleNewChat}
+                onRetryChat={handleRetryChat}
+                sendOnEnter={sendOnEnter}
+                savedChatSessions={savedChatSessions}
+                onInitializeSavedChatSessions={initializeSavedChatSessions}
+                onSaveChatSession={saveChatSession}
+                onLoadSavedChatSession={loadSavedChatSession}
+                onDeleteSavedChatSession={deleteSavedChatSession}
+                onRenameSavedChatSession={renameSavedChatSession}
+                onDuplicateSavedChatSession={duplicateSavedChatSession}
+                savedSessionsSort={savedSessionsSort}
+                onSetSavedSessionsSort={setSavedSessionsSort}
+              />
+            )}
+          </div>
         </main>
       </div>
-      <Footer />
+      <Footer onTabChange={handleTabChange} onOpenResources={handleOpenResourcesModal} />
     </div>
   );
 };
