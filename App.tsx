@@ -52,12 +52,14 @@ const App: React.FC = () => {
   const {
     chatMessages,
     chatInput,
+    chatImage,
     activeChatSession,
     copiedMessageId,
     chatError,
     handleChatInputChange,
     handleClearChatInput,
     handleChatSubmit,
+    setChatImage,
     handleNewChat,
     handleRetryChat,
     handleCopyChatMessage,
@@ -142,6 +144,8 @@ const App: React.FC = () => {
             <ChatInterfacePanel
               chatMessages={chatMessages}
               chatInput={chatInput}
+              chatImage={chatImage}
+              onChatImageChange={setChatImage}
               onChatInputChange={handleChatInputChange}
               onClearChatInput={handleClearChatInput}
               onChatSubmit={handleChatSubmit}

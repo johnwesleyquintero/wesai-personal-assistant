@@ -12,6 +12,8 @@ interface ChatInterfacePanelProps {
   onChatInputChange: (value: string) => void;
   onClearChatInput: () => void; // New prop for clearing chat input
   onChatSubmit: () => void;
+  chatImage: string | null;
+  onChatImageChange: (image: string | null) => void;
   isLoading: boolean;
   isApiKeyConfigured: boolean;
   isChatSessionActive: boolean;
@@ -40,6 +42,8 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = memo(
     onChatInputChange,
     onClearChatInput,
     onChatSubmit,
+    chatImage,
+    onChatImageChange,
     isLoading,
     isApiKeyConfigured,
     isChatSessionActive,
@@ -61,6 +65,7 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = memo(
     onSetSavedSessionsSort,
   }) => {
     const chatMessagesEndRef = useRef<HTMLDivElement | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const [isSavedContextsOpen, setIsSavedContextsOpen] = useState(false);
     const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
     const [saveName, setSaveName] = useState('');
@@ -146,6 +151,33 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = memo(
       setIsExportDialogOpen(false);
     };
 
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          onChatImageChange(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+
+    const handlePaste = (e: React.ClipboardEvent) => {
+      const items = e.clipboardData.items;
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf('image') !== -1) {
+          const blob = items[i].getAsFile();
+          if (blob) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              onChatImageChange(reader.result as string);
+            };
+            reader.readAsDataURL(blob);
+          }
+        }
+      }
+    };
+
     useEffect(() => {
       if (isSavedContextsOpen) {
         onInitializeSavedChatSessions();
@@ -154,7 +186,7 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = memo(
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-      if (chatInput.trim()) {
+      if (chatInput.trim() || chatImage) {
         // Ensure not submitting empty messages from Enter key
         onChatSubmit();
       }
@@ -291,14 +323,79 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = memo(
           onSubmit={handleSubmit}
           className="p-3 border-t border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800"
         >
+          {chatImage && (
+            <div className="mb-2 relative inline-block">
+              <img
+                src={chatImage}
+                alt="Selected"
+                className="h-20 w-auto rounded border border-gray-300 dark:border-gray-600"
+              />
+              <button
+                type="button"
+                onClick={() => onChatImageChange(null)}
+                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5 hover:bg-red-600 shadow-sm"
+                title="Remove image"
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+          )}
           <div className="flex items-center space-x-2 relative">
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleImageUpload}
+              accept="image/*"
+              className="hidden"
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              title="Attach image"
+              disabled={isLoading || !isApiKeyConfigured || !isChatSessionActive}
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
+              </svg>
+            </button>
             <textarea
               value={chatInput}
               onChange={(e) => onChatInputChange(e.target.value)}
+              onPaste={handlePaste}
               onKeyDown={(e) => {
                 if (sendOnEnter && e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
-                  if (!isLoading && isApiKeyConfigured && isChatSessionActive && chatInput.trim()) {
+                  if (
+                    !isLoading &&
+                    isApiKeyConfigured &&
+                    isChatSessionActive &&
+                    (chatInput.trim() || chatImage)
+                  ) {
                     onChatSubmit();
                   }
                 }
@@ -331,7 +428,10 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = memo(
             <button
               type="submit"
               disabled={
-                isLoading || !isApiKeyConfigured || !isChatSessionActive || !chatInput.trim()
+                isLoading ||
+                !isApiKeyConfigured ||
+                !isChatSessionActive ||
+                (!chatInput.trim() && !chatImage)
               }
               className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-lg shadow-md transition duration-150 ease-in-out disabled:opacity-60 disabled:cursor-not-allowed flex items-center whitespace-nowrap"
             >
@@ -694,6 +794,16 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = memo(
               >
                 Preview
               </button>
+            </div>
+          )}
+
+          {msg.imageContent && (
+            <div className="mb-2">
+              <img
+                src={msg.imageContent}
+                alt="Shared content"
+                className="max-h-64 w-auto rounded-lg shadow-sm border border-gray-200 dark:border-gray-600"
+              />
             </div>
           )}
 

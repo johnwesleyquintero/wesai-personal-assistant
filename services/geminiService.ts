@@ -1,4 +1,4 @@
-import type { GenerateContentResponse, Chat } from '@google/genai';
+import type { GenerateContentResponse, Chat, Part } from '@google/genai';
 import { GoogleGenAI } from '@google/genai';
 import { getActiveInstructionProfile } from './instructionService';
 import { useAppStore } from '../store';
@@ -342,6 +342,7 @@ export const startChatSession = async (
 
 const retryWithFallbackModel = async (
   message: string,
+  imageContent: string | null | undefined,
   originalError: unknown,
 ): Promise<AsyncIterable<GenerateContentResponse>> => {
   console.warn(
@@ -361,7 +362,7 @@ const retryWithFallbackModel = async (
       },
     });
 
-    return await sendMessageToChatStream(fallbackChatSession, message, true);
+    return await sendMessageToChatStream(fallbackChatSession, message, imageContent, true);
   } catch (fallbackError) {
     throw handleApiError(
       fallbackError,
@@ -370,13 +371,32 @@ const retryWithFallbackModel = async (
   }
 };
 
+const parseBase64 = (base64String: string) => {
+  const match = base64String.match(/^data:(image\/[a-zA-Z]+);base64,(.+)$/);
+  if (match) {
+    return { mimeType: match[1], data: match[2] };
+  }
+  return { mimeType: 'image/jpeg', data: base64String }; // Fallback
+};
+
 export const sendMessageToChatStream = async (
   chat: Chat,
   message: string,
+  imageContent?: string | null,
   useFallback = false,
 ): Promise<AsyncIterable<GenerateContentResponse>> => {
   try {
-    const stream = await chat.sendMessageStream({ message: message });
+    const parts: Part[] = [{ text: message }];
+    if (imageContent) {
+      const { mimeType, data } = parseBase64(imageContent);
+      parts.push({
+        inlineData: {
+          mimeType,
+          data,
+        },
+      });
+    }
+    const stream = await chat.sendMessageStream({ message: parts });
     return stream;
   } catch (error: unknown) {
     // Check for both response status and raw status
@@ -386,7 +406,7 @@ export const sendMessageToChatStream = async (
 
     // Retry on Rate Limit (429) or Service Overload (503) if we haven't already
     if ((status === 429 || status === 503) && !useFallback) {
-      return await retryWithFallbackModel(message, error);
+      return await retryWithFallbackModel(message, imageContent, error);
     }
     throw handleApiError(error, 'send message to chat stream');
   }

@@ -41,6 +41,7 @@ interface AppState {
   // Chat specific state
   chatMessages: ChatMessage[];
   chatInput: string;
+  chatImage: string | null; // Added: Current image to send
   activeChatSession: Chat | null;
   copiedMessageId: string | null;
   chatError: string | null;
@@ -60,6 +61,7 @@ interface AppState {
   setTheme: (theme: Theme) => void;
   setChatMessages: (messages: ChatMessage[]) => void;
   setChatInput: (input: string) => void;
+  setChatImage: (image: string | null) => void; // Added
   setActiveChatSession: (session: Chat | null) => void;
   setCopiedMessageId: (id: string | null) => void;
   setChatError: (error: string | null) => void;
@@ -123,6 +125,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   chatMessages: [],
   chatInput: '',
+  chatImage: null, // Initial state
   activeChatSession: null,
   copiedMessageId: null,
   chatError: null,
@@ -148,6 +151,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   setTheme: (theme: Theme) => set({ theme }),
   setChatMessages: (messages: ChatMessage[]) => set({ chatMessages: messages }),
   setChatInput: (input: string) => set({ chatInput: input }),
+  setChatImage: (image: string | null) => set({ chatImage: image }), // Added
   setActiveChatSession: (session: Chat | null) => set({ activeChatSession: session }),
   setCopiedMessageId: (id: string | null) => set({ copiedMessageId: id }),
   setChatError: (error: string | null) => set({ chatError: error }),
@@ -474,18 +478,19 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   handleChatSubmit: async () => {
-    const { chatInput, activeChatSession, extractComponentCode: extractCode } = get();
+    const { chatInput, chatImage, activeChatSession, extractComponentCode: extractCode } = get();
     const userMessageId = `user-${Date.now()}`;
     const modelMessageId = `model-${Date.now() + 1}`;
 
     set((state: AppState) => ({
       chatMessages: [
         ...state.chatMessages,
-        { id: userMessageId, role: 'user', content: chatInput },
+        { id: userMessageId, role: 'user', content: chatInput, imageContent: chatImage },
       ],
     }));
     const currentInput = chatInput;
-    set({ chatInput: '', isLoading: true, chatError: null });
+    const currentImage = chatImage;
+    set({ chatInput: '', chatImage: null, isLoading: true, chatError: null });
 
     set((state: AppState) => ({
       chatMessages: [
@@ -496,7 +501,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
     try {
       if (!activeChatSession) throw new Error('Chat session not active.');
-      const stream = await sendMessageToChatStream(activeChatSession, currentInput);
+      const stream = await sendMessageToChatStream(activeChatSession, currentInput, currentImage);
       let currentModelContent = '';
       for await (const chunk of stream) {
         const chunkText = chunk.text;
@@ -596,7 +601,8 @@ export const useAppStore = create<AppState>((set, get) => ({
       const stream = await sendMessageToChatStream(
         activeChatSession,
         lastUserMessage.content,
-        true,
+        null, // imageContent
+        true, // useFallback
       );
       let currentModelContent = '';
       for await (const chunk of stream) {
