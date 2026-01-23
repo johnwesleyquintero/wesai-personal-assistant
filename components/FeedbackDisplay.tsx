@@ -1,24 +1,13 @@
 import React from 'react';
 import { useCopyToClipboard } from '../hooks/useCopyToClipboard';
-import type { Components } from 'react-markdown';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { FaCheck, FaClipboard } from 'react-icons/fa6';
 import { useAppStore } from '../store';
-import { PreWithCopyButton } from './PreWithCopyButton';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { markdownComponents } from './MarkdownCodeRenderer';
 
 interface FeedbackDisplayProps {
   feedback: string;
-}
-
-interface CustomCodeRendererProps {
-  node?: unknown;
-  inline?: boolean;
-  className?: string;
-  children: React.ReactNode;
-  [key: string]: unknown;
 }
 
 export const FeedbackDisplay: React.FC<FeedbackDisplayProps> = ({ feedback }) => {
@@ -66,41 +55,7 @@ export const FeedbackDisplay: React.FC<FeedbackDisplayProps> = ({ feedback }) =>
                       prose-pre:border-gray-100 dark:prose-pre:border-gray-800
                       prose-pre:text-slate-800 dark:prose-pre:text-slate-200"
       >
-        <ReactMarkdown
-          remarkPlugins={[remarkGfm]}
-          components={
-            {
-              pre: PreWithCopyButton,
-              code: ({ _node, inline, className, children, ...rest }: CustomCodeRendererProps) => {
-                const match = /language-(\w+)/.exec(className || '');
-                if (!inline && match) {
-                  return (
-                    <SyntaxHighlighter
-                      style={oneDark}
-                      language={match[1]}
-                      PreTag="div"
-                      customStyle={{
-                        margin: 0,
-                        padding: '1.25rem',
-                        background: 'transparent',
-                        fontSize: '0.85rem',
-                        lineHeight: '1.6',
-                      }}
-                      {...rest}
-                    >
-                      {String(children).replace(/\n$/, '')}
-                    </SyntaxHighlighter>
-                  );
-                }
-                return (
-                  <code className={className} {...rest}>
-                    {children}
-                  </code>
-                );
-              },
-            } as Components
-          }
-        >
+        <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
           {feedback || ''}
         </ReactMarkdown>
       </div>

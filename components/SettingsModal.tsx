@@ -29,13 +29,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = memo(
     const [activeTab, setActiveTab] = useState<ModalTab>('settings');
     const [showConfirmRemove, setShowConfirmRemove] = useState<boolean>(false);
 
-    const {
-      showStreamFinishNotes,
-      setShowStreamFinishNotes,
-      sendOnEnter,
-      setSendOnEnter,
-      addToast,
-    } = useAppStore();
+    const showStreamFinishNotes = useAppStore((state) => state.showStreamFinishNotes);
+    const setShowStreamFinishNotes = useAppStore((state) => state.setShowStreamFinishNotes);
+    const sendOnEnter = useAppStore((state) => state.sendOnEnter);
+    const setSendOnEnter = useAppStore((state) => state.setSendOnEnter);
+    const addToast = useAppStore((state) => state.addToast);
 
     if (!isOpen) {
       return null;

@@ -1,12 +1,6 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  getProfiles,
-  saveProfile,
-  deleteProfile,
-  setActiveProfile,
-  getActiveInstructionProfile,
-} from '../services/instructionService';
+import { useAppStore } from '../store';
 import type { CustomInstructionProfile } from '../types';
 import {
   FaRobot,
@@ -21,18 +15,24 @@ import {
   FaCircleInfo,
 } from 'react-icons/fa6';
 
-export const AiAgentsPanel: React.FC = () => {
-  const [profiles, setProfiles] = useState<CustomInstructionProfile[]>(() => getProfiles());
+export const AiAgentsPanel: React.FC = React.memo(() => {
+  const profiles = useAppStore((state) => state.instructionProfiles);
+  const initializeInstructionProfiles = useAppStore((state) => state.initializeInstructionProfiles);
+  const handleSaveInstructionProfile = useAppStore((state) => state.handleSaveInstructionProfile);
+  const handleDeleteInstructionProfile = useAppStore(
+    (state) => state.handleDeleteInstructionProfile,
+  );
+  const handleSetActiveInstructionProfile = useAppStore(
+    (state) => state.handleSetActiveInstructionProfile,
+  );
+
   const [selectedProfile, setSelectedProfile] = useState<CustomInstructionProfile | null>(null);
   const [profileName, setProfileName] = useState('');
   const [instructions, setInstructions] = useState('');
-  const [activeProfileId, setActiveProfileId] = useState<string | null>(
-    () => getActiveInstructionProfile()?.id || null,
-  );
 
-  const loadProfiles = useCallback(() => {
-    setProfiles(getProfiles());
-  }, []);
+  useEffect(() => {
+    initializeInstructionProfiles();
+  }, [initializeInstructionProfiles]);
 
   const handleSaveProfile = () => {
     if (!profileName || !instructions) {
@@ -44,21 +44,15 @@ export const AiAgentsPanel: React.FC = () => {
       ? { ...selectedProfile, name: profileName, instructions: instructions }
       : { id: uuidv4(), name: profileName, instructions: instructions, isActive: false };
 
-    saveProfile(newProfile);
-    loadProfiles();
+    handleSaveInstructionProfile(newProfile);
     resetForm();
   };
 
   const handleDeleteProfile = (id: string) => {
     if (window.confirm('Are you sure you want to delete this AI Agent?')) {
-      deleteProfile(id);
-      loadProfiles();
+      handleDeleteInstructionProfile(id);
       if (selectedProfile?.id === id) {
         resetForm();
-      }
-      if (activeProfileId === id) {
-        setActiveProfileId(null);
-        setActiveProfile('');
       }
     }
   };
@@ -70,9 +64,7 @@ export const AiAgentsPanel: React.FC = () => {
   };
 
   const handleSetActive = (id: string) => {
-    setActiveProfile(id);
-    setActiveProfileId(id);
-    loadProfiles();
+    handleSetActiveInstructionProfile(id);
   };
 
   const resetForm = () => {
@@ -263,4 +255,4 @@ export const AiAgentsPanel: React.FC = () => {
       </div>
     </div>
   );
-};
+});

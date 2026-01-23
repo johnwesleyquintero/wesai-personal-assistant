@@ -99,6 +99,22 @@ const babelOptions = {
   sourceType: 'module' as const,
 };
 
+interface IframeError {
+  message: string;
+  stack?: string;
+  transpiledCode?: string;
+}
+
+interface BabelWorkerResponse {
+  type: 'TRANSPILE_SUCCESS' | 'TRANSPILE_ERROR';
+  transpiledCode?: string;
+  error?: {
+    message: string;
+    stack?: string;
+    name?: string;
+  };
+}
+
 /**
  * Renders a live preview of React/TSX code by transpiling and evaluating it in the browser.
  * WARNING: EVALUATING ARBITRARY CODE WITH `new Function` IS A SEVERE SECURITY RISK
@@ -114,7 +130,7 @@ export const ReactPreviewRenderer: React.FC<ReactPreviewRendererProps> = ({
 }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [iframeLoaded, setIframeLoaded] = useState(false);
-  const [iframeError, setIframeError] = useState<unknown | null>(null);
+  const [iframeError, setIframeError] = useState<IframeError | null>(null);
   const [iframeContent, setIframeContent] = useState<string | null>(null); // To store rendered HTML from iframe
 
   const uniqueId = useId();
@@ -134,12 +150,12 @@ export const ReactPreviewRenderer: React.FC<ReactPreviewRendererProps> = ({
     // or ensure 'babel-worker.ts' is directly accessible as 'babel-worker.js' at runtime.
     const worker = new Worker('babel-worker.ts');
 
-    worker.onmessage = (event: MessageEvent) => {
+    worker.onmessage = (event: MessageEvent<BabelWorkerResponse>) => {
       const { type, transpiledCode, error } = event.data;
-      if (type === 'TRANSPILE_SUCCESS') {
+      if (type === 'TRANSPILE_SUCCESS' && transpiledCode) {
         setTranspiledCodeForDebug(transpiledCode);
         setTranspilationError(null); // Clear any previous error on successful transpilation
-      } else if (type === 'TRANSPILE_ERROR') {
+      } else if (type === 'TRANSPILE_ERROR' && error) {
         console.error('Error from Babel Web Worker:', error);
         setTranspilationError(error); // Set error on transpilation failure
       }
@@ -222,9 +238,7 @@ export const ReactPreviewRenderer: React.FC<ReactPreviewRendererProps> = ({
   }, [iframeLoaded, transpiledCodeForDebug, code, darkTheme, transpilationError]);
 
   const renderErrorState = (caughtError: unknown): ReactNode => {
-    const isIframeError = (
-      e: unknown,
-    ): e is { message: string; stack?: string; transpiledCode?: string } => {
+    const isIframeError = (e: unknown): e is IframeError => {
       return !!e && typeof e === 'object' && 'message' in e && 'transpiledCode' in e;
     };
     // Use the custom onErrorRender prop if provided by the user

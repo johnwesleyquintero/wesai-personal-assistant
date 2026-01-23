@@ -1,5 +1,12 @@
 // babel-worker.ts
 
+interface BabelStandalone {
+  transform: (
+    code: string,
+    options: Record<string, unknown>,
+  ) => { code: string | null; map?: unknown; ast?: unknown };
+}
+
 // Import Babel standalone library into the worker's global scope
 declare function importScripts(...urls: string[]): void;
 importScripts('https://unpkg.com/@babel/standalone/babel.min.js');
@@ -7,7 +14,7 @@ importScripts('https://unpkg.com/@babel/standalone/babel.min.js');
 // This is the main message handler for the Web Worker
 self.onmessage = (event: MessageEvent) => {
   // Babel should now be available globally after importScripts
-  const Babel = (self as any).Babel;
+  const Babel = (self as unknown as { Babel: BabelStandalone }).Babel;
   // The check for Babel's presence might still be good for robustness,
   // though importScripts should ensure it's loaded.
   if (!Babel) {

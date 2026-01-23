@@ -1,12 +1,10 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import type { Theme } from './types';
 import { Header } from './components/Header.tsx';
 import { LoginPage } from './LoginPage.tsx';
 import { Footer } from './components/Footer.tsx';
 import { useAppStore, LS_KEY_LOGGED_IN } from './store.ts';
 import { useTheme } from './components/hooks/useTheme.ts';
-import { useChatLogic } from './components/hooks/useChatLogic.ts';
-import { useCodeInteractionLogic } from './components/hooks/useCodeInteractionLogic.ts';
 
 // Import new components
 import { SettingsModal } from './components/SettingsModal.tsx';
@@ -35,58 +33,26 @@ const App: React.FC = () => {
     setResourcesModal((prev) => ({ ...prev, isOpen: false }));
   }, []);
 
-  const {
-    apiKeySource,
-    isLoggedIn,
-    activeTab,
-    initializeActiveApiKey,
-    handleSaveApiKey,
-    handleRemoveApiKey,
-    handleLoginSuccess,
-    handleLogout,
-    handleTabChange,
-    setIsLoggedIn,
-  } = useAppStore();
+  const apiKeySource = useAppStore((state) => state.apiKeySource);
+  const isLoggedIn = useAppStore((state) => state.isLoggedIn);
+  const activeTab = useAppStore((state) => state.activeTab);
+  const initializeActiveApiKey = useAppStore((state) => state.initializeActiveApiKey);
+  const handleSaveApiKey = useAppStore((state) => state.handleSaveApiKey);
+  const handleRemoveApiKey = useAppStore((state) => state.handleRemoveApiKey);
+  const handleLoginSuccess = useAppStore((state) => state.handleLoginSuccess);
+  const handleLogout = useAppStore((state) => state.handleLogout);
+  const handleTabChange = useAppStore((state) => state.handleTabChange);
+  const setIsLoggedIn = useAppStore((state) => state.setIsLoggedIn);
 
-  const {
-    code,
-    feedback,
-    isLoading,
-    error,
-    activeApiKey,
-    codeInteractionActive,
-    handleCodeChange,
-    handleClearCodeInput,
-    handleSubmitCodeInteraction,
-    setError,
-  } = useCodeInteractionLogic();
-
-  const {
-    chatMessages,
-    chatInput,
-    chatImage,
-    activeChatSession,
-    copiedMessageId,
-    chatError,
-    handleChatInputChange,
-    handleClearChatInput,
-    handleChatSubmit,
-    setChatImage,
-    handleNewChat,
-    handleRetryChat,
-    handleCopyChatMessage,
-    handleTogglePreview,
-    sendOnEnter,
-    savedChatSessions,
-    initializeSavedChatSessions,
-    saveChatSession,
-    loadSavedChatSession,
-    deleteSavedChatSession,
-    renameSavedChatSession,
-    duplicateSavedChatSession,
-    savedSessionsSort,
-    setSavedSessionsSort,
-  } = useChatLogic();
+  const codeInteractionActive = useMemo(() => {
+    return (
+      activeTab === 'review' ||
+      activeTab === 'refactor' ||
+      activeTab === 'preview' ||
+      activeTab === 'generate' ||
+      activeTab === 'content'
+    );
+  }, [activeTab]);
 
   useEffect(() => {
     const loggedInStatus = localStorage.getItem(LS_KEY_LOGGED_IN);
@@ -98,6 +64,7 @@ const App: React.FC = () => {
     }
   }, [initializeActiveApiKey, setIsLoggedIn]);
 
+  const activeApiKey = useAppStore((state) => state.activeApiKey);
   const isApiKeyConfigured = !!activeApiKey;
 
   if (!isLoggedIn) {
@@ -138,53 +105,11 @@ const App: React.FC = () => {
       <div className="flex-grow flex flex-col">
         <main className="flex-grow w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="h-full animate-in fade-in slide-in-from-bottom-4 duration-700">
-            {codeInteractionActive && (
-              <CodeInteractionPanel
-                activeTab={activeTab as 'review' | 'refactor' | 'preview' | 'generate' | 'content'}
-                code={code}
-                onCodeChange={handleCodeChange}
-                onClearInput={handleClearCodeInput}
-                onSubmit={handleSubmitCodeInteraction}
-                isLoading={isLoading}
-                isApiKeyConfigured={isApiKeyConfigured}
-                feedback={feedback}
-                error={error}
-                setError={setError}
-              />
-            )}
+            {codeInteractionActive && <CodeInteractionPanel />}
 
             {activeTab === 'ai-agents' && <AiAgentsPanel />}
 
-            {activeTab === 'chat' && (
-              <ChatInterfacePanel
-                chatMessages={chatMessages}
-                chatInput={chatInput}
-                chatImage={chatImage}
-                onChatImageChange={setChatImage}
-                onChatInputChange={handleChatInputChange}
-                onClearChatInput={handleClearChatInput}
-                onChatSubmit={handleChatSubmit}
-                isLoading={isLoading}
-                isApiKeyConfigured={isApiKeyConfigured}
-                isChatSessionActive={!!activeChatSession}
-                onCopyChatMessage={handleCopyChatMessage}
-                onTogglePreview={handleTogglePreview}
-                copiedMessageId={copiedMessageId}
-                error={chatError}
-                onNewChat={handleNewChat}
-                onRetryChat={handleRetryChat}
-                sendOnEnter={sendOnEnter}
-                savedChatSessions={savedChatSessions}
-                onInitializeSavedChatSessions={initializeSavedChatSessions}
-                onSaveChatSession={saveChatSession}
-                onLoadSavedChatSession={loadSavedChatSession}
-                onDeleteSavedChatSession={deleteSavedChatSession}
-                onRenameSavedChatSession={renameSavedChatSession}
-                onDuplicateSavedChatSession={duplicateSavedChatSession}
-                savedSessionsSort={savedSessionsSort}
-                onSetSavedSessionsSort={setSavedSessionsSort}
-              />
-            )}
+            {activeTab === 'chat' && <ChatInterfacePanel />}
           </div>
         </main>
       </div>

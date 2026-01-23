@@ -7,7 +7,7 @@ import type { ChatMessage } from '../types';
 
 /**
  * Efficiently updates a single chat message by ID
- * Uses binary search for O(log n) performance instead of O(n) map operations
+ * Uses findIndex for O(n) performance
  * Only creates new array if message is found and actually changed
  */
 export function updateChatMessageById(
@@ -62,7 +62,9 @@ export function removeChatMessageById(messages: ChatMessage[], messageId: string
     return messages;
   }
 
-  return messages.filter((msg) => msg.id !== messageId);
+  const newMessages = [...messages];
+  newMessages.splice(messageIndex, 1);
+  return newMessages;
 }
 
 /**

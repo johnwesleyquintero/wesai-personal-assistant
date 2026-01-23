@@ -1,3 +1,4 @@
+import React, { memo } from 'react';
 import { FaGithub, FaGoogle, FaRobot, FaMessage, FaCode } from 'react-icons/fa6';
 import { WesAILogo } from './WesAILogo';
 import type { ActiveTab } from '../types';
@@ -8,7 +9,7 @@ interface FooterProps {
   onOpenResources?: (type: ResourceType) => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onTabChange, onOpenResources }) => {
+export const Footer: React.FC<FooterProps> = memo(({ onTabChange, onOpenResources }) => {
   const currentYear = new Date().getFullYear();
 
   return (
@@ -137,4 +138,4 @@ export const Footer: React.FC<FooterProps> = ({ onTabChange, onOpenResources }) 
       </div>
     </footer>
   );
-};
+});

@@ -1,6 +1,13 @@
 import { create } from 'zustand';
 import type { Chat } from '@google/genai';
-import type { ActiveTab, ApiKeySource, Theme, ChatMessage, SavedChatSession } from './types.ts';
+import type {
+  ActiveTab,
+  ApiKeySource,
+  Theme,
+  ChatMessage,
+  SavedChatSession,
+  CustomInstructionProfile,
+} from './types.ts';
 import {
   reviewCodeWithGemini,
   refactorCodeWithGeminiStream,
@@ -12,7 +19,13 @@ import {
   startChatSession,
   sendMessageToChatStream,
 } from './services/geminiService.ts';
-import { getActiveInstructionProfile } from './services/instructionService.ts';
+import {
+  getActiveInstructionProfile,
+  getProfiles,
+  saveProfile,
+  deleteProfile,
+  setActiveProfile,
+} from './services/instructionService.ts';
 import { getEnvVariable } from './utils/env.ts';
 import { generateKnowledgeContext } from './services/knowledgeBaseService.ts';
 import { updateChatMessageById } from './utils/storeUtils';
@@ -57,6 +70,10 @@ interface AppState {
   activeSavedChatSessionId: string | null;
   savedSessionsSort: 'newest' | 'oldest' | 'name_asc' | 'name_desc';
 
+  // AI Agents state
+  instructionProfiles: CustomInstructionProfile[];
+  activeInstructionProfileId: string | null;
+
   // Actions
   addToast: (message: string, type?: Toast['type'], duration?: number) => void;
   removeToast: (id: string) => void;
@@ -77,16 +94,16 @@ interface AppState {
   setChatError: (error: string | null) => void;
   setShowStreamFinishNotes: (show: boolean) => void;
   setSendOnEnter: (send: boolean) => void;
-  initializeActiveApiKey: () => Promise<void>;
+  initializeActiveApiKey: () => void;
   handleSaveApiKey: (key: string) => void;
   handleRemoveApiKey: () => void;
   handleLoginSuccess: () => void;
-  handleLogout: () => Promise<void>;
+  handleLogout: () => void;
   handleCodeChange: (value: string) => void;
   handleClearCodeInput: () => void;
   handleChatInputChange: (value: string) => void;
   handleClearChatInput: () => void;
-  handleTabChange: (tab: ActiveTab) => Promise<void>;
+  handleTabChange: (tab: ActiveTab) => void;
   handleSubmitCodeInteraction: () => Promise<void>;
   extractComponentCode: (markdownContent: string) => string | null;
   handleChatSubmit: () => Promise<void>;
@@ -95,18 +112,20 @@ interface AppState {
   handleCopyChatMessage: (content: string, messageId: string) => void;
   handleTogglePreview: (messageId: string) => void;
   initializeChatSession: (systemInstruction?: string, savedChatId?: string) => Promise<void>;
-  initializeSavedChatSessions: () => Promise<void>;
-  saveChatSession: (
-    sessionName: string,
-    messagesToSave: ChatMessage[],
-    sessionId?: string,
-  ) => Promise<void>;
+  initializeSavedChatSessions: () => void;
+  saveChatSession: (sessionName: string, messagesToSave: ChatMessage[], sessionId?: string) => void;
   loadSavedChatSession: (sessionId: string) => void;
-  deleteSavedChatSession: (sessionId: string) => Promise<void>;
-  renameSavedChatSession: (sessionId: string, newName: string) => Promise<void>;
+  deleteSavedChatSession: (sessionId: string) => void;
+  renameSavedChatSession: (sessionId: string, newName: string) => void;
   setActiveSavedChatSessionId: (sessionId: string | null) => void;
-  duplicateSavedChatSession: (sessionId: string, newName?: string) => Promise<void>;
+  duplicateSavedChatSession: (sessionId: string, newName?: string) => void;
   setSavedSessionsSort: (sort: 'newest' | 'oldest' | 'name_asc' | 'name_desc') => void;
+
+  // AI Agents actions
+  initializeInstructionProfiles: () => void;
+  handleSaveInstructionProfile: (profile: CustomInstructionProfile) => void;
+  handleDeleteInstructionProfile: (id: string) => void;
+  handleSetActiveInstructionProfile: (id: string) => void;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -150,6 +169,9 @@ export const useAppStore = create<AppState>((set, get) => ({
     return isValidSort(v) ? v : 'newest';
   })(),
 
+  instructionProfiles: [],
+  activeInstructionProfileId: null,
+
   // Actions
   addToast: (message, type = 'info', duration = 3000) => {
     const id = crypto.randomUUID();
@@ -186,7 +208,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ sendOnEnter: send });
   },
 
-  initializeSavedChatSessions: async () => {
+  initializeSavedChatSessions: () => {
     try {
       const storedSessions = localStorage.getItem(LS_KEY_SAVED_CHATS);
       if (storedSessions) {
@@ -201,11 +223,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
   },
 
-  saveChatSession: async (
-    sessionName: string,
-    messagesToSave: ChatMessage[],
-    sessionId?: string,
-  ) => {
+  saveChatSession: (sessionName: string, messagesToSave: ChatMessage[], sessionId?: string) => {
     try {
       const { savedChatSessions } = get();
       let updatedSessions: SavedChatSession[];
@@ -252,7 +270,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
   },
 
-  deleteSavedChatSession: async (sessionId: string) => {
+  deleteSavedChatSession: (sessionId: string) => {
     try {
       const { savedChatSessions } = get();
       const updatedSessions = savedChatSessions.filter((session) => session.id !== sessionId);
@@ -270,7 +288,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
   },
 
-  renameSavedChatSession: async (sessionId: string, newName: string) => {
+  renameSavedChatSession: (sessionId: string, newName: string) => {
     try {
       const { savedChatSessions } = get();
       const updatedSessions = savedChatSessions.map((session) =>
@@ -285,7 +303,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
   },
 
-  duplicateSavedChatSession: async (sessionId: string, newName?: string) => {
+  duplicateSavedChatSession: (sessionId: string, newName?: string) => {
     try {
       const { savedChatSessions } = get();
       const originalSession = savedChatSessions.find((session) => session.id === sessionId);
@@ -313,10 +331,34 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ savedSessionsSort: sort });
   },
 
+  initializeInstructionProfiles: () => {
+    const profiles = getProfiles();
+    const activeProfile = getActiveInstructionProfile();
+    set({
+      instructionProfiles: profiles,
+      activeInstructionProfileId: activeProfile?.id || null,
+    });
+  },
+
+  handleSaveInstructionProfile: (profile: CustomInstructionProfile) => {
+    saveProfile(profile);
+    get().initializeInstructionProfiles();
+  },
+
+  handleDeleteInstructionProfile: (id: string) => {
+    deleteProfile(id);
+    get().initializeInstructionProfiles();
+  },
+
+  handleSetActiveInstructionProfile: (id: string) => {
+    setActiveProfile(id);
+    get().initializeInstructionProfiles();
+  },
+
   setActiveSavedChatSessionId: (sessionId: string | null) =>
     set({ activeSavedChatSessionId: sessionId }),
 
-  initializeActiveApiKey: async () => {
+  initializeActiveApiKey: () => {
     const storedKey = localStorage.getItem(LS_KEY_API);
     const envApiKey = getEnvVariable('VITE_GEMINI_API_KEY');
 
@@ -358,7 +400,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     get().initializeActiveApiKey();
   },
 
-  handleLogout: async () => {
+  handleLogout: () => {
     localStorage.removeItem(LS_KEY_LOGGED_IN);
     set({ isLoggedIn: false, activeApiKey: null, apiKeySource: 'none' });
     clearGeminiClient();
@@ -440,7 +482,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
   },
 
-  handleTabChange: async (tab: ActiveTab) => {
+  handleTabChange: (tab: ActiveTab) => {
     set({ activeTab: tab });
   },
 

@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { memo } from 'react';
 
 interface LogoProps {
   size?: 'small' | 'medium' | 'large';
   className?: string;
 }
 
-export const WesAILogo: React.FC<LogoProps> = ({ size = 'medium', className = '' }) => {
+export const WesAILogo: React.FC<LogoProps> = memo(({ size = 'medium', className = '' }) => {
   const sizes = {
     small: { width: 80, height: 24, fontSize: 16 },
     medium: { width: 120, height: 32, fontSize: 20 },
@@ -118,6 +118,6 @@ export const WesAILogo: React.FC<LogoProps> = ({ size = 'medium', className = ''
       </text>
     </svg>
   );
-};
+});
 
 export default WesAILogo;
