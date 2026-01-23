@@ -1,54 +1,84 @@
-import React, { useState, useEffect } from 'react';
-import { signInWithGoogle, getSession, getSupabaseClient } from './services/supabaseService';
+import React, { useState, useEffect, useRef } from 'react';
 import WesAILogo from './components/WesAILogo';
 
 interface LoginPageProps {
   onLoginSuccess: () => void;
 }
 
+interface GoogleSignInResponse {
+  credential?: string;
+}
+
+declare global {
+  interface Window {
+    google: {
+      accounts: {
+        id: {
+          initialize: (config: {
+            client_id: string;
+            callback: (response: GoogleSignInResponse) => void;
+            use_fedcm_for_prompt?: boolean;
+          }) => void;
+          renderButton: (
+            parent: HTMLElement,
+            options: { theme: string; size: string; width?: number },
+          ) => void;
+        };
+      };
+    };
+  }
+}
+
 export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const googleButtonRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const checkSession = async () => {
+    const initializeGoogleSignIn = () => {
+      if (window.google && googleButtonRef.current) {
+        window.google.accounts.id.initialize({
+          client_id: '408818190066-ku10cb8afqouo3qbiij131gbeqqs9lqu.apps.googleusercontent.com',
+          callback: handleCredentialResponse,
+          use_fedcm_for_prompt: true,
+        });
+        window.google.accounts.id.renderButton(googleButtonRef.current, {
+          theme: 'outline',
+          size: 'large',
+          width: googleButtonRef.current.offsetWidth,
+        });
+      }
+    };
+
+    const handleCredentialResponse = (_response: GoogleSignInResponse) => {
       try {
-        const session = await getSession();
-        if (session) {
-          onLoginSuccess();
-        } else {
-          setIsLoading(false);
-        }
+        setIsLoading(true);
+        // In a local-only app, we just accept the credential
+        // and mark the user as logged in.
+        // We could decode the JWT to get user info if needed.
+        localStorage.setItem('isLoggedIn', 'true');
+        onLoginSuccess();
       } catch (err) {
-        console.error('Error checking session:', err);
-        setError('Failed to check login status.');
+        console.error('Login failed:', err);
+        setError('Google Sign-In failed. Please try again.');
         setIsLoading(false);
       }
     };
 
-    checkSession();
-
-    const { data: authListener } = getSupabaseClient().auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session) {
-        onLoginSuccess();
-      }
-    });
-
-    return () => {
-      authListener.subscription?.unsubscribe();
-    };
-  }, [onLoginSuccess]);
-
-  const handleGoogleSignIn = async () => {
-    try {
-      setError(null);
-      await signInWithGoogle();
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'An unknown error occurred during Google sign-in.',
-      );
+    // Check if script is already loaded
+    if (window.google) {
+      initializeGoogleSignIn();
+    } else {
+      // Wait for script to load if it's not ready
+      const interval = setInterval(() => {
+        if (window.google) {
+          clearInterval(interval);
+          initializeGoogleSignIn();
+        }
+      }, 100);
+      return () => clearInterval(interval);
     }
-  };
+  }, [onLoginSuccess]);
 
   if (isLoading) {
     return (
@@ -132,37 +162,38 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
           </div>
 
           <p className="text-xl mb-8 leading-relaxed text-gray-200">
-            Your AI co-pilot for strategy, creativity, and operations. Transform complexity into
-            actionable insights and streamline your workflow like a pro.
+            The ultimate platform to build, deploy, and optimize your AI agents. Streamline complex
+            workflows and automate your productivity with custom-built intelligence.
           </p>
 
           {/* Feature Cards */}
           <div className="space-y-4 mb-8">
             <div className="flex items-center space-x-3 p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
               <div className="w-3 h-3 bg-blue-400 rounded-full animate-pulse" />
-              <span className="text-gray-200">Executive-level decision support</span>
+              <span className="text-gray-200">Custom AI Agent Builder (Markdown-ready)</span>
             </div>
             <div className="flex items-center space-x-3 p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
               <div
                 className="w-3 h-3 bg-purple-400 rounded-full animate-pulse"
                 style={{ animationDelay: '0.5s' }}
               />
-              <span className="text-gray-200">Creative ideation & content assistance</span>
+              <span className="text-gray-200">Advanced Workflow Optimization</span>
             </div>
             <div className="flex items-center space-x-3 p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
               <div
                 className="w-3 h-3 bg-pink-400 rounded-full animate-pulse"
                 style={{ animationDelay: '1s' }}
               />
-              <span className="text-gray-200">Seamless operational guidance</span>
+              <span className="text-gray-200">Privacy-First, Local-Only Data Storage</span>
             </div>
           </div>
 
           {/* Call to Action */}
           <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-            <p className="text-white font-medium mb-2">Now with Cloud Storage</p>
+            <p className="text-white font-medium mb-2">Private & Local</p>
             <p className="text-gray-300 text-sm">
-              Your conversations sync across all devices. Never lose your insights again.
+              Your conversations are stored only on your device. Complete privacy, no cloud
+              required.
             </p>
           </div>
         </div>
@@ -173,9 +204,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         <div className="w-full max-w-md space-y-8 bg-gray-50 dark:bg-gray-900 shadow-2xl rounded-lg p-8">
           <header className="text-center">
             <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 py-2">
-              Sign In
+              Enter Workspace
             </h2>
-            <p className="text-gray-500 dark:text-gray-400 mt-1">Sign in to continue</p>
+            <p className="text-gray-500 dark:text-gray-400 mt-1">Sign in to build and optimize</p>
           </header>
 
           {error && (
@@ -184,31 +215,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             </p>
           )}
 
-          <button
-            type="button"
-            onClick={handleGoogleSignIn}
-            className="w-full flex justify-center items-center py-2.5 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-100 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800 transition duration-150"
-          >
-            <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
-              <path
-                d="M22.46 12.21c0-.75-.06-1.5-.18-2.2H12v4.18h5.92a5.05 5.05 0 0 1-2.19 3.32v2.7h3.48c2.04-1.88 3.22-4.7 3.22-8.08z"
-                fill="#4285F4"
-              />
-              <path
-                d="M12 23c3.24 0 5.92-1.07 7.89-2.91l-3.48-2.7c-.96.64-2.18 1.02-4.41 1.02-3.41 0-6.3-2.3-7.37-5.42H.93v2.79C2.93 20.67 7.15 23 12 23z"
-                fill="#34A853"
-              />
-              <path
-                d="M4.63 13.91a7.33 7.33 0 0 1 0-4.82V6.3H.93A11.97 11.97 0 0 0 0 12c0 2.45.6 4.77 1.63 6.7z"
-                fill="#FBBC04"
-              />
-              <path
-                d="M12 4.58c1.77 0 3.34.61 4.59 1.79l3.07-3.07C17.92 1.48 15.17 0 12 0 7.15 0 2.93 2.33.93 6.3l3.7 2.91c1.07-3.12 3.96-5.43 7.37-5.43z"
-                fill="#EA4335"
-              />
-            </svg>
-            Sign in with Google
-          </button>
+          <div className="flex flex-col items-center justify-center space-y-4">
+            <div ref={googleButtonRef} className="w-full flex justify-center" />
+          </div>
         </div>
       </div>
     </div>

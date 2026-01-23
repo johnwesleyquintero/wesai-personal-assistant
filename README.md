@@ -1,44 +1,37 @@
 # WesAI 🚀
 
-Your AI-powered personal assistant and creative partner with **cloud storage** and **cross-device sync**.
+The ultimate **AI Agent Builder** and **Workflow Optimizer** with **local storage** and **private sessions**.
 
-WesAI is a product of [ScaleSmart](https://wescode.vercel.app/). It's a web application that uses Google's AI models (Gemini for text and Imagen for images) to help you with intelligent assistance, creating content, generating images, and having interactive conversations. Now with **persistent cloud storage** powered by Supabase!
+WesAI is a product of [ScaleSmart](https://wescode.vercel.app/). It's a powerful web application that empowers you to build, deploy, and optimize custom AI agents using Google's Gemini models. Streamline your professional workflows and automate complex tasks with specialized intelligence, all while keeping your data 100% on your device.
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/2ec1707c-0c5a-49a4-821e-ee7d82bdd95d/deploy-status)](https://app.netlify.com/projects/wesai-pa/deploys)
+## 🌟 Private & Local
 
-## 🌟 What's New - Cloud Storage & Sync!
-
-**🔄 Cross-Device Sync**: Your chat sessions now sync across all your devices when you log in
-**☁️ Cloud Persistence**: Never lose your chat history again - everything is stored securely in the cloud
-**🔐 Enhanced Security**: Row-level security ensures your data stays private and isolated
-**📱 Access Anywhere**: Start a conversation on your laptop, continue on your phone
+**🔒 Local Persistence**: Your chat sessions and agent configurations are stored securely on your device using LocalStorage.
+**🕵️ Privacy First**: No cloud database means your conversations and proprietary workflows stay between you and your AI.
+**⚡ Fast & Offline-Ready**: Access your agents and saved sessions instantly without waiting for cloud sync.
 
 ## 🚀 What WesAI Can Do
 
 ### Core Features
 
-- **🔐 Secure Access**: Google OAuth authentication with persistent sessions
-- **🔑 API Key Management**: Safely save and manage your Google Gemini API key
-- **🎨 Customizable Look**: Switch between light and dark themes
-- **🤖 AI-Powered Assistance**:
-  - **Content Creation**: Generate blog posts, emails, documentation, social media content
-  - **Image Generation**: Create unique images from text descriptions
-  - **Interactive Chat**: Have conversations about your content with live previews
-- **💾 Cloud Storage**: All chat sessions automatically saved and synced
+- **🤖 AI Agent Builder**: Create custom AI agents with specialized system instructions using Markdown.
+- **⚙️ Workflow Optimizer**: Streamline complex tasks and professional workflows with targeted AI assistance.
+- **🔐 Secure Access**: Google-styled authentication with persistent local sessions.
+- **🔑 API Key Management**: Safely save and manage your Google Gemini API key.
+- **🎨 Customizable Look**: Switch between light and dark themes.
+- **💾 Local Storage**: All agent profiles and chat sessions automatically saved to your browser.
 
 ### Advanced Features
 
-- **📊 Session Management**: Save, rename, duplicate, and delete chat sessions
-- **🔄 Real-time Sync**: Changes appear instantly across all logged-in devices
-- **🔍 Search & Organize**: Find your conversations easily with organized session names
-- **📱 Responsive Design**: Works perfectly on desktop, tablet, and mobile
+- **📊 Session Management**: Save, rename, duplicate, and delete chat sessions.
+- **🔍 Search & Organize**: Find your conversations easily with organized session names.
+- **📱 Responsive Design**: Works perfectly on desktop, tablet, and mobile.
 
 ## 🛠️ Tech Stack
 
 - **Frontend**: React + TypeScript + Vite
 - **Styling**: Tailwind CSS with theme support
-- **AI Models**: Google Gemini API (text) + Imagen API (images)
-- **Backend**: Supabase (PostgreSQL + Authentication + Real-time)
+- **AI Models**: Google Gemini API (Text & Chat)
 - **State Management**: Zustand with persistent storage
 - **Deployment**: Netlify
 
@@ -64,43 +57,26 @@ WesAI is a product of [ScaleSmart](https://wescode.vercel.app/). It's a web appl
    npm install
    ```
 
-3. **Set up environment variables**
-   Create a `.env` file in the root directory:
-
-   ```bash
-   VITE_SUPABASE_URL=your_supabase_url
-   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-   ```
-
-4. **Start the development server**
+3. **Start the development server**
 
    ```bash
    npm run dev
    ```
 
-5. **Open your browser**
+4. **Open your browser**
    Navigate to `http://localhost:5173`
-
-### Supabase Setup (For Cloud Storage)
-
-1. **Create a Supabase project** at [supabase.com](https://supabase.com)
-2. **Run the database schema** using the provided `supabase_schema.sql` file
-3. **Configure Google OAuth** in your Supabase project settings
-4. **Update your environment variables** with your Supabase credentials
-
-Detailed setup instructions are in [`SUPABASE_SETUP.md`](SUPABASE_SETUP.md)
 
 ## 📖 How to Use
 
 ### For New Users
 
-1. **Login**: Use Google OAuth or demo credentials (user: `demo`, password: `password`)
+1. **Login**: Use Google Sign-In to start your session
 2. **Set API Key**: Add your Google Gemini API key in settings
 3. **Choose Your Mode**:
    - **Content**: Generate written content
    - **Image**: Create images from descriptions
    - **Chat**: Interactive conversations
-4. **Save Sessions**: Your work is automatically saved to the cloud
+4. **Save Sessions**: Your work is automatically saved to your local storage
 
 ### For Power Users
 
@@ -111,39 +87,40 @@ Detailed setup instructions are in [`SUPABASE_SETUP.md`](SUPABASE_SETUP.md)
 
 ## 🏗️ Architecture Overview
 
-### Cloud Storage Architecture
+### Local Storage Architecture
 
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Your Device   │    │   Supabase      │    │   Google APIs   │
-│                 │◄──►│   PostgreSQL    │    │   Gemini/Imagen │
-│  React + TS     │    │   Authentication│◄──►│                 │
-│  Zustand Store  │    │   Row Level     │    │                 │
-│  Local Storage  │    │   Security      │    │                 │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
+┌─────────────────┐    ┌─────────────────┐
+│   Your Device   │    │   Google APIs   │
+│                 │    │   Gemini API    │
+│  React + TS     │◄──►│                 │
+│  Zustand Store  │    │                 │
+│  Local Storage  │    │                 │
+└─────────────────┘    └─────────────────┘
 ```
+
+The application is built as a pure client-side application. All data persistence is handled via the browser's `LocalStorage` API, and authentication is managed via Google's Identity Services. No server-side database is used, ensuring maximum privacy and speed.
 
 ### Data Flow
 
-1. **Authentication**: Google OAuth → Supabase Auth → Session Management
-2. **Chat Storage**: User Input → Zustand → Supabase → Cross-device Sync
-3. **AI Processing**: User Input → Gemini API → Response → Cloud Storage
+1. **Authentication**: Google Sign-In → Local Session Management
+2. **Chat Storage**: User Input → Zustand → LocalStorage
+3. **AI Processing**: User Input → Gemini API → Response → Local Storage
 
 ## 🔒 Security & Privacy
 
 ### Data Protection
 
-- **Row Level Security**: Users can only access their own data
-- **Encrypted Storage**: All data encrypted at rest in PostgreSQL
-- **Secure Authentication**: Google OAuth with JWT tokens
-- **API Key Isolation**: API keys never touch our servers
+- **Local Storage**: All your data stays on your device
+- **Secure Authentication**: Google Identity Services for sign-in
+- **API Key Isolation**: API keys are stored only in your browser's LocalStorage
 
 ### Privacy Policy
 
 - **No Data Mining**: We don't analyze or sell your data
 - **No Tracking**: No analytics, cookies, or third-party tracking
-- **Local First**: API keys stored only in your browser
-- **User Control**: You can delete all your data at any time
+- **Local First**: Everything is stored only in your browser
+- **User Control**: You can delete all your data at any time by clearing your browser cache or logging out
 
 ## 🚀 Deployment
 
@@ -161,10 +138,7 @@ Detailed setup instructions are in [`SUPABASE_SETUP.md`](SUPABASE_SETUP.md)
 
 2. **Deploy to your hosting provider**
    - Upload the `dist` folder to your web server
-   - Configure environment variables
-   - Set up your Supabase project
-
-See [`DEPLOYMENT_CHECKLIST.md`](DEPLOYMENT_CHECKLIST.md) for detailed deployment instructions.
+   - Configure environment variables (if any)
 
 ## 🧪 Development
 
@@ -186,11 +160,10 @@ npm run format    # Prettier
 wesai-personal-assistant/
 ├── src/                    # Source code
 │   ├── components/          # React components
-│   ├── services/           # API and Supabase services
+│   ├── services/           # API services
 │   ├── hooks/              # Custom React hooks
 │   └── types/              # TypeScript type definitions
 ├── public/                 # Static assets
-├── supabase_schema.sql     # Database schema
 └── docs/                   # Documentation
 ```
 
@@ -208,8 +181,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- **Google AI**: Gemini and Imagen APIs for AI capabilities
-- **Supabase**: PostgreSQL database and authentication
+- **Google AI**: Gemini API for advanced AI capabilities
 - **React Community**: Excellent ecosystem and tools
 - **Tailwind CSS**: Beautiful, utility-first CSS framework
 

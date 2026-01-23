@@ -1,7 +1,6 @@
 import React, { useState, memo } from 'react';
 import type { ApiKeySource } from '../types.ts';
 import { useAppStore } from '../store.ts';
-import CustomInstructionsPanel from './CustomInstructionsPanel';
 import { SVG_ICONS } from '../src/constants';
 
 interface SettingsModalProps {
@@ -14,7 +13,7 @@ interface SettingsModalProps {
   onLogout: () => void;
 }
 
-type ModalTab = 'settings' | 'helpCenter' | 'customInstructions';
+type ModalTab = 'settings' | 'helpCenter';
 
 export const SettingsModal: React.FC<SettingsModalProps> = memo(
   ({ isOpen, onClose, onSaveKey, onRemoveKey, isKeySet, currentKeySource, onLogout }) => {
@@ -83,16 +82,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = memo(
               }`}
             >
               Help Center
-            </button>
-            <button
-              onClick={() => setActiveTab('customInstructions')}
-              className={`px-4 py-2 text-sm font-medium ${
-                activeTab === 'customInstructions'
-                  ? 'border-b-2 border-purple-500 text-purple-600 dark:text-purple-400'
-                  : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
-              }`}
-            >
-              Custom Instructions
             </button>
           </div>
 
@@ -400,7 +389,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = memo(
                 </p>
               </div>
             )}
-            {activeTab === 'customInstructions' && <CustomInstructionsPanel />}
           </div>
 
           {showConfirmRemove && (

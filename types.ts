@@ -6,8 +6,7 @@ export type ActiveTab =
   | 'chat'
   | 'documentation'
   | 'content'
-  | 'image'
-  | 'custom-instructions';
+  | 'ai-agents';
 export type ApiKeySource = 'ui' | 'env' | 'none';
 export type Theme = 'light' | 'dark';
 
@@ -33,8 +32,6 @@ export interface CustomInstructionProfile {
   instructions: string;
   isActive: boolean; // Only one can be true at a time
 }
-
-export type AspectRatio = '1:1' | '16:9' | '4:3' | '3:2' | '2:3' | '9:16' | '3:4';
 
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 

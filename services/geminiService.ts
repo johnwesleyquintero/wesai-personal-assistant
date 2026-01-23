@@ -1,14 +1,12 @@
 import type { GenerateContentResponse, Chat } from '@google/genai';
-import { GoogleGenAI, Modality } from '@google/genai';
+import { GoogleGenAI } from '@google/genai';
 import { getActiveInstructionProfile } from './instructionService';
-import type { AspectRatio } from '../types'; // Assuming AspectRatio is defined in types.ts
+import { useAppStore } from '../store';
 
 let ai: GoogleGenAI | null = null;
 
 // --- UPDATED MODEL CONSTANTS (2025) ---
 const MODEL_NAME_TEXT = 'gemini-2.5-flash'; // Main free-tier text model
-const MODEL_NAME_IMAGE_GENERATION = 'imagen-4.0-generate-001'; // Imagen for advanced image generation
-const MODEL_NAME_IMAGE_FLASH = 'gemini-2.5-flash-image'; // Flash for 1:1 image generation/editing
 const MODEL_NAME_FALLBACK = 'gemini-2.5-flash-lite'; // Cheaper fallback
 
 export const initializeGeminiClient = (apiKey: string): void => {
@@ -70,27 +68,9 @@ const handleApiError = (error: unknown, context: string): Error => {
       : typeof (e as { response?: { status?: number } }).response === 'object'
         ? (e as { response?: { status?: number } }).response?.status
         : undefined;
-  const rawErrorText = (() => {
-    try {
-      return JSON.stringify(error).toLowerCase();
-    } catch {
-      return '';
-    }
-  })();
 
   // 1. Rate Limiting (429) & Server Overload (503)
   if (status === 429 || status === 503) {
-    // Check for specific "limit: 0" quota error for image generation
-    if (
-      rawErrorText.includes('quota exceeded') &&
-      rawErrorText.includes('limit: 0') &&
-      (context.includes('image') || context.includes('imagen'))
-    ) {
-      return new Error(
-        'Image generation/editing is not available on the free tier. Please enable billing for your Google Cloud project to use this feature.',
-        { cause: error },
-      );
-    }
     return new Error('System is currently busy or rate-limited. Please try again shortly.', {
       cause: error,
     });
@@ -333,167 +313,6 @@ Generated Content:
   }
 };
 
-/**
- * Handles image generation using the powerful Imagen model, which supports aspect ratios.
- * Throws a specific error for billing issues.
- */
-async function generateWithImagen(
-  ai: GoogleGenAI,
-  prompt: string,
-  aspectRatio: AspectRatio,
-  negativePrompt?: string,
-): Promise<string> {
-  try {
-    const response = await ai.models.generateImages({
-      model: MODEL_NAME_IMAGE_GENERATION,
-      prompt: prompt,
-      config: {
-        numberOfImages: 1,
-        outputMimeType: 'image/jpeg',
-        aspectRatio: aspectRatio,
-        negativePrompt: negativePrompt,
-      },
-    });
-
-    const generatedImage = response.generatedImages?.[0];
-    if (generatedImage?.image?.imageBytes) {
-      const base64ImageBytes = generatedImage.image.imageBytes;
-      return `data:image/jpeg;base64,${base64ImageBytes}`;
-    } else {
-      throw new Error('Gemini API (Imagen) did not return an image.');
-    }
-  } catch (error) {
-    throw handleApiError(error, 'image generation (Imagen)');
-  }
-}
-
-/**
- * Handles image generation using the accessible Flash model for 1:1 images.
- */
-async function generateWithFlash(
-  ai: GoogleGenAI,
-  prompt: string,
-  negativePrompt?: string,
-): Promise<string> {
-  try {
-    const finalPrompt = negativePrompt
-      ? `${prompt}\n\n---\nNegative Prompt: Do not include the following elements: ${negativePrompt}`
-      : prompt;
-
-    const response = await ai.models.generateContent({
-      model: MODEL_NAME_IMAGE_FLASH,
-      contents: {
-        parts: [{ text: finalPrompt }],
-      },
-      config: {
-        responseModalities: [Modality.IMAGE],
-      },
-    });
-
-    for (const part of response.candidates?.[0]?.content?.parts ?? []) {
-      if (part.inlineData?.data) {
-        // Safely access .data
-        const base64ImageBytes = part.inlineData.data;
-        const mimeType = part.inlineData.mimeType || 'image/jpeg';
-        return `data:${mimeType};base64,${base64ImageBytes}`;
-      }
-    }
-
-    throw new Error('Gemini API (Flash) did not return an image.');
-  } catch (error) {
-    throw handleApiError(error, 'image generation (Flash)');
-  }
-}
-
-/**
- * Generates an image using the Google Gemini API.
- * It intelligently switches between models: `gemini-2.5-flash-image` for standard 1:1 images
- * and `imagen-4.0` for requests with specific aspect ratios.
- * @param prompt The text prompt to generate an image from.
- * @param aspectRatio The desired aspect ratio for the image.
- * @param negativePrompt An optional prompt of what to avoid in the image.
- * @returns A promise that resolves to a data URL of the generated image.
- */
-export async function generateImageWithGemini(
-  prompt: string,
-  aspectRatio: AspectRatio,
-  negativePrompt?: string,
-): Promise<string> {
-  const currentAi = getAiInstance(); // Get the initialized AI instance
-  const fullPrompt = createPrompt(prompt);
-
-  // If a specific aspect ratio is requested, use the powerful Imagen model.
-  // Otherwise, use the more accessible Flash model for standard 1:1 generation.
-  if (aspectRatio !== '1:1') {
-    return generateWithImagen(currentAi, fullPrompt, aspectRatio, negativePrompt);
-  } else {
-    return generateWithFlash(currentAi, fullPrompt, negativePrompt);
-  }
-}
-
-/**
- * Converts a data URL to a base64 string and its MIME type.
- * @param dataUrl The data URL string.
- * @returns An object with the base64 data and MIME type, or null if parsing fails.
- */
-function parseDataUrl(dataUrl: string): { data: string; mimeType: string } | null {
-  const match = dataUrl.match(/^data:(.+);base64,(.+)$/);
-  if (!match) return null;
-  return { mimeType: match[1], data: match[2] };
-}
-
-/**
- * Edits an image using the Google Gemini API (gemini-2.5-flash-image model).
- * @param originalImageSrc The data URL of the original image.
- * @param editPrompt The text prompt describing the desired edit.
- * @returns A promise that resolves to a data URL of the edited image.
- */
-export async function editImageWithGemini(
-  originalImageSrc: string,
-  editPrompt: string,
-): Promise<string> {
-  const imageParts = parseDataUrl(originalImageSrc);
-  if (!imageParts) {
-    throw new Error('Invalid image source format. Must be a data URL.');
-  }
-
-  try {
-    const currentAi = getAiInstance(); // Get the initialized AI instance
-
-    const response = await currentAi.models.generateContent({
-      model: MODEL_NAME_IMAGE_FLASH,
-      contents: {
-        parts: [
-          {
-            inlineData: {
-              data: imageParts.data,
-              mimeType: imageParts.mimeType,
-            },
-          },
-          {
-            text: createPrompt(editPrompt),
-          },
-        ],
-      },
-      config: {
-        responseModalities: [Modality.IMAGE],
-      },
-    });
-
-    for (const part of response.candidates?.[0]?.content?.parts ?? []) {
-      if (part.inlineData) {
-        const base64ImageBytes = part.inlineData.data;
-        const mimeType = part.inlineData.mimeType || 'image/jpeg';
-        return `data:${mimeType};base64,${base64ImageBytes}`;
-      }
-    }
-
-    throw new Error('Gemini API did not return an edited image.');
-  } catch (error) {
-    throw handleApiError(error, 'image editing');
-  }
-}
-
 // --- Chat Functions ---
 
 export const startChatSession = async (
@@ -571,4 +390,12 @@ export const sendMessageToChatStream = async (
     }
     throw handleApiError(error, 'send message to chat stream');
   }
+};
+
+/**
+ * Checks if the API key is configured.
+ */
+export const isGeminiApiKeyConfigured = (): boolean => {
+  const { activeApiKey } = useAppStore.getState();
+  return !!activeApiKey && activeApiKey.trim() !== '';
 };

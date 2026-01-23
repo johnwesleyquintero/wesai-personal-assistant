@@ -8,6 +8,11 @@ export default defineConfig({
   // Useful if your app is not served from the root.
   base: './',
   plugins: [react()],
+  server: {
+    headers: {
+      'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
+    },
+  },
   resolve: {
     alias: {
       // Set up an alias for the 'src' directory to simplify imports

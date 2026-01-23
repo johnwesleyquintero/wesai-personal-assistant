@@ -7,14 +7,13 @@ import { useAppStore, LS_KEY_LOGGED_IN } from './store.ts';
 import { useTheme } from './components/hooks/useTheme.ts';
 import { useChatLogic } from './components/hooks/useChatLogic.ts';
 import { useCodeInteractionLogic } from './components/hooks/useCodeInteractionLogic.ts';
-import { useImageGenerationLogic } from './components/hooks/useImageGenerationLogic.ts';
 
 // Import new components
 import { SettingsModal } from './components/SettingsModal.tsx';
 import { TabNavigation } from './components/TabNavigation.tsx';
 import { CodeInteractionPanel } from './components/CodeInteractionPanel.tsx';
 import { ChatInterfacePanel } from './components/ChatInterfacePanel.tsx';
-import { ImageGenerationPanel } from './components/ImageGenerationPanel.tsx';
+import AiAgentsPanel from './components/AiAgentsPanel.tsx';
 
 const App: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
@@ -75,16 +74,6 @@ const App: React.FC = () => {
     setSavedSessionsSort,
   } = useChatLogic();
 
-  const {
-    imagePrompt,
-    generatedImageData,
-    onPromptChange: handleImagePromptChange,
-    onClearPrompt: handleClearImagePrompt,
-    onSubmit: handleImageGenerationSubmit,
-    imageError,
-    setImageError,
-  } = useImageGenerationLogic();
-
   useEffect(() => {
     const loggedInStatus = localStorage.getItem(LS_KEY_LOGGED_IN);
     if (loggedInStatus === 'true') {
@@ -127,7 +116,7 @@ const App: React.FC = () => {
           tabs={[
             { id: 'chat', label: 'Chat' },
             { id: 'content', label: 'Generate Content' },
-            { id: 'image', label: 'Image Generation' },
+            { id: 'ai-agents', label: 'AI Agents' },
           ]}
         />
 
@@ -147,19 +136,7 @@ const App: React.FC = () => {
             />
           )}
 
-          {activeTab === 'image' && (
-            <ImageGenerationPanel
-              prompt={imagePrompt}
-              onPromptChange={handleImagePromptChange}
-              onClearPrompt={handleClearImagePrompt}
-              onSubmit={handleImageGenerationSubmit}
-              isLoading={isLoading}
-              isApiKeyConfigured={isApiKeyConfigured}
-              imageData={generatedImageData}
-              error={imageError}
-              setError={setImageError}
-            />
-          )}
+          {activeTab === 'ai-agents' && <AiAgentsPanel />}
 
           {activeTab === 'chat' && (
             <ChatInterfacePanel

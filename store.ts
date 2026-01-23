@@ -1,22 +1,12 @@
 import { create } from 'zustand';
 import type { Chat } from '@google/genai';
-import type {
-  ActiveTab,
-  ApiKeySource,
-  Theme,
-  ChatMessage,
-  AspectRatio,
-  SavedChatSession,
-  TablesInsert,
-  TablesUpdate,
-} from './types.ts';
+import type { ActiveTab, ApiKeySource, Theme, ChatMessage, SavedChatSession } from './types.ts';
 import {
   reviewCodeWithGemini,
   refactorCodeWithGeminiStream,
   getReactComponentPreview,
   generateCodeWithGemini,
   generateContentWithGemini,
-  generateImageWithGemini,
   initializeGeminiClient,
   clearGeminiClient,
   startChatSession,
@@ -25,7 +15,6 @@ import {
 import { getActiveInstructionProfile } from './services/instructionService.ts';
 import { getEnvVariable } from './utils/env.ts';
 import { generateKnowledgeContext } from './services/knowledgeBaseService.ts';
-import { signOut, initializeSupabaseClient, getSupabaseClient } from './services/supabaseService';
 import { updateChatMessageById } from './utils/storeUtils';
 
 export const LS_KEY_API = 'geminiApiKey';
@@ -59,11 +48,6 @@ interface AppState {
   activeSavedChatSessionId: string | null;
   savedSessionsSort: 'newest' | 'oldest' | 'name_asc' | 'name_desc';
 
-  // Image generation specific state
-  imagePrompt: string;
-  generatedImageData: string | null;
-  imageError: string | null;
-
   // Actions
   setCode: (code: string) => void;
   setFeedback: (feedback: string) => void;
@@ -79,9 +63,6 @@ interface AppState {
   setActiveChatSession: (session: Chat | null) => void;
   setCopiedMessageId: (id: string | null) => void;
   setChatError: (error: string | null) => void;
-  setImagePrompt: (prompt: string) => void;
-  setGeneratedImageData: (data: string | null) => void;
-  setImageError: (error: string | null) => void;
   setShowStreamFinishNotes: (show: boolean) => void;
   setSendOnEnter: (send: boolean) => void;
   initializeActiveApiKey: () => Promise<void>;
@@ -91,13 +72,10 @@ interface AppState {
   handleLogout: () => Promise<void>;
   handleCodeChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
   handleClearCodeInput: () => void;
-  handleImagePromptChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
-  handleClearImagePrompt: () => void;
   handleChatInputChange: (value: string) => void;
   handleClearChatInput: () => void;
   handleTabChange: (tab: ActiveTab) => Promise<void>;
   handleSubmitCodeInteraction: () => Promise<void>;
-  handleImageGenerationSubmit: (aspectRatio: AspectRatio, negativePrompt: string) => Promise<void>;
   extractComponentCode: (markdownContent: string) => string | null;
   handleChatSubmit: () => Promise<void>;
   handleNewChat: () => void;
@@ -127,7 +105,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   error: null,
   activeApiKey: null,
   apiKeySource: 'none',
-  isLoggedIn: false,
+  isLoggedIn: false, // Default to false, will be updated by App.tsx useEffect
   activeTab: 'chat',
   theme: (() => {
     const storedTheme = localStorage.getItem('theme') as Theme | null;
@@ -158,10 +136,6 @@ export const useAppStore = create<AppState>((set, get) => ({
     return isValidSort(v) ? v : 'newest';
   })(),
 
-  imagePrompt: '',
-  generatedImageData: null,
-  imageError: null,
-
   // Actions
   setCode: (code: string) => set({ code }),
   setFeedback: (feedback: string) => set({ feedback }),
@@ -177,9 +151,6 @@ export const useAppStore = create<AppState>((set, get) => ({
   setActiveChatSession: (session: Chat | null) => set({ activeChatSession: session }),
   setCopiedMessageId: (id: string | null) => set({ copiedMessageId: id }),
   setChatError: (error: string | null) => set({ chatError: error }),
-  setImagePrompt: (prompt: string) => set({ imagePrompt: prompt }),
-  setGeneratedImageData: (data: string | null) => set({ generatedImageData: data }),
-  setImageError: (error: string | null) => set({ imageError: error }),
   setShowStreamFinishNotes: (show: boolean) => {
     localStorage.setItem(LS_KEY_STREAM_NOTES, String(show));
     set({ showStreamFinishNotes: show });
@@ -190,30 +161,16 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   initializeSavedChatSessions: async () => {
-    const { isLoggedIn } = get();
-    if (!isLoggedIn) {
-      set({ savedChatSessions: [] });
-      return;
-    }
-
     try {
-      const supabase = getSupabaseClient();
-      const { data, error } = await supabase
-        .from('chat_sessions')
-        .select('id, name, created_at, messages')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      const parsedSessions: SavedChatSession[] = data.map((session) => ({
-        id: session.id,
-        name: session.name,
-        timestamp: new Date(session.created_at).getTime(),
-        messages: Array.isArray(session.messages) ? (session.messages as ChatMessage[]) : [],
-      }));
-      set({ savedChatSessions: parsedSessions });
+      const storedSessions = localStorage.getItem(LS_KEY_SAVED_CHATS);
+      if (storedSessions) {
+        const parsedSessions: SavedChatSession[] = JSON.parse(storedSessions);
+        set({ savedChatSessions: parsedSessions });
+      } else {
+        set({ savedChatSessions: [] });
+      }
     } catch (err) {
-      console.error('Failed to load saved chat sessions from Supabase:', err);
+      console.error('Failed to load saved chat sessions from localStorage:', err);
       set({ savedChatSessions: [], chatError: 'Error loading saved chat sessions.' });
     }
   },
@@ -223,48 +180,32 @@ export const useAppStore = create<AppState>((set, get) => ({
     messagesToSave: ChatMessage[],
     sessionId?: string,
   ) => {
-    const { isLoggedIn } = get();
-    if (!isLoggedIn) {
-      console.warn('Cannot save chat session: user not logged in.');
-      set({ chatError: 'Login required to save chat sessions.' });
-      return;
-    }
-
     try {
-      const supabase = getSupabaseClient();
-      const { data: userSessionData, error: userSessionError } = await supabase.auth.getSession();
-
-      if (userSessionError) throw userSessionError;
-      if (!userSessionData.session?.user.id) throw new Error('User not authenticated.');
-      const userId = userSessionData.session.user.id;
-
-      const newSessionData: TablesInsert<'chat_sessions'> = {
-        user_id: userId,
-        name: sessionName,
-        messages: messagesToSave,
-      };
+      const { savedChatSessions } = get();
+      let updatedSessions: SavedChatSession[];
 
       if (sessionId) {
         // Update existing session
-        const { error } = await supabase
-          .from('chat_sessions')
-          .update(newSessionData)
-          .eq('id', sessionId);
-        if (error) throw error;
+        updatedSessions = savedChatSessions.map((session) =>
+          session.id === sessionId
+            ? { ...session, name: sessionName, messages: messagesToSave, timestamp: Date.now() }
+            : session,
+        );
       } else {
         // Insert new session
-        const { data, error } = await supabase
-          .from('chat_sessions')
-          .insert(newSessionData)
-          .select('id, name, created_at, messages');
-        if (error) throw error;
-        sessionId = data?.[0].id; // Get the ID of the newly inserted session
+        const newSession: SavedChatSession = {
+          id: crypto.randomUUID(),
+          name: sessionName,
+          timestamp: Date.now(),
+          messages: messagesToSave,
+        };
+        updatedSessions = [newSession, ...savedChatSessions];
       }
 
-      // Refresh local state
-      get().initializeSavedChatSessions();
+      localStorage.setItem(LS_KEY_SAVED_CHATS, JSON.stringify(updatedSessions));
+      set({ savedChatSessions: updatedSessions });
     } catch (err) {
-      console.error('Failed to save chat session to Supabase:', err);
+      console.error('Failed to save chat session to localStorage:', err);
       set({ chatError: 'Error saving chat session.' });
     }
   },
@@ -286,18 +227,11 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   deleteSavedChatSession: async (sessionId: string) => {
-    const { isLoggedIn } = get();
-    if (!isLoggedIn) {
-      console.warn('Cannot delete chat session: user not logged in.');
-      set({ chatError: 'Login required to delete chat sessions.' });
-      return;
-    }
-
     try {
-      const supabase = getSupabaseClient();
-      const { error } = await supabase.from('chat_sessions').delete().eq('id', sessionId);
-      if (error) throw error;
+      const { savedChatSessions } = get();
+      const updatedSessions = savedChatSessions.filter((session) => session.id !== sessionId);
 
+      localStorage.setItem(LS_KEY_SAVED_CHATS, JSON.stringify(updatedSessions));
       // Refresh local state
       get().initializeSavedChatSessions();
       set((state) => ({
@@ -305,72 +239,45 @@ export const useAppStore = create<AppState>((set, get) => ({
           state.activeSavedChatSessionId === sessionId ? null : state.activeSavedChatSessionId,
       }));
     } catch (err) {
-      console.error('Failed to delete chat session from Supabase:', err);
+      console.error('Failed to delete chat session from localStorage:', err);
       set({ chatError: 'Error deleting chat session.' });
     }
   },
 
   renameSavedChatSession: async (sessionId: string, newName: string) => {
-    const { isLoggedIn } = get();
-    if (!isLoggedIn) {
-      console.warn('Cannot rename chat session: user not logged in.');
-      set({ chatError: 'Login required to rename chat sessions.' });
-      return;
-    }
-
     try {
-      const supabase = getSupabaseClient();
-      const { error } = await supabase
-        .from('chat_sessions')
-        .update({ name: newName } as TablesUpdate<'chat_sessions'>)
-        .eq('id', sessionId);
-      if (error) throw error;
+      const { savedChatSessions } = get();
+      const updatedSessions = savedChatSessions.map((session) =>
+        session.id === sessionId ? { ...session, name: newName } : session,
+      );
 
-      // Refresh local state
-      get().initializeSavedChatSessions();
+      localStorage.setItem(LS_KEY_SAVED_CHATS, JSON.stringify(updatedSessions));
+      set({ savedChatSessions: updatedSessions });
     } catch (err) {
-      console.error('Failed to rename chat session in Supabase:', err);
+      console.error('Failed to rename chat session in localStorage:', err);
       set({ chatError: 'Error renaming chat session.' });
     }
   },
 
   duplicateSavedChatSession: async (sessionId: string, newName?: string) => {
-    const { isLoggedIn } = get();
-    if (!isLoggedIn) {
-      console.warn('Cannot duplicate chat session: user not logged in.');
-      set({ chatError: 'Login required to duplicate chat sessions.' });
-      return;
-    }
-
     try {
-      const supabase = getSupabaseClient();
-      const { data: originalSession, error: fetchError } = await supabase
-        .from('chat_sessions')
-        .select('name, messages')
-        .eq('id', sessionId)
-        .single();
+      const { savedChatSessions } = get();
+      const originalSession = savedChatSessions.find((session) => session.id === sessionId);
 
-      if (fetchError) throw fetchError;
       if (!originalSession) throw new Error('Original session not found.');
 
-      const { data: userSessionData, error: userSessionError } = await supabase.auth.getSession();
-      if (userSessionError) throw userSessionError;
-      if (!userSessionData.session?.user.id) throw new Error('User not authenticated.');
-      const userId = userSessionData.session.user.id;
-
-      const copyData: TablesInsert<'chat_sessions'> = {
-        user_id: userId,
+      const newSession: SavedChatSession = {
+        id: crypto.randomUUID(),
         name: newName && newName.trim() ? newName.trim() : `Copy of ${originalSession.name}`,
-        messages: originalSession.messages,
+        timestamp: Date.now(),
+        messages: [...originalSession.messages],
       };
 
-      const { error: insertError } = await supabase.from('chat_sessions').insert(copyData);
-      if (insertError) throw insertError;
-
-      // Refresh local state
-      get().initializeSavedChatSessions();
+      const updatedSessions = [newSession, ...savedChatSessions];
+      localStorage.setItem(LS_KEY_SAVED_CHATS, JSON.stringify(updatedSessions));
+      set({ savedChatSessions: updatedSessions });
     } catch (err) {
-      console.error('Failed to duplicate chat session in Supabase:', err);
+      console.error('Failed to duplicate chat session in localStorage:', err);
       set({ chatError: 'Error duplicating chat session.' });
     }
   },
@@ -384,18 +291,6 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ activeSavedChatSessionId: sessionId }),
 
   initializeActiveApiKey: async () => {
-    initializeSupabaseClient();
-    const { data: sessionData, error: sessionError } = await getSupabaseClient().auth.getSession();
-
-    if (sessionError) {
-      console.error('Error getting Supabase session:', sessionError.message);
-      set({ isLoggedIn: false, error: 'Failed to check login status.' });
-    } else if (sessionData.session) {
-      set({ isLoggedIn: true });
-    } else {
-      set({ isLoggedIn: false });
-    }
-
     const storedKey = localStorage.getItem(LS_KEY_API);
     const envApiKey = getEnvVariable('VITE_GEMINI_API_KEY');
 
@@ -413,8 +308,6 @@ export const useAppStore = create<AppState>((set, get) => ({
     if (get().activeApiKey) {
       get().initializeChatSession();
     }
-    // Always attempt to initialize saved sessions, even if not logged in,
-    // as the function itself handles the isLoggedIn check now.
     get().initializeSavedChatSessions();
   },
 
@@ -429,73 +322,28 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   handleRemoveApiKey: () => {
     localStorage.removeItem(LS_KEY_API);
-    set({
-      feedback: '',
-      generatedImageData: null,
-      error: null,
-      chatError: null,
-      chatMessages: [],
-      activeChatSession: null,
-      savedChatSessions: [],
-      activeSavedChatSessionId: null,
-      isLoggedIn: false, // Ensure isLoggedIn is false after API key removal if it implies logout
-    });
+    set({ activeApiKey: null, apiKeySource: 'none', error: null, chatError: null });
     clearGeminiClient();
-    get().initializeActiveApiKey(); // Re-initialize to handle env API key if present
   },
 
   handleLoginSuccess: () => {
-    // Supabase auth state listener in LoginPage handles setting isLoggedIn
-    // This action now primarily ensures other parts of the app state are correctly initialized
-    // after a successful login (handled by LoginPage.tsx redirect/callback).
-    get().initializeActiveApiKey(); // This will also set isLoggedIn based on Supabase session
-    get().initializeChatSession();
-    get().initializeSavedChatSessions();
+    localStorage.setItem(LS_KEY_LOGGED_IN, 'true');
+    set({ isLoggedIn: true });
+    get().initializeActiveApiKey();
   },
 
   handleLogout: async () => {
-    try {
-      await signOut();
-      // After signOut, Supabase's onAuthStateChange will trigger a re-render of LoginPage,
-      // which will then set isLoggedIn to false via initializeActiveApiKey indirectly.
-      // We still clear API key and chat state locally for immediate UI update and safety.
-      localStorage.removeItem(LS_KEY_API);
-      set({
-        isLoggedIn: false,
-        feedback: '',
-        generatedImageData: null,
-        error: null,
-        chatError: null,
-        chatMessages: [],
-        chatInput: '',
-        activeChatSession: null,
-        code: '',
-        imagePrompt: '',
-        savedChatSessions: [],
-        activeSavedChatSessionId: null,
-      });
-      clearGeminiClient(); // Clear Gemini client on logout
-      get().initializeActiveApiKey(); // Re-initialize to ensure clean state
-    } catch (err) {
-      console.error('Error during logout:', err);
-      set({ error: 'Logout failed.' });
-    }
+    localStorage.removeItem(LS_KEY_LOGGED_IN);
+    set({ isLoggedIn: false, activeApiKey: null, apiKeySource: 'none' });
+    clearGeminiClient();
   },
 
-  handleCodeChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    set({ code: event.target.value });
+  handleCodeChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    set({ code: e.target.value });
   },
 
   handleClearCodeInput: () => {
-    set({ code: '' });
-  },
-
-  handleImagePromptChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    set({ imagePrompt: event.target.value });
-  },
-
-  handleClearImagePrompt: () => {
-    set({ imagePrompt: '' });
+    set({ code: '', feedback: '', error: null });
   },
 
   handleChatInputChange: (value: string) => {
@@ -567,40 +415,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   handleTabChange: async (tab: ActiveTab) => {
-    set((state) => {
-      const newState: Partial<AppState> = {
-        activeTab: tab,
-        feedback: '',
-        error: null,
-        chatError: null,
-        generatedImageData: null,
-      };
-
-      if (state.activeTab === 'image' && tab !== 'image') {
-        newState.imagePrompt = '';
-      }
-
-      const codeRelatedTabs: ActiveTab[] = [
-        'review',
-        'refactor',
-        'preview',
-        'generate',
-        'content',
-        'custom-instructions',
-      ];
-      const wasCodeRelated = codeRelatedTabs.includes(state.activeTab);
-      const isNowCodeRelated = codeRelatedTabs.includes(tab);
-
-      if (wasCodeRelated && !isNowCodeRelated) {
-        newState.code = '';
-      }
-
-      return newState;
-    });
-
-    if (tab === 'chat') {
-      get().initializeChatSession();
-    }
+    set({ activeTab: tab });
   },
 
   handleSubmitCodeInteraction: async () => {
@@ -644,27 +459,6 @@ export const useAppStore = create<AppState>((set, get) => ({
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
       set({ error: `Error during ${activeTab}: ${errorMessage}` });
       console.error(`Error in ${activeTab}:`, err);
-    } finally {
-      set({ isLoading: false });
-    }
-  },
-
-  handleImageGenerationSubmit: async (aspectRatio: AspectRatio, negativePrompt: string) => {
-    const { imagePrompt } = get();
-    if (!imagePrompt.trim()) {
-      set({ imageError: 'Please enter a description for the image.' });
-      return;
-    }
-    set({ isLoading: true, generatedImageData: null, imageError: null });
-
-    try {
-      const imageData = await generateImageWithGemini(imagePrompt, aspectRatio, negativePrompt);
-      set({ generatedImageData: imageData });
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : 'An unknown error occurred during image generation.';
-      set({ imageError: `Image Generation Error: ${errorMessage}` });
-      console.error('Image generation error:', err);
     } finally {
       set({ isLoading: false });
     }
