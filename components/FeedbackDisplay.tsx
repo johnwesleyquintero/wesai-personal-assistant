@@ -21,19 +21,19 @@ export const FeedbackDisplay: React.FC<FeedbackDisplayProps> = ({ feedback }) =>
   const { isCopied, copyToClipboard } = useCopyToClipboard(2000);
 
   return (
-    <div className="bg-gray-50 dark:bg-gray-700 p-4 md:p-6 rounded-lg shadow-inner relative">
+    <div className="relative group">
       <button
         onClick={() => copyToClipboard(feedback || '')}
         title={isCopied ? 'Copied!' : 'Copy feedback'}
         aria-label={isCopied ? 'Feedback copied to clipboard' : 'Copy feedback to clipboard'}
-        className={`absolute top-3 right-3 p-2 rounded-md transition-colors duration-150 ease-in-out
+        className={`absolute top-0 right-0 p-2 rounded-md transition-all duration-150 ease-in-out z-10 opacity-0 group-hover:opacity-100 shadow-sm
                     ${
                       isCopied
-                        ? 'bg-green-500 hover:bg-green-600 text-white dark:bg-green-600 dark:hover:bg-green-700'
-                        : 'bg-gray-200 hover:bg-gray-300 text-gray-600 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-gray-300 dark:hover:text-gray-100'
+                        ? 'bg-green-500 text-white opacity-100'
+                        : 'bg-white/80 dark:bg-gray-800/80 hover:bg-white dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600'
                     }`}
       >
-        {isCopied ? <FaCheck className="w-5 h-5" /> : <FaClipboard className="w-5 h-5" />}
+        {isCopied ? <FaCheck className="w-4 h-4" /> : <FaClipboard className="w-4 h-4" />}
         <span className="sr-only">{isCopied ? 'Copied!' : 'Copy'}</span>
       </button>
       <div
@@ -45,8 +45,9 @@ export const FeedbackDisplay: React.FC<FeedbackDisplayProps> = ({ feedback }) =>
                       prose-code:text-pink-600 dark:prose-code:text-pink-400
                       prose-code:bg-slate-100 dark:prose-code:bg-slate-700
                       prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded
-                      prose-pre:bg-slate-200 dark:prose-pre:bg-gray-800
-                      prose-pre:p-4 prose-pre:rounded-md
+                      prose-pre:bg-slate-50 dark:prose-pre:bg-gray-900/50
+                      prose-pre:p-4 prose-pre:rounded-xl prose-pre:border
+                      prose-pre:border-gray-100 dark:prose-pre:border-gray-800
                       prose-pre:text-slate-800 dark:prose-pre:text-slate-200"
       >
         <ReactMarkdown

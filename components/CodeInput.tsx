@@ -17,14 +17,13 @@ export const CodeInput: React.FC<CodeInputProps> = ({
   placeholder,
 }) => {
   return (
-    <div className="relative w-full">
+    <div className="relative w-full h-full">
       <textarea
         id="codeInput"
         value={value}
         onChange={onChange}
         disabled={disabled}
-        rows={15}
-        className="w-full p-4 pr-10 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 font-mono text-sm transition-colors duration-150 ease-in-out disabled:opacity-70 disabled:cursor-not-allowed"
+        className="w-full h-full p-4 pr-10 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 font-mono text-sm transition-colors duration-150 ease-in-out disabled:opacity-70 disabled:cursor-not-allowed resize-none"
         placeholder={placeholder}
         aria-label="Code input"
       />

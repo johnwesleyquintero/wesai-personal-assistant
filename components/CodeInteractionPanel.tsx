@@ -194,26 +194,26 @@ export const CodeInteractionPanel: React.FC<CodeInteractionPanelProps> = React.m
       const feedbackTitle = getFeedbackTitle();
 
       return (
-        <div className="flex flex-col h-full animate-in fade-in slide-in-from-right-4 duration-500">
-          <div className="flex items-center gap-2 mb-4">
+        <div className="flex flex-col h-full animate-in fade-in slide-in-from-right-4 duration-500 overflow-hidden bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-xl">
+          <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30 flex-shrink-0">
             <div
-              className={`p-2 rounded-lg bg-gradient-to-br ${getTabColor()} text-white shadow-lg shadow-blue-500/10`}
+              className={`p-2 rounded-lg bg-gradient-to-br ${getTabColor()} text-white shadow-md`}
             >
               {getTabIcon()}
             </div>
-            <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400">
+            <h2 className="text-sm font-bold text-gray-900 dark:text-white leading-tight uppercase tracking-wider">
               {feedbackTitle}
             </h2>
           </div>
 
-          <div className="flex-grow overflow-auto pr-2 custom-scrollbar">
+          <div className="flex-grow overflow-y-auto p-5 custom-scrollbar">
             {activeTab === 'refactor' ? (
               <div className="space-y-6">
                 {parsedRefactorFeedback.summary && (
-                  <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5 transition-all hover:shadow-md">
-                    <div className="flex items-center gap-2 mb-3 text-emerald-600 dark:text-emerald-400 font-bold text-sm uppercase tracking-wider">
+                  <div className="bg-blue-50/50 dark:bg-blue-900/10 rounded-2xl border border-blue-100/50 dark:border-blue-900/20 p-5 transition-all hover:shadow-md">
+                    <div className="flex items-center gap-2 mb-3 text-blue-700 dark:text-blue-300 font-bold text-sm uppercase tracking-wider">
                       <FaCircleInfo className="w-4 h-4" />
-                      Summary
+                      Refactoring Summary
                     </div>
                     <FeedbackDisplay feedback={parsedRefactorFeedback.summary} />
                   </div>
@@ -226,7 +226,7 @@ export const CodeInteractionPanel: React.FC<CodeInteractionPanelProps> = React.m
                         Refactored Code
                       </div>
                     </div>
-                    <div className="p-2">
+                    <div className="p-4">
                       <FeedbackDisplay
                         feedback={`\`\`\`typescript\n${parsedRefactorFeedback.refactoredCode}\n\`\`\``}
                       />
@@ -254,11 +254,11 @@ export const CodeInteractionPanel: React.FC<CodeInteractionPanelProps> = React.m
     };
 
     return (
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-250px)] min-h-[500px]">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-280px)] min-h-[500px] overflow-hidden">
         {/* Input Column */}
-        <div className="flex flex-col gap-4 h-full">
+        <div className="flex flex-col h-full overflow-hidden">
           <div className="flex flex-col flex-grow bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-xl overflow-hidden transition-all duration-300">
-            <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-gray-50/50 dark:bg-gray-800/30">
+            <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-gray-50/50 dark:bg-gray-800/30 flex-shrink-0">
               <div className="flex items-center gap-3">
                 <div
                   className={`p-2 rounded-lg bg-gradient-to-br ${getTabColor()} text-white shadow-md`}
@@ -285,7 +285,7 @@ export const CodeInteractionPanel: React.FC<CodeInteractionPanelProps> = React.m
               )}
             </div>
 
-            <div className="flex-grow p-4 relative flex flex-col">
+            <div className="flex-grow p-4 relative flex flex-col overflow-hidden">
               <CodeInput
                 value={code}
                 onChange={onCodeChange}
@@ -295,7 +295,7 @@ export const CodeInteractionPanel: React.FC<CodeInteractionPanelProps> = React.m
               />
             </div>
 
-            <div className="p-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50/30 dark:bg-gray-800/20">
+            <div className="p-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50/30 dark:bg-gray-800/20 flex-shrink-0">
               <button
                 onClick={handleSubmitClick}
                 disabled={isLoading || !isApiKeyConfigured || !code.trim()}
@@ -320,7 +320,7 @@ export const CodeInteractionPanel: React.FC<CodeInteractionPanelProps> = React.m
         </div>
 
         {/* Output Column */}
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full overflow-hidden">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center h-full bg-gray-50/50 dark:bg-gray-900/30 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-800 p-10 text-center animate-pulse">
               <div
@@ -336,7 +336,7 @@ export const CodeInteractionPanel: React.FC<CodeInteractionPanelProps> = React.m
               </p>
             </div>
           ) : feedback ? (
-            renderFeedback()
+            <div className="h-full overflow-hidden">{renderFeedback()}</div>
           ) : (
             <div className="flex flex-col items-center justify-center h-full bg-gray-50/50 dark:bg-gray-900/30 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-800 p-10 text-center group transition-colors hover:border-blue-300 dark:hover:border-blue-900/50">
               <div className="p-6 rounded-full bg-white dark:bg-gray-800 text-gray-300 dark:text-gray-700 mb-6 shadow-sm group-hover:scale-110 transition-transform duration-500">
