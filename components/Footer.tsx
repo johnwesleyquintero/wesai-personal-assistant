@@ -121,18 +121,18 @@ export const Footer: React.FC<FooterProps> = memo(({ onTabChange, onOpenResource
             © {currentYear} WesAI. Built with precision for professional workflows.
           </p>
           <div className="flex items-center gap-6">
-            <a
-              href="#"
+            <button
+              onClick={() => onOpenResources?.('privacy-policy')}
               className="text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-purple-500 transition-colors"
             >
               Privacy Policy
-            </a>
-            <a
-              href="#"
+            </button>
+            <button
+              onClick={() => onOpenResources?.('terms-of-service')}
               className="text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-purple-500 transition-colors"
             >
               Terms of Service
-            </a>
+            </button>
           </div>
         </div>
       </div>

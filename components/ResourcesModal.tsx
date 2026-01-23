@@ -1,7 +1,19 @@
 import React, { memo } from 'react';
-import { FaXmark, FaRocket, FaLightbulb, FaBook, FaCheck } from 'react-icons/fa6';
+import {
+  FaXmark,
+  FaRocket,
+  FaLightbulb,
+  FaBook,
+  FaCheck,
+  FaShieldHalved,
+  FaGavel,
+} from 'react-icons/fa6';
 
-export type ResourceType = 'getting-started' | 'best-practices';
+export type ResourceType =
+  | 'getting-started'
+  | 'best-practices'
+  | 'privacy-policy'
+  | 'terms-of-service';
 
 interface ResourcesModalProps {
   isOpen: boolean;
@@ -63,6 +75,60 @@ export const ResourcesModal: React.FC<ResourcesModalProps> = memo(({ isOpen, onC
             'Keep your API keys secure and never share them.',
             'Use the Code Studio to verify AI-generated code.',
             'Monitor your session usage and clean up old chats.',
+          ],
+        },
+      ],
+    },
+    'privacy-policy': {
+      title: 'Privacy Policy',
+      icon: <FaShieldHalved className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />,
+      iconBg: 'bg-emerald-100 dark:bg-emerald-900/30',
+      sections: [
+        {
+          title: 'Data Privacy',
+          description: 'How we handle your data and maintain your privacy.',
+          steps: [
+            'All chat history and agent data are stored locally in your browser.',
+            'We do not store your API keys on our servers.',
+            'Data is only transmitted to Gemini API for processing.',
+            'Your local data remains private and is never shared with third parties.',
+          ],
+        },
+        {
+          title: 'Gemini API Usage',
+          description: 'Information regarding the use of external AI services.',
+          steps: [
+            'Interactions with AI models are subject to Google Gemini API terms.',
+            'Ensure you review Google Privacy Policy for API data handling.',
+            'We recommend not sharing sensitive personal information in prompts.',
+            'You can clear your local storage at any time to remove all data.',
+          ],
+        },
+      ],
+    },
+    'terms-of-service': {
+      title: 'Terms of Service',
+      icon: <FaGavel className="w-5 h-5 text-purple-600 dark:text-purple-400" />,
+      iconBg: 'bg-purple-100 dark:bg-purple-900/30',
+      sections: [
+        {
+          title: 'Usage Terms',
+          description: 'Guidelines for using the WesAI personal assistant.',
+          steps: [
+            'WesAI is provided for professional and personal productivity.',
+            'Users are responsible for the content they generate and share.',
+            'Prohibited use includes any illegal or harmful activities.',
+            'We reserve the right to update these terms as the platform evolves.',
+          ],
+        },
+        {
+          title: 'Limitations of Liability',
+          description: 'Important legal notices regarding tool usage.',
+          steps: [
+            'AI outputs should be verified for accuracy and safety.',
+            'We are not liable for decisions made based on AI-generated content.',
+            'The tool is provided "as is" without warranties of any kind.',
+            'Use of the Gemini API is subject to its own service limitations.',
           ],
         },
       ],
