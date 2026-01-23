@@ -102,6 +102,43 @@ export const CodeInteractionPanel: React.FC = React.memo(() => {
     return 'Result';
   };
 
+  const getQuickPrompts = (): string[] => {
+    switch (activeTab) {
+      case 'review':
+        return [
+          'Review this for performance: const [count, setCount] = useState(0);',
+          'Check for security risks in this dangerouslySetInnerHTML usage.',
+          'Audit this useEffect for missing dependencies.',
+        ];
+      case 'refactor':
+        return [
+          'Convert this class component to functional with hooks.',
+          'Simplify these nested ternary operators into a switch.',
+          'Refactor this fetch logic into a custom useFetch hook.',
+        ];
+      case 'preview':
+        return [
+          'Create a responsive hero section with a purple gradient.',
+          'Build a glassmorphism user profile card with Tailwind.',
+          'Design a modern navigation bar with a mobile menu.',
+        ];
+      case 'generate':
+        return [
+          'Generate a useLocalStorage hook with TypeScript.',
+          'Create a Zod schema for a complex User profile object.',
+          'Write a generic debounce function in TypeScript.',
+        ];
+      case 'content':
+        return [
+          'Write a technical guide on React.memo usage.',
+          'Draft a PR description for a new Dark Mode feature.',
+          'Create a README snippet for a Vite-based project.',
+        ];
+      default:
+        return [];
+    }
+  };
+
   const handleClearInput = () => {
     onClearInput();
     addToast('Input cleared', 'info', 2000);
@@ -300,6 +337,24 @@ export const CodeInteractionPanel: React.FC = React.memo(() => {
               disabled={isLoading || !isApiKeyConfigured}
               placeholder={getInputPlaceholder()}
             />
+            {!code && (
+              <div className="mt-4 animate-in fade-in slide-in-from-top-2 duration-500">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2 px-1">
+                  Try a quick prompt
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {getQuickPrompts().map((prompt, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => onCodeChange(prompt)}
+                      className="text-xs px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-900/50 hover:bg-purple-50 dark:hover:bg-purple-900/10 hover:text-purple-600 dark:hover:text-purple-400 transition-all text-left"
+                    >
+                      {prompt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="p-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50/30 dark:bg-gray-800/20 flex-shrink-0">
