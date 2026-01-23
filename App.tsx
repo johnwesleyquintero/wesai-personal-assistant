@@ -14,6 +14,7 @@ import { ResourcesModal, type ResourceType } from './components/ResourcesModal.t
 import { CodeInteractionPanel } from './components/CodeInteractionPanel.tsx';
 import { ChatInterfacePanel } from './components/ChatInterfacePanel.tsx';
 import { AiAgentsPanel } from './components/AiAgentsPanel.tsx';
+import { ToastContainer } from './components/Toast.tsx';
 
 const App: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
@@ -188,6 +189,7 @@ const App: React.FC = () => {
         </main>
       </div>
       <Footer onTabChange={handleTabChange} onOpenResources={handleOpenResourcesModal} />
+      <ToastContainer />
     </div>
   );
 };

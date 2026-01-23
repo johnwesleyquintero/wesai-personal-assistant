@@ -1,9 +1,15 @@
 import React, { useRef, useEffect, memo, useState, useMemo } from 'react';
+import type { Components } from 'react-markdown';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { LoadingSpinner } from './LoadingSpinner.tsx';
 import { ReactPreviewRenderer } from './ReactPreviewRenderer.tsx';
 import { ErrorMessage } from './ErrorMessage.tsx';
+import { useAppStore } from '../store.ts';
+import { PreWithCopyButton } from './PreWithCopyButton.tsx';
+import { TextSkeleton } from './Skeleton.tsx';
 import type { ChatMessage } from '../types.ts';
 import {
   FaMagnifyingGlass,
@@ -19,6 +25,8 @@ import {
   FaFileExport,
   FaCode,
   FaEye,
+  FaWandMagicSparkles,
+  FaCircleInfo,
 } from 'react-icons/fa6';
 
 interface ChatInterfacePanelProps {
@@ -48,6 +56,14 @@ interface ChatInterfacePanelProps {
   onDuplicateSavedChatSession: (sessionId: string, newName?: string) => void;
   savedSessionsSort: 'newest' | 'oldest' | 'name_asc' | 'name_desc';
   onSetSavedSessionsSort: (sort: 'newest' | 'oldest' | 'name_asc' | 'name_desc') => void;
+}
+
+interface CustomCodeRendererProps {
+  node?: unknown;
+  inline?: boolean;
+  className?: string;
+  children: React.ReactNode;
+  [key: string]: unknown;
 }
 
 export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = memo(
@@ -81,6 +97,7 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = memo(
   }) => {
     const chatMessagesEndRef = useRef<HTMLDivElement | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const { addToast } = useAppStore();
     const [isSavedContextsOpen, setIsSavedContextsOpen] = useState(false);
     const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
     const [saveName, setSaveName] = useState('');
@@ -214,6 +231,11 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = memo(
       return 'How can I help you today?...';
     };
 
+    const handleClearChatInput = () => {
+      onClearChatInput();
+      addToast('Chat input cleared', 'info', 2000);
+    };
+
     return (
       <div className="flex flex-col h-[70vh] bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 overflow-hidden transition-all duration-300">
         {/* Header */}
@@ -240,7 +262,7 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = memo(
                     ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
                     : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
                 }`}
-                title="Search conversation"
+                title="Search messages"
               >
                 <FaMagnifyingGlass className="w-4 h-4" />
               </button>
@@ -313,7 +335,50 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = memo(
 
         {/* Messages Area */}
         <div className="flex-grow p-6 space-y-6 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-800 scrollbar-track-transparent">
-          {searchTerm.trim() && filteredMessages.length === 0 ? (
+          {chatMessages.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full text-center py-12 animate-in fade-in zoom-in-95 duration-700">
+              <div className="relative mb-8">
+                <div className="absolute inset-0 bg-blue-500/10 blur-3xl rounded-full scale-150" />
+                <div className="relative p-10 rounded-[2.5rem] bg-white dark:bg-gray-800 shadow-2xl border border-gray-100 dark:border-gray-700 transform transition-transform hover:scale-105 duration-500">
+                  <div className="bg-gradient-to-br from-blue-500 to-indigo-600 p-6 rounded-3xl shadow-lg shadow-blue-500/20">
+                    <FaPaperPlane className="w-10 h-10 text-white" />
+                  </div>
+                </div>
+              </div>
+              <h3 className="text-3xl font-black text-gray-900 dark:text-white mb-4 tracking-tight">
+                Start a conversation
+              </h3>
+              <p className="text-gray-500 dark:text-gray-400 max-w-sm mx-auto text-base leading-relaxed mb-10">
+                Ask me anything about code, design, or business. I&apos;m here to help you build
+                faster.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg w-full px-4">
+                {[
+                  { title: 'Refactor this function', icon: <FaCode className="w-4 h-4" /> },
+                  { title: 'Review my React code', icon: <FaEye className="w-4 h-4" /> },
+                  {
+                    title: 'Optimize performance',
+                    icon: <FaWandMagicSparkles className="w-4 h-4" />,
+                  },
+                  { title: 'Explain this concept', icon: <FaCircleInfo className="w-4 h-4" /> },
+                ].map((suggestion, i) => (
+                  <button
+                    key={i}
+                    onClick={() => onChatInputChange(suggestion.title)}
+                    className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700 rounded-2xl text-left hover:border-blue-400 dark:hover:border-blue-500/50 hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-all group"
+                  >
+                    <div className="p-2 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-400 group-hover:text-blue-500 transition-colors">
+                      {suggestion.icon}
+                    </div>
+                    <span className="text-sm font-bold text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white">
+                      {suggestion.title}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : searchTerm.trim() && filteredMessages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center py-12">
               <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-full mb-4">
                 <FaMagnifyingGlass className="w-8 h-8 text-gray-300 dark:text-gray-600" />
@@ -339,6 +404,21 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = memo(
               />
             ))
           )}
+
+          {isLoading && (
+            <div className="flex flex-col items-start group animate-in fade-in slide-in-from-bottom-2 mb-6">
+              <div className="flex items-center gap-2 mb-1 px-1">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-purple-600 dark:text-purple-400">
+                  Wesai
+                </span>
+                <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse" />
+              </div>
+              <div className="bg-white dark:bg-gray-800 p-5 rounded-2xl rounded-tl-none shadow-sm border border-gray-100 dark:border-gray-700 w-full max-w-[80%]">
+                <TextSkeleton lines={3} />
+              </div>
+            </div>
+          )}
+
           <div ref={chatMessagesEndRef} />
         </div>
 
@@ -402,15 +482,22 @@ export const ChatInterfacePanel: React.FC<ChatInterfacePanelProps> = memo(
                 }}
                 placeholder={getInputPlaceholder()}
                 disabled={isLoading || !isApiKeyConfigured || !isChatSessionActive}
-                className="flex-grow py-3 bg-transparent text-gray-900 dark:text-gray-100 border-none focus:ring-0 text-sm resize-none min-h-[44px] max-h-40 overflow-y-auto"
+                className="flex-grow py-3 bg-transparent text-gray-900 dark:text-gray-100 border-none focus:ring-0 text-sm resize-none min-h-[44px] max-h-40 overflow-y-auto custom-scrollbar"
                 aria-label="Chat input"
               />
 
               <div className="flex items-center gap-2 pr-1 pb-1">
                 {chatInput && !isLoading && (
+                  <div className="hidden sm:block pointer-events-none opacity-40 mr-1">
+                    <kbd className="px-1.5 py-0.5 text-[10px] font-sans font-semibold text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded shadow-sm">
+                      {sendOnEnter ? 'Enter' : 'Cmd+Enter'}
+                    </kbd>
+                  </div>
+                )}
+                {chatInput && !isLoading && (
                   <button
                     type="button"
-                    onClick={onClearChatInput}
+                    onClick={handleClearChatInput}
                     title="Clear input"
                     className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-white dark:hover:bg-gray-700 transition-all"
                   >
@@ -834,7 +921,49 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = memo(
                         prose-p:leading-relaxed prose-pre:bg-gray-900 prose-pre:text-gray-100
                         `}
             >
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content || ''}</ReactMarkdown>
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={
+                  {
+                    pre: PreWithCopyButton,
+                    code: ({
+                      _node,
+                      inline,
+                      className,
+                      children,
+                      ...rest
+                    }: CustomCodeRendererProps) => {
+                      const match = /language-(\w+)/.exec(className || '');
+                      if (!inline && match) {
+                        return (
+                          <SyntaxHighlighter
+                            style={oneDark}
+                            language={match[1]}
+                            PreTag="div"
+                            customStyle={{
+                              margin: 0,
+                              padding: '1.25rem',
+                              background: 'transparent',
+                              fontSize: '0.85rem',
+                              lineHeight: '1.6',
+                            }}
+                            {...rest}
+                          >
+                            {String(children).replace(/\n$/, '')}
+                          </SyntaxHighlighter>
+                        );
+                      }
+                      return (
+                        <code className={className} {...rest}>
+                          {children}
+                        </code>
+                      );
+                    },
+                  } as Components
+                }
+              >
+                {msg.content || ''}
+              </ReactMarkdown>
             </div>
           )}
 

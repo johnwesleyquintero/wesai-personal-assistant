@@ -26,12 +26,16 @@ type ModalTab = 'settings' | 'helpCenter';
 export const SettingsModal: React.FC<SettingsModalProps> = memo(
   ({ isOpen, onClose, onSaveKey, onRemoveKey, isKeySet, currentKeySource, onLogout }) => {
     const [apiKeyInput, setApiKeyInput] = useState<string>('');
-    const [showSavedMessage, setShowSavedMessage] = useState<boolean>(false);
     const [activeTab, setActiveTab] = useState<ModalTab>('settings');
     const [showConfirmRemove, setShowConfirmRemove] = useState<boolean>(false);
 
-    const { showStreamFinishNotes, setShowStreamFinishNotes, sendOnEnter, setSendOnEnter } =
-      useAppStore();
+    const {
+      showStreamFinishNotes,
+      setShowStreamFinishNotes,
+      sendOnEnter,
+      setSendOnEnter,
+      addToast,
+    } = useAppStore();
 
     if (!isOpen) {
       return null;
@@ -40,11 +44,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = memo(
     const handleSave = () => {
       if (apiKeyInput.trim()) {
         onSaveKey(apiKeyInput);
-        setShowSavedMessage(true);
-        setTimeout(() => {
-          setShowSavedMessage(false);
-          onClose();
-        }, 2000);
+        addToast('Settings saved successfully', 'success');
+        onClose();
       }
     };
 
@@ -54,6 +55,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = memo(
 
     const handleConfirmRemove = () => {
       onRemoveKey();
+      addToast('API Key removed', 'info');
       setShowConfirmRemove(false);
     };
 
@@ -343,12 +345,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = memo(
           </div>
 
           {/* Footer Status */}
-          {showSavedMessage && (
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-full shadow-xl animate-in fade-in slide-in-from-bottom-4 flex items-center gap-2">
-              <FaCheck className="w-4 h-4" />
-              <span className="font-bold text-sm">Settings Saved Successfully!</span>
-            </div>
-          )}
         </div>
       </div>
     );

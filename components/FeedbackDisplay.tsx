@@ -4,6 +4,10 @@ import type { Components } from 'react-markdown';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { FaCheck, FaClipboard } from 'react-icons/fa6';
+import { useAppStore } from '../store';
+import { PreWithCopyButton } from './PreWithCopyButton';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 interface FeedbackDisplayProps {
   feedback: string;
@@ -19,22 +23,34 @@ interface CustomCodeRendererProps {
 
 export const FeedbackDisplay: React.FC<FeedbackDisplayProps> = ({ feedback }) => {
   const { isCopied, copyToClipboard } = useCopyToClipboard(2000);
+  const addToast = useAppStore((state) => state.addToast);
+
+  const handleCopy = () => {
+    copyToClipboard(feedback || '');
+    addToast('Feedback copied to clipboard', 'success');
+  };
 
   return (
     <div className="relative group">
       <button
-        onClick={() => copyToClipboard(feedback || '')}
+        onClick={handleCopy}
         title={isCopied ? 'Copied!' : 'Copy feedback'}
         aria-label={isCopied ? 'Feedback copied to clipboard' : 'Copy feedback to clipboard'}
-        className={`absolute top-0 right-0 p-2 rounded-md transition-all duration-150 ease-in-out z-10 opacity-0 group-hover:opacity-100 shadow-sm
+        className={`absolute top-0 right-0 p-2.5 rounded-xl transition-all duration-200 ease-in-out z-10 opacity-0 group-hover:opacity-100 shadow-lg border
                     ${
                       isCopied
-                        ? 'bg-green-500 text-white opacity-100'
-                        : 'bg-white/80 dark:bg-gray-800/80 hover:bg-white dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600'
+                        ? 'bg-green-500 text-white border-green-400 opacity-100'
+                        : 'bg-white/90 dark:bg-gray-800/90 hover:bg-white dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600'
                     }`}
       >
-        {isCopied ? <FaCheck className="w-4 h-4" /> : <FaClipboard className="w-4 h-4" />}
-        <span className="sr-only">{isCopied ? 'Copied!' : 'Copy'}</span>
+        {isCopied ? (
+          <div className="flex items-center gap-2 px-1">
+            <FaCheck className="w-3.5 h-3.5" />
+            <span className="text-[10px] font-bold uppercase tracking-wider">Copied</span>
+          </div>
+        ) : (
+          <FaClipboard className="w-4 h-4" />
+        )}
       </button>
       <div
         className="prose prose-sm sm:prose-base max-w-none dark:prose-invert
@@ -54,12 +70,26 @@ export const FeedbackDisplay: React.FC<FeedbackDisplayProps> = ({ feedback }) =>
           remarkPlugins={[remarkGfm]}
           components={
             {
+              pre: PreWithCopyButton,
               code: ({ _node, inline, className, children, ...rest }: CustomCodeRendererProps) => {
-                if (!inline) {
+                const match = /language-(\w+)/.exec(className || '');
+                if (!inline && match) {
                   return (
-                    <code className={`${className || ''} break-words`} {...rest}>
-                      {children}
-                    </code>
+                    <SyntaxHighlighter
+                      style={oneDark}
+                      language={match[1]}
+                      PreTag="div"
+                      customStyle={{
+                        margin: 0,
+                        padding: '1.25rem',
+                        background: 'transparent',
+                        fontSize: '0.85rem',
+                        lineHeight: '1.6',
+                      }}
+                      {...rest}
+                    >
+                      {String(children).replace(/\n$/, '')}
+                    </SyntaxHighlighter>
                   );
                 }
                 return (

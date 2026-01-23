@@ -13,12 +13,14 @@ import {
 import { CodeInput } from './CodeInput.tsx';
 import { FeedbackDisplay } from './FeedbackDisplay.tsx';
 import { LoadingSpinner } from './LoadingSpinner.tsx';
+import { Skeleton, TextSkeleton, CodeBlockSkeleton } from './Skeleton.tsx';
 import { ErrorMessage } from './ErrorMessage.tsx';
+import { useAppStore } from '../store.ts';
 
 interface CodeInteractionPanelProps {
   activeTab: 'review' | 'refactor' | 'preview' | 'generate' | 'content';
   code: string; // Used for code input or content description
-  onCodeChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  onCodeChange: (value: string) => void;
   onClearInput: () => void; // New prop for clearing input
   onSubmit: () => void;
   isLoading: boolean;
@@ -60,6 +62,7 @@ export const CodeInteractionPanel: React.FC<CodeInteractionPanelProps> = React.m
     error,
     setError,
   }) => {
+    const { addToast } = useAppStore();
     const [parsedRefactorFeedback, setParsedRefactorFeedback] = React.useState<{
       summary: string | null;
       refactoredCode: string | null;
@@ -144,14 +147,9 @@ export const CodeInteractionPanel: React.FC<CodeInteractionPanelProps> = React.m
       return 'Result';
     };
 
-    const getLoadingMessage = (): string => {
-      if (activeTab === 'review')
-        return 'Analyzing code for best practices and potential issues...';
-      if (activeTab === 'refactor') return 'Optimizing and restructuring your code...';
-      if (activeTab === 'preview') return 'Building visual representation and description...';
-      if (activeTab === 'generate') return 'Crafting your requested code snippet...';
-      if (activeTab === 'content') return 'Composing your requested content...';
-      return 'Processing, please wait...';
+    const handleClearInput = () => {
+      onClearInput();
+      addToast('Input cleared', 'info', 2000);
     };
 
     const getInputPlaceholder = (): string => {
@@ -187,9 +185,64 @@ export const CodeInteractionPanel: React.FC<CodeInteractionPanelProps> = React.m
       onSubmit();
     }, [activeTab, code, isApiKeyConfigured, setError, onSubmit, getActionVerb]);
 
-    // Helper function to render the feedback section
-    const renderFeedback = () => {
-      if (!feedback || isLoading) return null;
+    const renderFeedbackArea = () => {
+      if (isLoading) {
+        return (
+          <div className="flex flex-col h-full bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-xl overflow-hidden animate-in fade-in duration-500">
+            <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
+              <Skeleton className="w-9 h-9 rounded-lg" />
+              <Skeleton className="h-5 w-32" />
+            </div>
+            <div className="p-6 space-y-8 overflow-y-auto">
+              {activeTab === 'refactor' ? (
+                <>
+                  <div className="space-y-4">
+                    <Skeleton className="h-4 w-40" />
+                    <div className="p-5 rounded-2xl bg-blue-50/30 dark:bg-blue-900/5 border border-blue-100/30 dark:border-blue-900/10">
+                      <TextSkeleton lines={4} />
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <Skeleton className="h-4 w-40" />
+                    <CodeBlockSkeleton />
+                  </div>
+                </>
+              ) : (
+                <div className="space-y-6">
+                  <TextSkeleton lines={2} />
+                  <CodeBlockSkeleton />
+                  <TextSkeleton lines={3} />
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      }
+
+      if (error) {
+        return (
+          <div className="flex flex-col h-full bg-white dark:bg-gray-900 rounded-2xl border border-red-200 dark:border-red-900/30 shadow-xl overflow-hidden">
+            <div className="p-8 flex flex-col items-center justify-center text-center h-full">
+              <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-2xl flex items-center justify-center mb-4">
+                <FaTriangleExclamation className="w-8 h-8" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                Analysis Failed
+              </h3>
+              <p className="text-gray-500 dark:text-gray-400 max-w-xs mb-6">{error}</p>
+              <button
+                onClick={onSubmit}
+                title="Retry analysis"
+                className="px-6 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl font-bold text-sm transition-transform active:scale-95"
+              >
+                Try Again
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      if (!feedback) return null;
 
       const feedbackTitle = getFeedbackTitle();
 
@@ -276,7 +329,7 @@ export const CodeInteractionPanel: React.FC<CodeInteractionPanelProps> = React.m
               </div>
               {code && !isLoading && (
                 <button
-                  onClick={onClearInput}
+                  onClick={handleClearInput}
                   className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all"
                   title="Clear Input"
                 >
@@ -289,7 +342,8 @@ export const CodeInteractionPanel: React.FC<CodeInteractionPanelProps> = React.m
               <CodeInput
                 value={code}
                 onChange={onCodeChange}
-                onClearInput={onClearInput}
+                onClearInput={handleClearInput}
+                onSubmit={handleSubmitClick}
                 disabled={isLoading || !isApiKeyConfigured}
                 placeholder={getInputPlaceholder()}
               />
@@ -321,33 +375,32 @@ export const CodeInteractionPanel: React.FC<CodeInteractionPanelProps> = React.m
 
         {/* Output Column */}
         <div className="flex flex-col h-full overflow-hidden">
-          {isLoading ? (
-            <div className="flex flex-col items-center justify-center h-full bg-gray-50/50 dark:bg-gray-900/30 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-800 p-10 text-center animate-pulse">
-              <div
-                className={`p-6 rounded-full bg-gradient-to-br ${getTabColor()} text-white mb-6 shadow-2xl shadow-blue-500/20`}
-              >
-                <LoadingSpinner />
-              </div>
-              <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">
-                Generating Magic...
-              </h3>
-              <p className="text-gray-500 dark:text-gray-400 max-w-xs mx-auto">
-                {getLoadingMessage()}
-              </p>
-            </div>
-          ) : feedback ? (
-            <div className="h-full overflow-hidden">{renderFeedback()}</div>
+          {isLoading || feedback || error ? (
+            <div className="h-full overflow-hidden">{renderFeedbackArea()}</div>
           ) : (
-            <div className="flex flex-col items-center justify-center h-full bg-gray-50/50 dark:bg-gray-900/30 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-800 p-10 text-center group transition-colors hover:border-blue-300 dark:hover:border-blue-900/50">
-              <div className="p-6 rounded-full bg-white dark:bg-gray-800 text-gray-300 dark:text-gray-700 mb-6 shadow-sm group-hover:scale-110 transition-transform duration-500">
-                <FaTerminal className="w-12 h-12" />
+            <div className="flex flex-col items-center justify-center h-full bg-gray-50/50 dark:bg-gray-900/30 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-800 p-10 text-center group transition-all duration-500 hover:border-blue-400/50 dark:hover:border-blue-500/30 hover:bg-blue-50/10 dark:hover:bg-blue-900/10">
+              <div className="relative mb-8">
+                <div className="absolute inset-0 bg-blue-500/20 blur-3xl rounded-full scale-150 group-hover:scale-110 transition-transform duration-700" />
+                <div className="relative p-8 rounded-3xl bg-white dark:bg-gray-800 text-gray-300 dark:text-gray-700 shadow-xl group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
+                  <FaTerminal className="w-14 h-14 group-hover:text-blue-500 transition-colors" />
+                </div>
               </div>
-              <h3 className="text-xl font-bold text-gray-400 dark:text-gray-600 mb-2">
-                Waiting for input
+              <h3 className="text-2xl font-black text-gray-800 dark:text-gray-200 mb-3 tracking-tight">
+                Ready for action?
               </h3>
-              <p className="text-gray-400 dark:text-gray-500 max-w-xs mx-auto text-sm">
-                Enter your code or description on the left to see the AI magic happen here.
+              <p className="text-gray-500 dark:text-gray-400 max-w-xs mx-auto text-sm leading-relaxed mb-8">
+                Enter your code on the left or choose a mode to get started with our
+                high-performance AI engine.
               </p>
+
+              <div className="grid grid-cols-2 gap-3 w-full max-w-sm">
+                <div className="p-3 rounded-xl bg-white/50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700 text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+                  Fast Processing
+                </div>
+                <div className="p-3 rounded-xl bg-white/50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700 text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+                  Smart Refactoring
+                </div>
+              </div>
             </div>
           )}
         </div>
