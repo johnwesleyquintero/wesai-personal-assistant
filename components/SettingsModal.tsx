@@ -59,7 +59,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = memo(
 
     return (
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm dark:bg-gray-900/80 animate-in fade-in duration-300"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm dark:bg-app-main/80 animate-in fade-in duration-300"
         onClick={onClose}
       >
         <div
@@ -213,7 +213,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = memo(
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div
-                      className={`p-4 rounded-2xl border transition-all cursor-pointer active:scale-[0.98] ${
+                      className={`p-4 rounded-2xl border transition-all cursor-pointer active:scale-95 ${
                         showStreamFinishNotes
                           ? 'bg-app-accent-soft border-app-accent/50'
                           : 'bg-app-main border-app-border hover:border-app-accent/30'
@@ -238,7 +238,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = memo(
                     </div>
 
                     <div
-                      className={`p-4 rounded-2xl border transition-all cursor-pointer active:scale-[0.98] ${
+                      className={`p-4 rounded-2xl border transition-all cursor-pointer active:scale-95 ${
                         sendOnEnter
                           ? 'bg-app-accent-soft border-app-accent/50'
                           : 'bg-app-main border-app-border hover:border-app-accent/30'

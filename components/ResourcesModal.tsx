@@ -137,7 +137,7 @@ export const ResourcesModal: React.FC<ResourcesModalProps> = memo(({ isOpen, onC
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm dark:bg-app-main/80 animate-in fade-in duration-300"
       onClick={onClose}
     >
       <div
@@ -152,7 +152,7 @@ export const ResourcesModal: React.FC<ResourcesModalProps> = memo(({ isOpen, onC
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-app-muted hover:text-app-text transition-colors rounded-full hover:bg-app-tertiary"
+            className="p-2 text-app-muted hover:text-app-text transition-colors rounded-full hover:bg-app-tertiary active:scale-95"
             aria-label="Close modal"
           >
             <FaXmark className="w-5 h-5" />

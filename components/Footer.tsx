@@ -50,7 +50,7 @@ export const Footer: React.FC<FooterProps> = memo(({ onTabChange, onOpenResource
               <li>
                 <button
                   onClick={() => onTabChange?.('chat')}
-                  className="flex items-center gap-2 text-sm text-app-muted hover:text-app-accent transition-colors"
+                  className="flex items-center gap-2 text-sm text-app-muted hover:text-app-accent transition-all active:scale-95"
                 >
                   <FaMessage className="w-3.5 h-3.5" />
                   Chat Assistant
@@ -59,7 +59,7 @@ export const Footer: React.FC<FooterProps> = memo(({ onTabChange, onOpenResource
               <li>
                 <button
                   onClick={() => onTabChange?.('content')}
-                  className="flex items-center gap-2 text-sm text-app-muted hover:text-app-accent transition-colors"
+                  className="flex items-center gap-2 text-sm text-app-muted hover:text-app-accent transition-all active:scale-95"
                 >
                   <FaCode className="w-3.5 h-3.5" />
                   Code Studio
@@ -68,7 +68,7 @@ export const Footer: React.FC<FooterProps> = memo(({ onTabChange, onOpenResource
               <li>
                 <button
                   onClick={() => onTabChange?.('ai-agents')}
-                  className="flex items-center gap-2 text-sm text-app-muted hover:text-app-accent transition-colors"
+                  className="flex items-center gap-2 text-sm text-app-muted hover:text-app-accent transition-all active:scale-95"
                 >
                   <FaRobot className="w-3.5 h-3.5" />
                   Agent Builder
@@ -94,7 +94,7 @@ export const Footer: React.FC<FooterProps> = memo(({ onTabChange, onOpenResource
               <li>
                 <button
                   onClick={() => onOpenResources?.('getting-started')}
-                  className="text-sm text-app-muted hover:text-app-accent transition-colors"
+                  className="text-sm text-app-muted hover:text-app-accent transition-all active:scale-95"
                 >
                   Getting Started
                 </button>
@@ -102,7 +102,7 @@ export const Footer: React.FC<FooterProps> = memo(({ onTabChange, onOpenResource
               <li>
                 <button
                   onClick={() => onOpenResources?.('best-practices')}
-                  className="text-sm text-app-muted hover:text-app-accent transition-colors"
+                  className="text-sm text-app-muted hover:text-app-accent transition-all active:scale-95"
                 >
                   Best Practices
                 </button>
@@ -119,13 +119,13 @@ export const Footer: React.FC<FooterProps> = memo(({ onTabChange, onOpenResource
           <div className="flex items-center gap-6">
             <button
               onClick={() => onOpenResources?.('privacy-policy')}
-              className="text-[10px] font-black uppercase tracking-widest text-app-muted hover:text-app-accent transition-colors"
+              className="text-[10px] font-black uppercase tracking-widest text-app-muted hover:text-app-accent transition-all active:scale-95"
             >
               Privacy Policy
             </button>
             <button
               onClick={() => onOpenResources?.('terms-of-service')}
-              className="text-[10px] font-black uppercase tracking-widest text-app-muted hover:text-app-accent transition-colors"
+              className="text-[10px] font-black uppercase tracking-widest text-app-muted hover:text-app-accent transition-all active:scale-95"
             >
               Terms of Service
             </button>

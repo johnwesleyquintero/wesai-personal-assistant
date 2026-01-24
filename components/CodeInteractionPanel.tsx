@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   FaTerminal,
   FaCode,
@@ -16,8 +16,11 @@ import { LoadingSpinner } from './LoadingSpinner.tsx';
 import { Skeleton, TextSkeleton, CodeBlockSkeleton } from './Skeleton.tsx';
 import { ErrorMessage } from './ErrorMessage.tsx';
 import { useCodeInteractionLogic } from './hooks/useCodeInteractionLogic.ts';
+import { useIsMobile } from './hooks/useMediaQuery.ts';
 
 export const CodeInteractionPanel: React.FC = React.memo(() => {
+  const isMobile = useIsMobile();
+  const [mobileActiveView, setMobileActiveView] = useState<'input' | 'output'>('input');
   const {
     code,
     feedback,
@@ -294,119 +297,180 @@ export const CodeInteractionPanel: React.FC = React.memo(() => {
     );
   };
 
+  // Auto-switch to output view on mobile when feedback or error arrives
+  useEffect(() => {
+    if (isMobile && (feedback || error)) {
+      // Use setTimeout to avoid synchronous setState in effect
+      const timer = setTimeout(() => {
+        setMobileActiveView('output');
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [feedback, error, isMobile]);
+
+  // Reset to input view on mobile when code is cleared
+  useEffect(() => {
+    if (isMobile && !code && !feedback && !error) {
+      // Use setTimeout to avoid synchronous setState in effect
+      const timer = setTimeout(() => {
+        setMobileActiveView('input');
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [code, feedback, error, isMobile]);
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-280px)] min-h-[500px] overflow-hidden">
-      {/* Input Column */}
-      <div className="flex flex-col h-full overflow-hidden">
-        <div className="flex flex-col flex-grow bg-app-main rounded-2xl border border-app-border shadow-2xl overflow-hidden transition-all duration-300">
-          <div className="px-5 py-4 border-b border-app-border flex items-center justify-between bg-app-secondary/50 flex-shrink-0">
-            <div className="flex items-center gap-3">
-              <div
-                className={`p-2 rounded-lg bg-gradient-to-br ${getTabColor()} text-white shadow-md`}
-              >
-                {getTabIcon()}
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-app-text leading-tight uppercase tracking-wider">
-                  {activeTab}
-                </h3>
-                <p className="text-[10px] text-app-muted font-medium uppercase tracking-tight">
-                  {getInputLabel()}
-                </p>
-              </div>
-            </div>
-            {code && !isLoading && (
-              <button
-                onClick={handleClearInput}
-                className="p-2 text-app-muted hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all active:scale-90"
-                title="Clear Input"
-              >
-                <FaEraser className="w-4 h-4" />
-              </button>
+    <div className="flex flex-col h-[calc(100vh-280px)] min-h-[500px] overflow-hidden">
+      {/* Mobile Tab Switcher */}
+      {isMobile && (
+        <div className="flex p-1 bg-app-tertiary/50 rounded-xl mb-4 border border-app-border shrink-0">
+          <button
+            onClick={() => setMobileActiveView('input')}
+            className={`flex-1 py-2.5 text-xs font-black uppercase tracking-widest rounded-lg transition-all flex items-center justify-center gap-2 ${
+              mobileActiveView === 'input'
+                ? 'bg-app-main text-app-accent shadow-sm'
+                : 'text-app-muted'
+            }`}
+          >
+            <FaCode className="w-3.5 h-3.5" />
+            Input
+          </button>
+          <button
+            onClick={() => setMobileActiveView('output')}
+            className={`flex-1 py-2.5 text-xs font-black uppercase tracking-widest rounded-lg transition-all flex items-center justify-center gap-2 ${
+              mobileActiveView === 'output'
+                ? 'bg-app-main text-app-accent shadow-sm'
+                : 'text-app-muted'
+            }`}
+          >
+            <FaTerminal className="w-3.5 h-3.5" />
+            Output
+            {(feedback || error || isLoading) && (
+              <span className="w-2 h-2 rounded-full bg-app-accent animate-pulse" />
             )}
-          </div>
-
-          <div className="flex-grow p-4 relative flex flex-col overflow-hidden bg-app-main/50">
-            <CodeInput
-              value={code}
-              onChange={onCodeChange}
-              onClearInput={handleClearInput}
-              onSubmit={handleSubmitClick}
-              disabled={isLoading || !isApiKeyConfigured}
-              placeholder={getInputPlaceholder()}
-            />
-            {!code && (
-              <div className="mt-4 animate-in fade-in slide-in-from-top-2 duration-500">
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-app-muted mb-3 px-1">
-                  Try a quick prompt
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {getQuickPrompts().map((prompt, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => onCodeChange(prompt)}
-                      className="text-xs px-4 py-2 rounded-xl bg-app-tertiary text-app-muted border border-app-border hover:border-app-accent/30 hover:bg-app-accent-soft hover:text-app-accent transition-all text-left font-medium active:scale-95 shadow-sm"
-                    >
-                      {prompt}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="p-4 border-t border-app-border bg-app-secondary/20 flex-shrink-0">
-            <button
-              onClick={handleSubmitClick}
-              disabled={isLoading || !isApiKeyConfigured || !code.trim()}
-              className={`w-full flex items-center justify-center gap-2 bg-gradient-to-r ${getTabColor()} hover:opacity-90 text-white font-black py-4 px-6 rounded-xl shadow-lg shadow-app-accent/10 transition-all transform active:scale-[0.98] disabled:opacity-40 disabled:grayscale disabled:cursor-not-allowed uppercase tracking-widest text-sm`}
-            >
-              {isLoading ? (
-                <div className="flex items-center gap-3">
-                  <LoadingSpinner />
-                  <span>Processing...</span>
-                </div>
-              ) : (
-                <>
-                  <FaPlay className="w-4 h-4" />
-                  <span>{getButtonText()}</span>
-                </>
-              )}
-            </button>
-
-            <ErrorMessage message={error} />
-          </div>
+          </button>
         </div>
-      </div>
+      )}
 
-      {/* Output Column */}
-      <div className="flex flex-col h-full overflow-hidden">
-        {isLoading || feedback || error ? (
-          <div className="h-full overflow-hidden">{renderFeedbackArea()}</div>
-        ) : (
-          <div className="flex flex-col items-center justify-center h-full bg-app-secondary/20 rounded-2xl border-2 border-dashed border-app-border p-10 text-center group transition-all duration-500 hover:border-app-accent/30 hover:bg-app-accent-soft">
-            <div className="relative mb-8">
-              <div className="absolute inset-0 bg-app-accent/20 blur-3xl rounded-full scale-150 group-hover:scale-110 transition-transform duration-700" />
-              <div className="relative p-10 rounded-[2.5rem] bg-app-tertiary text-app-muted/30 shadow-2xl group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 border border-app-border">
-                <FaTerminal className="w-16 h-16 group-hover:text-app-accent transition-colors" />
+      <div
+        className={`grid grid-cols-1 ${isMobile ? '' : 'lg:grid-cols-2'} gap-6 flex-grow overflow-hidden`}
+      >
+        {/* Input Column */}
+        {(!isMobile || mobileActiveView === 'input') && (
+          <div className="flex flex-col h-full overflow-hidden animate-in fade-in slide-in-from-left-4 duration-300">
+            <div className="flex flex-col flex-grow bg-app-main rounded-2xl border border-app-border shadow-2xl overflow-hidden transition-all duration-300">
+              <div className="px-5 py-4 border-b border-app-border flex items-center justify-between bg-app-secondary/50 flex-shrink-0">
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`p-2 rounded-lg bg-gradient-to-br ${getTabColor()} text-white shadow-md`}
+                  >
+                    {getTabIcon()}
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-app-text leading-tight uppercase tracking-wider">
+                      {activeTab}
+                    </h3>
+                    <p className="text-[10px] text-app-muted font-medium uppercase tracking-tight">
+                      {getInputLabel()}
+                    </p>
+                  </div>
+                </div>
+                {code && !isLoading && (
+                  <button
+                    onClick={handleClearInput}
+                    className="p-2 text-app-muted hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all active:scale-90"
+                    title="Clear Input"
+                  >
+                    <FaEraser className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+
+              <div className="flex-grow p-4 relative flex flex-col overflow-hidden bg-app-main/50">
+                <CodeInput
+                  value={code}
+                  onChange={onCodeChange}
+                  onClearInput={handleClearInput}
+                  onSubmit={handleSubmitClick}
+                  disabled={isLoading || !isApiKeyConfigured}
+                  placeholder={getInputPlaceholder()}
+                />
+                {!code && (
+                  <div className="mt-4 animate-in fade-in slide-in-from-top-2 duration-500">
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-app-muted mb-3 px-1">
+                      Try a quick prompt
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {getQuickPrompts().map((prompt, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => onCodeChange(prompt)}
+                          className="text-xs px-4 py-2 rounded-xl bg-app-tertiary text-app-muted border border-app-border hover:border-app-accent/30 hover:bg-app-accent-soft hover:text-app-accent transition-all text-left font-medium active:scale-95 shadow-sm"
+                        >
+                          {prompt}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="p-4 border-t border-app-border bg-app-secondary/20 flex-shrink-0">
+                <button
+                  onClick={handleSubmitClick}
+                  disabled={isLoading || !isApiKeyConfigured || !code.trim()}
+                  className={`w-full flex items-center justify-center gap-2 bg-gradient-to-r ${getTabColor()} hover:opacity-90 text-white font-black py-4 px-6 rounded-xl shadow-lg shadow-app-accent/10 transition-all transform active:scale-[0.98] disabled:opacity-40 disabled:grayscale disabled:cursor-not-allowed uppercase tracking-widest text-sm`}
+                >
+                  {isLoading ? (
+                    <div className="flex items-center gap-3">
+                      <LoadingSpinner />
+                      <span>Processing...</span>
+                    </div>
+                  ) : (
+                    <>
+                      <FaPlay className="w-4 h-4" />
+                      <span>{getButtonText()}</span>
+                    </>
+                  )}
+                </button>
+
+                <ErrorMessage message={error} />
               </div>
             </div>
-            <h3 className="text-3xl font-black text-app-text mb-4 tracking-tighter uppercase">
-              Ready for action?
-            </h3>
-            <p className="text-app-muted max-w-xs mx-auto text-sm leading-relaxed mb-10 font-medium">
-              Enter your code on the left or choose a mode to get started with our high-performance
-              AI engine.
-            </p>
+          </div>
+        )}
 
-            <div className="grid grid-cols-2 gap-4 w-full max-w-sm">
-              <div className="p-4 rounded-2xl bg-app-tertiary/50 border border-app-border text-[10px] font-black uppercase tracking-[0.2em] text-app-muted/60 shadow-sm">
-                Fast Processing
+        {/* Output Column */}
+        {(!isMobile || mobileActiveView === 'output') && (
+          <div className="flex flex-col h-full overflow-hidden animate-in fade-in slide-in-from-right-4 duration-300">
+            {isLoading || feedback || error ? (
+              <div className="h-full overflow-hidden">{renderFeedbackArea()}</div>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full bg-app-secondary/20 rounded-2xl border-2 border-dashed border-app-border p-10 text-center group transition-all duration-500 hover:border-app-accent/30 hover:bg-app-accent-soft">
+                <div className="relative mb-8">
+                  <div className="absolute inset-0 bg-app-accent/20 blur-3xl rounded-full scale-150 group-hover:scale-110 transition-transform duration-700" />
+                  <div className="relative p-10 rounded-[2.5rem] bg-app-tertiary text-app-muted/30 shadow-2xl group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 border border-app-border">
+                    <FaTerminal className="w-16 h-16 group-hover:text-app-accent transition-colors" />
+                  </div>
+                </div>
+                <h3 className="text-2xl sm:text-3xl font-black text-app-text mb-4 tracking-tighter uppercase">
+                  Ready for action?
+                </h3>
+                <p className="text-app-muted max-w-xs mx-auto text-xs sm:text-sm leading-relaxed mb-10 font-medium">
+                  Enter your code on the left or choose a mode to get started with our
+                  high-performance AI engine.
+                </p>
+
+                <div className="grid grid-cols-2 gap-4 w-full max-w-sm">
+                  <div className="p-3 sm:p-4 rounded-2xl bg-app-tertiary/50 border border-app-border text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-app-muted/60 shadow-sm">
+                    Fast Processing
+                  </div>
+                  <div className="p-3 sm:p-4 rounded-2xl bg-app-tertiary/50 border border-app-border text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-app-muted/60 shadow-sm">
+                    Smart Refactoring
+                  </div>
+                </div>
               </div>
-              <div className="p-4 rounded-2xl bg-app-tertiary/50 border border-app-border text-[10px] font-black uppercase tracking-[0.2em] text-app-muted/60 shadow-sm">
-                Smart Refactoring
-              </div>
-            </div>
+            )}
           </div>
         )}
       </div>

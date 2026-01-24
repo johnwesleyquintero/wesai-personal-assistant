@@ -50,7 +50,7 @@ const ToastItem: React.FC<ToastProps> = ({ toast }) => {
       <p className="text-sm font-bold tracking-tight">{toast.message}</p>
       <button
         onClick={() => removeToast(toast.id)}
-        className="absolute top-1/2 -translate-y-1/2 right-3 p-1 opacity-60 hover:opacity-100 transition-opacity"
+        className="absolute top-1/2 -translate-y-1/2 right-3 p-1 opacity-60 hover:opacity-100 transition-all active:scale-95"
         aria-label="Close notification"
       >
         <FaXmark className="w-4 h-4" />

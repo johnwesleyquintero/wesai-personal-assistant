@@ -63,7 +63,7 @@ export const CodeInput: React.FC<CodeInputProps> = ({
           onClick={onClearInput}
           title="Clear code input"
           aria-label="Clear code input field"
-          className="absolute top-4 right-4 p-1.5 text-app-muted hover:text-red-500 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 hover:bg-red-500/10 transition-all duration-200 z-10"
+          className="absolute top-4 right-4 p-1.5 text-app-muted hover:text-red-500 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 hover:bg-red-500/10 transition-all duration-200 z-10 active:scale-95"
         >
           <FaXmark className="w-4 h-4" />
         </button>

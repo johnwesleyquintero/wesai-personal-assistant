@@ -28,8 +28,10 @@ import {
 } from 'react-icons/fa6';
 
 import { useChatLogic } from './hooks/useChatLogic.ts';
+import { useIsMobile } from './hooks/useMediaQuery.ts';
 
 export const ChatInterfacePanel: React.FC = memo(() => {
+  const isMobile = useIsMobile();
   const {
     chatMessages,
     chatInput,
@@ -203,38 +205,42 @@ export const ChatInterfacePanel: React.FC = memo(() => {
   };
 
   return (
-    <div className="flex flex-col h-[70vh] bg-app-main rounded-2xl shadow-2xl border border-app-border overflow-hidden transition-all duration-300">
+    <div
+      className={`flex flex-col ${isMobile ? 'h-[85vh]' : 'h-[75vh]'} bg-app-main rounded-2xl shadow-2xl border border-app-border overflow-hidden transition-all duration-300`}
+    >
       {/* Header */}
-      <header className="flex justify-between items-center px-6 py-4 border-b border-app-border bg-app-main/80 backdrop-blur-md z-10">
-        <div className="flex items-center gap-4">
+      <header className="flex justify-between items-center px-4 sm:px-6 py-4 border-b border-app-border bg-app-main/80 backdrop-blur-md z-10">
+        <div className="flex items-center gap-3 sm:gap-4">
           <div className="flex flex-col">
-            <h3 className="text-xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-app-accent dark:to-indigo-400 tracking-tight">
-              Wesai Chat
+            <h3 className="text-lg sm:text-xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-app-accent dark:to-indigo-400 tracking-tight">
+              {isMobile ? 'Wesai' : 'Wesai Chat'}
             </h3>
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              <span className="text-[10px] uppercase tracking-wider font-black text-app-muted">
-                {isLoading ? 'Processing...' : 'Active Session'}
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-green-500 animate-pulse" />
+              <span className="text-[9px] sm:text-[10px] uppercase tracking-wider font-black text-app-muted">
+                {isLoading ? 'Processing...' : 'Active'}
               </span>
             </div>
           </div>
 
           {/* Search Toggle */}
-          <div className="relative ml-2">
+          <div className="relative">
             <button
               onClick={() => setIsSearchExpanded(!isSearchExpanded)}
-              className={`p-2.5 rounded-xl transition-all duration-200 ${
+              className={`p-2 sm:p-2.5 rounded-xl transition-all duration-200 ${
                 isSearchExpanded
                   ? 'bg-app-accent-soft text-app-accent shadow-inner'
                   : 'text-app-muted hover:text-app-text hover:bg-app-tertiary'
               }`}
               title="Search messages"
             >
-              <FaMagnifyingGlass className="w-4 h-4" />
+              <FaMagnifyingGlass className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
 
             {isSearchExpanded && (
-              <div className="absolute top-full left-0 mt-3 w-80 bg-app-secondary rounded-2xl shadow-2xl border border-app-border p-4 z-20 animate-in fade-in slide-in-from-top-2">
+              <div
+                className={`absolute top-full left-0 mt-3 ${isMobile ? 'w-[calc(100vw-4rem)]' : 'w-80'} bg-app-secondary rounded-2xl shadow-2xl border border-app-border p-3 sm:p-4 z-20 animate-in fade-in slide-in-from-top-2`}
+              >
                 <div className="relative">
                   <FaMagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-app-muted w-3.5 h-3.5" />
                   <input
@@ -246,53 +252,62 @@ export const ChatInterfacePanel: React.FC = memo(() => {
                     autoFocus
                   />
                 </div>
-                {searchTerm && (
-                  <div className="mt-2 text-[10px] font-black text-app-muted px-1 uppercase tracking-widest">
-                    Showing {filteredMessages.length} of {chatMessages.length} results
-                  </div>
-                )}
               </div>
             )}
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setIsExportDialogOpen(true)}
-            className="p-2.5 text-app-muted hover:text-orange-500 hover:bg-orange-500/10 rounded-xl transition-all active:scale-95"
-            disabled={isLoading || chatMessages.length === 0}
-            title="Export conversation"
-          >
-            <FaFileExport className="w-4 h-4" />
-          </button>
+        <div className="flex items-center gap-1 sm:gap-2">
+          {!isMobile && (
+            <>
+              <button
+                onClick={() => setIsExportDialogOpen(true)}
+                className="p-2.5 text-app-muted hover:text-orange-500 hover:bg-orange-500/10 rounded-xl transition-all active:scale-95"
+                disabled={isLoading || chatMessages.length === 0}
+                title="Export conversation"
+              >
+                <FaFileExport className="w-4 h-4" />
+              </button>
 
-          <button
-            onClick={() => setIsSavedContextsOpen(true)}
-            className="p-2.5 text-app-muted hover:text-app-accent hover:bg-app-accent-soft rounded-xl transition-all active:scale-95"
-            disabled={isLoading}
-            title="Saved Contexts"
-          >
-            <FaClockRotateLeft className="w-4 h-4" />
-          </button>
+              <button
+                onClick={() => setIsSavedContextsOpen(true)}
+                className="p-2.5 text-app-muted hover:text-app-accent hover:bg-app-accent-soft rounded-xl transition-all active:scale-95"
+                disabled={isLoading}
+                title="Saved Contexts"
+              >
+                <FaClockRotateLeft className="w-4 h-4" />
+              </button>
+            </>
+          )}
+
+          {isMobile && (
+            <button
+              onClick={() => setIsSavedContextsOpen(true)}
+              className="p-2 text-app-muted hover:text-app-accent hover:bg-app-accent-soft rounded-xl transition-all active:scale-95"
+              disabled={isLoading}
+            >
+              <FaClockRotateLeft className="w-4 h-4" />
+            </button>
+          )}
 
           <button
             onClick={() => setIsSaveDialogOpen(true)}
-            className="p-2.5 text-app-muted hover:text-green-500 hover:bg-green-500/10 rounded-xl transition-all active:scale-95"
+            className="p-2 sm:p-2.5 text-app-muted hover:text-green-500 hover:bg-green-500/10 rounded-xl transition-all active:scale-95"
             disabled={isLoading}
             title="Save current chat"
           >
             <FaFloppyDisk className="w-4 h-4" />
           </button>
 
-          <div className="h-6 w-px bg-app-border mx-1" />
+          <div className="h-5 sm:h-6 w-px bg-app-border mx-0.5 sm:mx-1" />
 
           <button
             onClick={onNewChat}
-            className="flex items-center gap-2 px-4 py-2.5 bg-app-accent hover:opacity-90 text-white text-sm font-black rounded-xl shadow-lg shadow-app-accent/30 transition-all active:scale-95 disabled:opacity-50 uppercase tracking-widest"
+            className="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-app-accent hover:opacity-90 text-white text-xs sm:text-sm font-black rounded-xl shadow-lg shadow-app-accent/30 transition-all active:scale-95 disabled:opacity-50 uppercase tracking-widest"
             disabled={isLoading}
           >
-            <FaPlus className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">New Chat</span>
+            <FaPlus className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+            <span className="hidden xs:inline">New</span>
           </button>
         </div>
       </header>
@@ -389,15 +404,17 @@ export const ChatInterfacePanel: React.FC = memo(() => {
       </div>
 
       {/* Input Area */}
-      <footer className="p-4 bg-app-main border-t border-app-border">
+      <footer className={`${isMobile ? 'p-2' : 'p-4'} bg-app-main border-t border-app-border`}>
         <form onSubmit={handleSubmit} className="max-w-4xl mx-auto relative">
           {chatImage && (
-            <div className="absolute bottom-full mb-4 left-0 animate-in slide-in-from-bottom-2 fade-in">
+            <div
+              className={`absolute bottom-full ${isMobile ? 'mb-2' : 'mb-4'} left-0 animate-in slide-in-from-bottom-2 fade-in`}
+            >
               <div className="relative p-1 bg-app-secondary rounded-2xl shadow-2xl border border-app-border group">
                 <img
                   src={chatImage}
                   alt="Selected"
-                  className="h-24 w-auto rounded-xl object-cover"
+                  className={`${isMobile ? 'h-16' : 'h-24'} w-auto rounded-xl object-cover`}
                 />
                 <button
                   type="button"
@@ -411,7 +428,9 @@ export const ChatInterfacePanel: React.FC = memo(() => {
             </div>
           )}
 
-          <div className="flex items-end gap-3 p-2 bg-app-tertiary/50 rounded-2xl border border-app-border focus-within:ring-2 focus-within:ring-app-accent/20 focus-within:border-app-accent transition-all">
+          <div
+            className={`flex items-end ${isMobile ? 'gap-1.5 p-1.5' : 'gap-3 p-2'} bg-app-tertiary/50 rounded-2xl border border-app-border focus-within:ring-2 focus-within:ring-app-accent/20 focus-within:border-app-accent transition-all`}
+          >
             <input
               type="file"
               ref={fileInputRef}
@@ -422,11 +441,11 @@ export const ChatInterfacePanel: React.FC = memo(() => {
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="p-3 text-app-muted hover:text-app-accent hover:bg-app-main rounded-xl transition-all"
+              className={`${isMobile ? 'p-2' : 'p-3'} text-app-muted hover:text-app-accent hover:bg-app-main rounded-xl transition-all`}
               title="Attach image"
               disabled={isLoading || !isApiKeyConfigured || !isChatSessionActive}
             >
-              <FaPaperclip className="w-5 h-5" />
+              <FaPaperclip className={`${isMobile ? 'w-4 h-4' : 'w-5 h-5'}`} />
             </button>
 
             <textarea
@@ -448,12 +467,12 @@ export const ChatInterfacePanel: React.FC = memo(() => {
               }}
               placeholder={getInputPlaceholder()}
               disabled={isLoading || !isApiKeyConfigured || !isChatSessionActive}
-              className="flex-grow py-3 bg-transparent text-app-text border-none focus:ring-0 text-sm resize-none min-h-[44px] max-h-40 overflow-y-auto custom-scrollbar"
+              className={`flex-grow ${isMobile ? 'py-2 text-xs' : 'py-3 text-sm'} bg-transparent text-app-text border-none focus:ring-0 resize-none min-h-[40px] max-h-40 overflow-y-auto custom-scrollbar`}
               aria-label="Chat input"
             />
 
-            <div className="flex items-center gap-2 pr-1 pb-1">
-              {chatInput && !isLoading && (
+            <div className={`flex items-center ${isMobile ? 'gap-1' : 'gap-2'} pr-1 pb-1`}>
+              {chatInput && !isLoading && !isMobile && (
                 <div className="hidden sm:block pointer-events-none opacity-40 mr-1">
                   <kbd className="px-1.5 py-0.5 text-[10px] font-sans font-semibold text-app-muted bg-app-main border border-app-border rounded shadow-sm">
                     {sendOnEnter ? 'Enter' : 'Cmd+Enter'}
@@ -465,9 +484,9 @@ export const ChatInterfacePanel: React.FC = memo(() => {
                   type="button"
                   onClick={handleClearChatInput}
                   title="Clear input"
-                  className="p-2 text-app-muted hover:text-app-text rounded-lg hover:bg-app-main transition-all"
+                  className={`${isMobile ? 'p-1.5' : 'p-2'} text-app-muted hover:text-app-text rounded-lg hover:bg-app-main transition-all`}
                 >
-                  <FaXmark className="w-4 h-4" />
+                  <FaXmark className={`${isMobile ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />
                 </button>
               )}
 
@@ -479,13 +498,17 @@ export const ChatInterfacePanel: React.FC = memo(() => {
                   !isChatSessionActive ||
                   (!chatInput.trim() && !chatImage)
                 }
-                className={`p-3 rounded-xl transition-all flex items-center justify-center ${
+                className={`${isMobile ? 'p-2.5' : 'p-3'} rounded-xl transition-all flex items-center justify-center ${
                   (!chatInput.trim() && !chatImage) || isLoading
                     ? 'bg-app-tertiary text-app-muted'
                     : 'bg-app-accent text-white shadow-lg shadow-app-accent/30 hover:opacity-90 active:scale-95'
                 }`}
               >
-                {isLoading ? <LoadingSpinner /> : <FaPaperPlane className="w-4 h-4" />}
+                {isLoading ? (
+                  <LoadingSpinner />
+                ) : (
+                  <FaPaperPlane className={`${isMobile ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />
+                )}
               </button>
             </div>
           </div>
@@ -621,33 +644,30 @@ export const ChatInterfacePanel: React.FC = memo(() => {
         </div>
       )}
 
+      {/* Saved Contexts Modal/Drawer */}
       {isSavedContextsOpen && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-app-main rounded-2xl shadow-2xl p-0 w-full max-w-2xl border border-app-border overflow-hidden animate-in zoom-in-95 duration-200">
-            {/* Header */}
-            <header className="px-8 py-6 bg-app-secondary border-b border-app-border flex justify-between items-center">
+          <div
+            className={`${isMobile ? 'w-full h-full' : 'w-full max-w-2xl max-h-[80vh]'} bg-app-main ${isMobile ? '' : 'rounded-3xl'} shadow-2xl border border-app-border flex flex-col overflow-hidden animate-in zoom-in-95 duration-200`}
+          >
+            <div className="p-4 sm:p-6 border-b border-app-border flex justify-between items-center bg-app-secondary/50">
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-app-accent-soft rounded-xl text-app-accent">
+                <div className="p-2 bg-app-accent-soft text-app-accent rounded-xl">
                   <FaClockRotateLeft className="w-5 h-5" />
                 </div>
-                <div>
-                  <h4 className="text-xl font-black text-app-text tracking-tight">
-                    Saved Contexts
-                  </h4>
-                  <p className="text-xs text-app-muted font-bold uppercase tracking-widest">
-                    Manage your previous chat sessions
-                  </p>
-                </div>
+                <h3 className="text-lg sm:text-xl font-black text-app-text tracking-tight uppercase">
+                  Saved Sessions
+                </h3>
               </div>
               <button
                 onClick={() => setIsSavedContextsOpen(false)}
-                className="p-2 text-app-muted hover:text-app-text hover:bg-app-tertiary rounded-xl transition-all"
+                className="p-2 text-app-muted hover:text-app-text hover:bg-app-tertiary rounded-xl transition-all active:scale-95"
               >
-                <FaXmark className="w-5 h-5" />
+                <FaXmark className="w-6 h-6" />
               </button>
-            </header>
+            </div>
 
-            <div className="p-6 bg-app-main space-y-4">
+            <div className="flex-grow overflow-y-auto p-4 sm:p-6 custom-scrollbar">
               <div className="flex flex-col sm:flex-row items-center gap-3">
                 <div className="relative flex-grow w-full">
                   <FaMagnifyingGlass className="absolute left-4 top-1/2 -translate-y-1/2 text-app-muted w-4 h-4" />
