@@ -1,4 +1,4 @@
-import { useAppStore } from '../../store';
+import { useAppStore } from '../store';
 import { useMemo } from 'react';
 
 // Helper function to parse refactor feedback based on expected markdown structure
@@ -31,7 +31,6 @@ export const useCodeInteractionLogic = () => {
   const handleClearCodeInput = useAppStore((state) => state.handleClearCodeInput);
   const handleSubmitCodeInteraction = useAppStore((state) => state.handleSubmitCodeInteraction);
   const setError = useAppStore((state) => state.setError);
-  const addToast = useAppStore((state) => state.addToast);
 
   // Memoize parsed feedback when it changes, but only for the refactor tab
   const parsedRefactorFeedback = useMemo(() => {
@@ -64,7 +63,6 @@ export const useCodeInteractionLogic = () => {
     handleClearCodeInput,
     handleSubmitCodeInteraction,
     setError,
-    addToast,
     parsedRefactorFeedback,
     isApiKeyConfigured,
   };

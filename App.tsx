@@ -4,12 +4,12 @@ import { Header } from './components/Header.tsx';
 import { LoginPage } from './LoginPage.tsx';
 import { Footer } from './components/Footer.tsx';
 import { useAppStore, LS_KEY_LOGGED_IN } from './store.ts';
-import { useTheme } from './components/hooks/useTheme.ts';
+import { useTheme } from './hooks/useTheme.ts';
 
 // Import new components with lazy loading
 import { SettingsModal } from './components/SettingsModal.tsx';
 import { ResourcesModal, type ResourceType } from './components/ResourcesModal.tsx';
-import { ToastContainer } from './components/Toast.tsx';
+import { Toaster } from 'sonner';
 import { LoadingSpinner } from './components/LoadingSpinner.tsx';
 
 const CodeInteractionPanel = lazy(() =>
@@ -132,7 +132,13 @@ const App: React.FC = () => {
         </main>
       </div>
       <Footer onTabChange={handleTabChange} onOpenResources={handleOpenResourcesModal} />
-      <ToastContainer />
+      <Toaster
+        theme={theme as 'light' | 'dark' | 'system'}
+        position="top-right"
+        expand={false}
+        richColors
+        closeButton
+      />
     </div>
   );
 };

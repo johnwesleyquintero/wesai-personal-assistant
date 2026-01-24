@@ -11,8 +11,8 @@ import {
   FaWandMagicSparkles,
   FaCopy,
 } from 'react-icons/fa6';
-import { useAppStore } from '../store.ts';
-import { useIsMobile } from './hooks/useMediaQuery.ts';
+import { useChatLogic } from '../hooks/useChatLogic.ts';
+import { useIsMobile } from '../hooks/useMediaQuery.ts';
 import { ChatMessageItem } from './ChatMessageItem.tsx';
 import { SavedSessionsList } from './SavedSessionsList.tsx';
 import type { ChatMessage } from '../types.ts';
@@ -40,27 +40,28 @@ const TextSkeleton = ({ lines = 3 }: { lines?: number }) => (
 export const ChatInterfacePanel: React.FC = memo(() => {
   const {
     chatMessages,
-    isLoading,
-    activeApiKey,
-    activeChatSession,
     chatInput,
     chatImage,
-    savedChatSessions,
-    savedSessionsSort,
+    activeChatSession,
+    activeApiKey,
     activeSavedChatSessionId,
+    isLoading,
     handleChatInputChange: onChatInputChange,
-    setChatImage: onChatImageChange,
+    handleClearChatInput: onClearChatInput,
     handleChatSubmit: onChatSubmit,
+    setChatImage: onChatImageChange,
+    handleNewChat: onClearChat,
     handleTogglePreview: onTogglePreview,
+    sendOnEnter,
+    savedChatSessions,
     saveChatSession: onSaveChatSession,
     loadSavedChatSession: onLoadSavedChatSession,
     deleteSavedChatSession: onDeleteSavedChatSession,
     renameSavedChatSession: onRenameSavedChatSession,
     duplicateSavedChatSession: onDuplicateSavedChatSession,
+    savedSessionsSort,
     setSavedSessionsSort: onSetSavedSessionsSort,
-    handleNewChat: onClearChat,
-    sendOnEnter,
-  } = useAppStore();
+  } = useChatLogic();
 
   const isApiKeyConfigured = !!activeApiKey;
   const isChatSessionActive = !!activeChatSession;
@@ -197,7 +198,7 @@ export const ChatInterfacePanel: React.FC = memo(() => {
   };
 
   const handleClearChatInput = () => {
-    onChatInputChange('');
+    onClearChatInput();
   };
 
   const filteredMessages = useMemo(() => {

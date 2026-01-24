@@ -3,7 +3,7 @@ import { useCopyToClipboard } from '../hooks/useCopyToClipboard';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { FaCheck, FaClipboard } from 'react-icons/fa6';
-import { useAppStore } from '../store';
+import { toast } from '../utils/toast';
 import { markdownComponents } from './MarkdownCodeRenderer';
 
 interface FeedbackDisplayProps {
@@ -12,11 +12,10 @@ interface FeedbackDisplayProps {
 
 export const FeedbackDisplay: React.FC<FeedbackDisplayProps> = ({ feedback }) => {
   const { isCopied, copyToClipboard } = useCopyToClipboard(2000);
-  const addToast = useAppStore((state) => state.addToast);
 
   const handleCopy = () => {
     copyToClipboard(feedback || '');
-    addToast('Feedback copied to clipboard', 'success');
+    toast.success('Feedback copied to clipboard');
   };
 
   return (

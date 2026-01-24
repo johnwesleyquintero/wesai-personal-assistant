@@ -1,10 +1,12 @@
-import { useAppStore } from '../../store';
+import { useAppStore } from '../store';
 
 export const useChatLogic = () => {
   const chatMessages = useAppStore((state) => state.chatMessages);
   const chatInput = useAppStore((state) => state.chatInput);
   const chatImage = useAppStore((state) => state.chatImage);
   const activeChatSession = useAppStore((state) => state.activeChatSession);
+  const activeApiKey = useAppStore((state) => state.activeApiKey);
+  const activeSavedChatSessionId = useAppStore((state) => state.activeSavedChatSessionId);
   const copiedMessageId = useAppStore((state) => state.copiedMessageId);
   const chatError = useAppStore((state) => state.chatError);
   const isLoading = useAppStore((state) => state.isLoading);
@@ -32,6 +34,8 @@ export const useChatLogic = () => {
     chatInput,
     chatImage,
     activeChatSession,
+    activeApiKey,
+    activeSavedChatSessionId,
     copiedMessageId,
     chatError,
     isLoading,

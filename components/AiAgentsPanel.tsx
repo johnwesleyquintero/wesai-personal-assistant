@@ -15,7 +15,7 @@ import {
   FaCircleInfo,
 } from 'react-icons/fa6';
 
-import { useIsMobile } from './hooks/useMediaQuery.ts';
+import { useIsMobile } from '../hooks/useMediaQuery.ts';
 
 export const AiAgentsPanel: React.FC = React.memo(() => {
   const isMobile = useIsMobile();

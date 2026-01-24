@@ -1,6 +1,7 @@
 import React, { useState, memo } from 'react';
 import type { ApiKeySource } from '../types.ts';
 import { useAppStore } from '../store.ts';
+import { toast } from '../utils/toast';
 import {
   FaXmark,
   FaTriangleExclamation,
@@ -33,7 +34,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = memo(
     const setShowStreamFinishNotes = useAppStore((state) => state.setShowStreamFinishNotes);
     const sendOnEnter = useAppStore((state) => state.sendOnEnter);
     const setSendOnEnter = useAppStore((state) => state.setSendOnEnter);
-    const addToast = useAppStore((state) => state.addToast);
 
     if (!isOpen) {
       return null;
@@ -42,7 +42,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = memo(
     const handleSave = () => {
       if (apiKeyInput.trim()) {
         onSaveKey(apiKeyInput);
-        addToast('Settings saved successfully', 'success');
+        toast.success('Settings saved successfully');
         onClose();
       }
     };
@@ -53,7 +53,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = memo(
 
     const handleConfirmRemove = () => {
       onRemoveKey();
-      addToast('API Key removed', 'info');
+      toast.info('API Key removed');
       setShowConfirmRemove(false);
     };
 

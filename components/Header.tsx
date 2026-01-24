@@ -3,7 +3,7 @@ import { FaGear, FaMessage, FaCode, FaRobot } from 'react-icons/fa6';
 import type { Theme, ActiveTab } from '../types';
 import { ThemeToggleButton } from './ThemeToggleButton';
 import { WesAILogo } from './WesAILogo';
-import { useIsMobile } from './hooks/useMediaQuery.ts';
+import { useIsMobile } from '../hooks/useMediaQuery.ts';
 
 interface HeaderProps {
   toggleTheme: () => void;

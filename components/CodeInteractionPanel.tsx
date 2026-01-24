@@ -15,8 +15,9 @@ import { FeedbackDisplay } from './FeedbackDisplay.tsx';
 import { LoadingSpinner } from './LoadingSpinner.tsx';
 import { Skeleton, TextSkeleton, CodeBlockSkeleton } from './Skeleton.tsx';
 import { ErrorMessage } from './ErrorMessage.tsx';
-import { useCodeInteractionLogic } from './hooks/useCodeInteractionLogic.ts';
-import { useIsMobile } from './hooks/useMediaQuery.ts';
+import { useCodeInteractionLogic } from '../hooks/useCodeInteractionLogic.ts';
+import { useIsMobile } from '../hooks/useMediaQuery.ts';
+import { toast } from '../utils/toast';
 
 export const CodeInteractionPanel: React.FC = React.memo(() => {
   const isMobile = useIsMobile();
@@ -31,7 +32,6 @@ export const CodeInteractionPanel: React.FC = React.memo(() => {
     handleClearCodeInput: onClearInput,
     handleSubmitCodeInteraction: onSubmit,
     setError,
-    addToast,
     parsedRefactorFeedback,
     isApiKeyConfigured,
   } = useCodeInteractionLogic();
@@ -144,7 +144,7 @@ export const CodeInteractionPanel: React.FC = React.memo(() => {
 
   const handleClearInput = () => {
     onClearInput();
-    addToast('Input cleared', 'info', 2000);
+    toast.info('Input cleared');
   };
 
   const getInputPlaceholder = (): string => {

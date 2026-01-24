@@ -37,13 +37,6 @@ export const LS_KEY_SAVED_CHATS = 'savedChatSessions';
 export const LS_KEY_SAVED_CHATS_SORT = 'savedChatSessionsSort';
 export const LS_KEY_LOGGED_IN = 'isLoggedIn';
 
-export interface Toast {
-  id: string;
-  message: string;
-  type: 'success' | 'error' | 'info' | 'warning';
-  duration?: number;
-}
-
 interface AppState {
   // Global state
   code: string;
@@ -57,7 +50,6 @@ interface AppState {
   theme: Theme;
   showStreamFinishNotes: boolean;
   sendOnEnter: boolean;
-  toasts: Toast[];
 
   // Chat specific state
   chatMessages: ChatMessage[];
@@ -75,8 +67,6 @@ interface AppState {
   activeInstructionProfileId: string | null;
 
   // Actions
-  addToast: (message: string, type?: Toast['type'], duration?: number) => void;
-  removeToast: (id: string) => void;
   setCode: (code: string) => void;
   setFeedback: (feedback: string) => void;
   setIsLoading: (isLoading: boolean) => void;
@@ -151,7 +141,6 @@ export const useAppStore = create<AppState>((set, get) => ({
     const v = localStorage.getItem(LS_KEY_SEND_ON_ENTER);
     return v === null ? true : v === 'true';
   })(),
-  toasts: [],
 
   chatMessages: [],
   chatInput: '',
@@ -173,17 +162,6 @@ export const useAppStore = create<AppState>((set, get) => ({
   activeInstructionProfileId: null,
 
   // Actions
-  addToast: (message, type = 'info', duration = 3000) => {
-    const id = crypto.randomUUID();
-    set((state) => ({
-      toasts: [...state.toasts, { id, message, type, duration }],
-    }));
-    setTimeout(() => get().removeToast(id), duration);
-  },
-  removeToast: (id) =>
-    set((state) => ({
-      toasts: state.toasts.filter((t) => t.id !== id),
-    })),
   setCode: (code: string) => set({ code }),
   setFeedback: (feedback: string) => set({ feedback }),
   setIsLoading: (isLoading: boolean) => set({ isLoading }),
