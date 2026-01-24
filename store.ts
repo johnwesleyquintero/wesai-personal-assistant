@@ -533,23 +533,49 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   extractComponentCode: (markdownContent: string): string | null => {
-    const codeBlockRegex = /```(?:tsx|jsx|ts|typescript)?\s*\n([\s\S]+?)\n```/;
-    const match = markdownContent.match(codeBlockRegex);
-    if (match && match[1] && match[1].trim() !== '') {
-      return match[1];
+    // Improved regex to capture the language and content separately
+    const codeBlockRegex = /```(\w+)?\s*\n([\s\S]+?)\n```/g;
+    const matches = Array.from(markdownContent.matchAll(codeBlockRegex));
+
+    if (matches.length === 0) return null;
+
+    // 1. Prioritize blocks that have "export default"
+    const defaultExportBlock = matches.find((m) => m[2] && m[2].includes('export default'));
+    if (defaultExportBlock) return defaultExportBlock[2].trim();
+
+    // 2. Prioritize tsx/jsx blocks
+    const tsxJsxBlock = matches.find((m) => {
+      const lang = (m[1] || '').toLowerCase();
+      return ['tsx', 'jsx', 'ts', 'typescript'].includes(lang);
+    });
+    if (tsxJsxBlock) return tsxJsxBlock[2].trim();
+
+    // 3. Fallback to the first non-empty block
+    for (const match of matches) {
+      if (match[2] && match[2].trim() !== '') {
+        return match[2].trim();
+      }
     }
+
     return null;
   },
 
   handleChatSubmit: async () => {
     const { chatInput, chatImage, activeChatSession, extractComponentCode: extractCode } = get();
-    const userMessageId = `user-${Date.now()}`;
-    const modelMessageId = `model-${Date.now() + 1}`;
+    const now = Date.now();
+    const userMessageId = `user-${now}`;
+    const modelMessageId = `model-${now + 1}`;
 
     set((state: AppState) => ({
       chatMessages: [
         ...state.chatMessages,
-        { id: userMessageId, role: 'user', content: chatInput, imageContent: chatImage },
+        {
+          id: userMessageId,
+          role: 'user',
+          content: chatInput,
+          imageContent: chatImage,
+          timestamp: now,
+        },
       ],
     }));
     const currentInput = chatInput;
@@ -559,7 +585,14 @@ export const useAppStore = create<AppState>((set, get) => ({
     set((state: AppState) => ({
       chatMessages: [
         ...state.chatMessages,
-        { id: modelMessageId, role: 'model', content: '', componentCode: null, showPreview: false },
+        {
+          id: modelMessageId,
+          role: 'model',
+          content: '',
+          componentCode: null,
+          showPreview: false,
+          timestamp: now + 1,
+        },
       ],
     }));
 
@@ -652,11 +685,19 @@ export const useAppStore = create<AppState>((set, get) => ({
 
     set({ isLoading: true, chatError: null });
 
-    const modelMessageId = `model-${Date.now() + 1}`;
+    const now = Date.now();
+    const modelMessageId = `model-${now}`;
     set((state: AppState) => ({
       chatMessages: [
         ...state.chatMessages,
-        { id: modelMessageId, role: 'model', content: '', componentCode: null, showPreview: false },
+        {
+          id: modelMessageId,
+          role: 'model',
+          content: '',
+          componentCode: null,
+          showPreview: false,
+          timestamp: now,
+        },
       ],
     }));
 

@@ -14,6 +14,7 @@ export interface ChatMessage {
   id: string;
   role: 'user' | 'model';
   content: string;
+  timestamp: number; // Added: Unix timestamp for the message
   imageContent?: string | null; // Base64 encoded image data
   componentCode?: string | null; // Extracted React component code string, if any
   showPreview?: boolean; // Toggles between code view and preview view for this message

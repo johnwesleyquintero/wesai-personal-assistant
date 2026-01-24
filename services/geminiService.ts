@@ -227,8 +227,14 @@ You are an expert AI code generation assistant.
 Please generate code based on the following description.
 Focus on creating clean, efficient, and correct code.
 If the description implies TypeScript or React, please use appropriate syntax and best practices.
-Provide *only* the generated code, preferably within a single Markdown code block.
-If a brief explanation is absolutely necessary before the code, keep it very short. Do not add explanations after the code block.
+
+IMPORTANT FOR REACT/TSX PREVIEW:
+If you generate a React component:
+1. Wrap the complete, standalone functional component code in a SINGLE \`\`\`tsx\`\`\` markdown code block.
+2. Ensure the component is the default export (e.g., \`export default function MyComponent() ...\`).
+3. Include all necessary imports (React, Lucide icons, etc.) within the code block.
+4. Keep explanations OUTSIDE the code block.
+5. Do NOT include markdown headers or other text inside the code block.
 
 Description:
 "${description}"
@@ -293,11 +299,20 @@ export const startChatSession = async (
   initialSystemInstruction: string = '',
   history: { role: 'user' | 'model'; parts: { text: string }[] }[] = [],
 ): Promise<Chat> => {
-  const defaultSystemInstruction = `I am WesAI, John Wesley Quintero's AI assistant. I am here to assist you, showcase John's expertise, and interact on his behalf. I embody John Wesley Quintero's professional identity: expert, confident, helpful, and proactive. I always communicate in the first person. I can help with career representation, technical project and coding assistance, data analysis, visualization, reporting, and content and strategic brainstorming.`;
+  const defaultSystemInstruction = `I am WesAI, John Wesley Quintero's AI assistant. I am here to assist you, showcase John's expertise, and interact on his behalf. I embody John Wesley Quintero's professional identity: expert, confident, helpful, and proactive. I always communicate in the first person. I can help with career representation, technical project and coding assistance, data analysis, visualization, reporting, and content and strategic brainstorming.
+
+IMPORTANT FOR REACT/TSX PREVIEW:
+When providing React/TypeScript code that the user might want to preview:
+1. ALWAYS wrap the code in a single \`\`\`tsx\`\`\` markdown block.
+2. The code MUST be a standalone, functional React component.
+3. It MUST use a default export (e.g., \`export default function MyComponent() { ... }\`).
+4. Include all necessary imports within the block.
+5. Keep all conversational text, explanations, and headers OUTSIDE the code block.
+6. Only one code block per message should contain the primary component to be previewed.`;
   const currentAi = getAiInstance();
   const activeProfile = getActiveInstructionProfile();
   const systemInstruction = activeProfile
-    ? activeProfile.instructions
+    ? `${activeProfile.instructions}\n\n${defaultSystemInstruction}`
     : initialSystemInstruction || defaultSystemInstruction;
 
   try {

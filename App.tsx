@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useEffect, useMemo, lazy, Suspense } from 'react';
 import type { Theme } from './types';
 import { Header } from './components/Header.tsx';
 import { LoginPage } from './LoginPage.tsx';
@@ -6,13 +6,23 @@ import { Footer } from './components/Footer.tsx';
 import { useAppStore, LS_KEY_LOGGED_IN } from './store.ts';
 import { useTheme } from './components/hooks/useTheme.ts';
 
-// Import new components
+// Import new components with lazy loading
 import { SettingsModal } from './components/SettingsModal.tsx';
 import { ResourcesModal, type ResourceType } from './components/ResourcesModal.tsx';
-import { CodeInteractionPanel } from './components/CodeInteractionPanel.tsx';
-import { ChatInterfacePanel } from './components/ChatInterfacePanel.tsx';
-import { AiAgentsPanel } from './components/AiAgentsPanel.tsx';
 import { ToastContainer } from './components/Toast.tsx';
+import { LoadingSpinner } from './components/LoadingSpinner.tsx';
+
+const CodeInteractionPanel = lazy(() =>
+  import('./components/CodeInteractionPanel.tsx').then((m) => ({
+    default: m.CodeInteractionPanel,
+  })),
+);
+const ChatInterfacePanel = lazy(() =>
+  import('./components/ChatInterfacePanel.tsx').then((m) => ({ default: m.ChatInterfacePanel })),
+);
+const AiAgentsPanel = lazy(() =>
+  import('./components/AiAgentsPanel.tsx').then((m) => ({ default: m.AiAgentsPanel })),
+);
 
 const App: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
@@ -105,11 +115,19 @@ const App: React.FC = () => {
       <div className="flex-grow flex flex-col">
         <main className="flex-grow w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="h-full animate-in fade-in slide-in-from-bottom-4 duration-700">
-            {codeInteractionActive && <CodeInteractionPanel />}
+            <Suspense
+              fallback={
+                <div className="h-full flex items-center justify-center">
+                  <LoadingSpinner />
+                </div>
+              }
+            >
+              {codeInteractionActive && <CodeInteractionPanel />}
 
-            {activeTab === 'ai-agents' && <AiAgentsPanel />}
+              {activeTab === 'ai-agents' && <AiAgentsPanel />}
 
-            {activeTab === 'chat' && <ChatInterfacePanel />}
+              {activeTab === 'chat' && <ChatInterfacePanel />}
+            </Suspense>
           </div>
         </main>
       </div>

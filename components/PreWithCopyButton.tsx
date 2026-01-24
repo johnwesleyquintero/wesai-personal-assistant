@@ -24,10 +24,10 @@ export const PreWithCopyButton: React.FC<
         onClick={onCopy}
         title={isCopied ? 'Copied! Click to copy again' : 'Copy code to clipboard'}
         aria-label={isCopied ? 'Code copied. Click to copy again.' : 'Copy code to clipboard'}
-        className={`absolute top-3 right-3 p-2 rounded-xl transition-all duration-300 ease-in-out z-10
+        className={`absolute top-3 right-3 p-2.5 rounded-xl transition-all duration-300 ease-in-out z-10 active:scale-95
                     ${
                       isCopied
-                        ? 'bg-green-500 text-white shadow-lg shadow-green-500/20 scale-105'
+                        ? 'bg-green-500 text-white shadow-lg shadow-green-500/20'
                         : 'bg-white/80 dark:bg-gray-800/80 text-gray-600 dark:text-gray-300 backdrop-blur-sm border border-gray-200 dark:border-gray-700 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 hover:bg-white dark:hover:bg-gray-700 shadow-sm'
                     }`}
       >
