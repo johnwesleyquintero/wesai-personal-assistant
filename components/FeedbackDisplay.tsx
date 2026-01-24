@@ -29,7 +29,7 @@ export const FeedbackDisplay: React.FC<FeedbackDisplayProps> = ({ feedback }) =>
                     ${
                       isCopied
                         ? 'bg-green-500 text-white border-green-400 opacity-100'
-                        : 'bg-white/90 dark:bg-gray-800/90 hover:bg-white dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600'
+                        : 'bg-app-main hover:bg-app-tertiary text-app-muted hover:text-app-text border-app-border'
                     }`}
       >
         {isCopied ? (
@@ -43,17 +43,17 @@ export const FeedbackDisplay: React.FC<FeedbackDisplayProps> = ({ feedback }) =>
       </button>
       <div
         className="prose prose-sm sm:prose-base max-w-none dark:prose-invert
-                      prose-headings:text-slate-800 dark:prose-headings:text-slate-200
-                      prose-p:text-slate-700 dark:prose-p:text-slate-300
-                      prose-li:text-slate-700 dark:prose-li:text-slate-300
-                      prose-strong:text-slate-900 dark:prose-strong:text-slate-100
-                      prose-code:text-pink-600 dark:prose-code:text-pink-400
-                      prose-code:bg-slate-100 dark:prose-code:bg-slate-700
+                      prose-headings:text-app-text
+                      prose-p:text-app-text
+                      prose-li:text-app-text
+                      prose-strong:text-app-text font-bold
+                      prose-code:text-app-accent
+                      prose-code:bg-app-tertiary
                       prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded
-                      prose-pre:bg-slate-50 dark:prose-pre:bg-gray-900/50
+                      prose-pre:bg-app-tertiary
                       prose-pre:p-4 prose-pre:rounded-xl prose-pre:border
-                      prose-pre:border-gray-100 dark:prose-pre:border-gray-800
-                      prose-pre:text-slate-800 dark:prose-pre:text-slate-200"
+                      prose-pre:border-app-border
+                      prose-pre:text-app-text"
       >
         <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
           {feedback || ''}

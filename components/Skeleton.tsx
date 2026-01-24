@@ -6,10 +6,7 @@ interface SkeletonProps {
 
 export const Skeleton: React.FC<SkeletonProps> = ({ className = '' }) => {
   return (
-    <div
-      className={`animate-pulse bg-gray-200 dark:bg-gray-700 rounded-md ${className}`}
-      aria-hidden="true"
-    />
+    <div className={`animate-pulse bg-app-tertiary rounded-md ${className}`} aria-hidden="true" />
   );
 };
 
@@ -29,7 +26,7 @@ export const TextSkeleton: React.FC<{ lines?: number; className?: string }> = ({
 export const CodeBlockSkeleton: React.FC<{ className?: string }> = ({ className = '' }) => {
   return (
     <div
-      className={`p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 space-y-3 ${className}`}
+      className={`p-4 rounded-xl border border-app-border bg-app-secondary/50 space-y-3 ${className}`}
     >
       <Skeleton className="h-4 w-1/4 mb-4" />
       <Skeleton className="h-4 w-full" />

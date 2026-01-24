@@ -82,8 +82,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <p className="text-xl text-gray-700 dark:text-gray-300">Loading...</p>
+      <div className="min-h-screen flex items-center justify-center p-4 bg-app-main">
+        <p className="text-xl text-app-text">Loading...</p>
       </div>
     );
   }
@@ -125,25 +125,20 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
               stroke="url(#network-gradient)"
               strokeWidth="0.5"
               fill="none"
-              className="animate-pulse"
-              style={{ animationDelay: '0.5s' }}
+              className="animate-pulse [animation-delay:0.5s]"
             />
             <path
               d="M15,70 L35,65 L55,75 L75,70"
               stroke="url(#network-gradient)"
               strokeWidth="0.5"
               fill="none"
-              className="animate-pulse"
-              style={{ animationDelay: '1s' }}
+              className="animate-pulse [animation-delay:1s]"
             />
           </svg>
 
           {/* Gradient Orbs */}
           <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-blue-500 to-transparent rounded-full opacity-10 blur-3xl animate-pulse" />
-          <div
-            className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-tl from-purple-500 to-transparent rounded-full opacity-10 blur-3xl animate-pulse"
-            style={{ animationDelay: '2s' }}
-          />
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-tl from-purple-500 to-transparent rounded-full opacity-10 blur-3xl animate-pulse [animation-delay:2s]" />
         </div>
 
         {/* Main Content */}
@@ -173,17 +168,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
               <span className="text-gray-200">Custom AI Agent Builder (Markdown-ready)</span>
             </div>
             <div className="flex items-center space-x-3 p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
-              <div
-                className="w-3 h-3 bg-purple-400 rounded-full animate-pulse"
-                style={{ animationDelay: '0.5s' }}
-              />
+              <div className="w-3 h-3 bg-purple-400 rounded-full animate-pulse [animation-delay:0.5s]" />
               <span className="text-gray-200">Advanced Workflow Optimization</span>
             </div>
             <div className="flex items-center space-x-3 p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
-              <div
-                className="w-3 h-3 bg-pink-400 rounded-full animate-pulse"
-                style={{ animationDelay: '1s' }}
-              />
+              <div className="w-3 h-3 bg-pink-400 rounded-full animate-pulse [animation-delay:1s]" />
               <span className="text-gray-200">Privacy-First, Local-Only Data Storage</span>
             </div>
           </div>
@@ -200,23 +189,34 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
       </div>
 
       {/* Right: Login Form */}
-      <div className="md:w-1/2 flex items-center justify-center p-8 bg-gray-100 dark:bg-gray-800">
-        <div className="w-full max-w-md space-y-8 bg-gray-50 dark:bg-gray-900 shadow-2xl rounded-lg p-8">
+      <div className="md:w-1/2 flex items-center justify-center p-8 bg-app-secondary">
+        <div className="w-full max-w-md space-y-8 bg-app-main shadow-2xl rounded-3xl p-10 border border-app-border">
           <header className="text-center">
-            <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 py-2">
+            <h2 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 py-2 uppercase tracking-tighter">
               Enter Workspace
             </h2>
-            <p className="text-gray-500 dark:text-gray-400 mt-1">Sign in to build and optimize</p>
+            <p className="text-app-muted mt-2 font-medium">Sign in to build and optimize</p>
           </header>
 
           {error && (
-            <p className="text-sm text-red-600 dark:text-red-400 text-center" role="alert">
-              {error}
-            </p>
+            <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
+              <p
+                className="text-sm text-red-600 dark:text-red-400 text-center font-bold"
+                role="alert"
+              >
+                {error}
+              </p>
+            </div>
           )}
 
-          <div className="flex flex-col items-center justify-center space-y-4">
-            <div ref={googleButtonRef} className="w-full flex justify-center" />
+          <div className="flex flex-col items-center justify-center space-y-6">
+            <div
+              ref={googleButtonRef}
+              className="w-full flex justify-center p-1 bg-app-tertiary rounded-xl border border-app-border hover:border-app-accent/30 transition-all"
+            />
+            <p className="text-[10px] text-app-muted uppercase tracking-[0.2em] font-black">
+              Secure Google Authentication
+            </p>
           </div>
         </div>
       </div>

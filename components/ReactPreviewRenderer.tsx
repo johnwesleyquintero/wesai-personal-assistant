@@ -351,8 +351,7 @@ export const ReactPreviewRenderer: React.FC<ReactPreviewRendererProps> = ({
         <div
           className={twMerge(
             clsx(
-              'p-2 border border-dashed rounded bg-white text-black min-h-[50px] overflow-auto',
-              darkTheme ? 'border-gray-600 bg-gray-800 text-white' : 'border-gray-300',
+              'p-4 border border-dashed rounded-xl bg-app-main text-app-text min-h-[50px] overflow-auto border-app-border transition-all duration-300',
             ),
           )}
           dangerouslySetInnerHTML={{ __html: iframeContent }}
@@ -361,13 +360,8 @@ export const ReactPreviewRenderer: React.FC<ReactPreviewRendererProps> = ({
           ref={iframeRef}
           src="./preview-iframe.html"
           title="React Code Preview Sandbox"
+          className="w-full h-full border-none hidden"
           sandbox="allow-scripts allow-forms allow-modals allow-popups allow-presentation allow-same-origin"
-          style={{
-            width: '100%',
-            height: '100%',
-            border: 'none',
-            display: 'none', // Initially hide the iframe, we render its content directly
-          }}
           onLoad={() => setIframeLoaded(true)}
         />
       </PreviewErrorBoundary>

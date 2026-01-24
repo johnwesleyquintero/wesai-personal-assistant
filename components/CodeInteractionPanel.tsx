@@ -180,8 +180,8 @@ export const CodeInteractionPanel: React.FC = React.memo(() => {
   const renderFeedbackArea = () => {
     if (isLoading) {
       return (
-        <div className="flex flex-col h-full bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-xl overflow-hidden animate-in fade-in duration-500">
-          <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
+        <div className="flex flex-col h-full bg-app-main rounded-2xl border border-app-border shadow-2xl overflow-hidden animate-in fade-in duration-500">
+          <div className="flex items-center gap-3 px-5 py-4 border-b border-app-border bg-app-secondary/50">
             <Skeleton className="w-9 h-9 rounded-lg" />
             <Skeleton className="h-5 w-32" />
           </div>
@@ -190,7 +190,7 @@ export const CodeInteractionPanel: React.FC = React.memo(() => {
               <>
                 <div className="space-y-4">
                   <Skeleton className="h-4 w-40" />
-                  <div className="p-5 rounded-2xl bg-blue-50/30 dark:bg-blue-900/5 border border-blue-100/30 dark:border-blue-900/10">
+                  <div className="p-5 rounded-2xl bg-app-accent-soft border border-app-accent/20">
                     <TextSkeleton lines={4} />
                   </div>
                 </div>
@@ -213,19 +213,17 @@ export const CodeInteractionPanel: React.FC = React.memo(() => {
 
     if (error) {
       return (
-        <div className="flex flex-col h-full bg-white dark:bg-gray-900 rounded-2xl border border-red-200 dark:border-red-900/30 shadow-xl overflow-hidden">
+        <div className="flex flex-col h-full bg-app-main rounded-2xl border border-red-500/20 shadow-2xl overflow-hidden">
           <div className="p-8 flex flex-col items-center justify-center text-center h-full">
-            <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-2xl flex items-center justify-center mb-4">
+            <div className="w-16 h-16 bg-red-500/10 text-red-600 dark:text-red-400 rounded-2xl flex items-center justify-center mb-4">
               <FaTriangleExclamation className="w-8 h-8" />
             </div>
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-              Analysis Failed
-            </h3>
-            <p className="text-gray-500 dark:text-gray-400 max-w-xs mb-6">{error}</p>
+            <h3 className="text-lg font-bold text-app-text mb-2">Analysis Failed</h3>
+            <p className="text-app-muted max-w-xs mb-6">{error}</p>
             <button
               onClick={onSubmit}
               title="Retry analysis"
-              className="px-6 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl font-bold text-sm transition-transform active:scale-95"
+              className="px-8 py-3 bg-app-accent hover:opacity-90 text-white rounded-xl font-bold text-sm shadow-lg shadow-app-accent/20 transition-all active:scale-95"
             >
               Try Again
             </button>
@@ -239,22 +237,22 @@ export const CodeInteractionPanel: React.FC = React.memo(() => {
     const feedbackTitle = getFeedbackTitle();
 
     return (
-      <div className="flex flex-col h-full animate-in fade-in slide-in-from-right-4 duration-500 overflow-hidden bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-xl">
-        <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30 flex-shrink-0">
+      <div className="flex flex-col h-full animate-in fade-in slide-in-from-right-4 duration-500 overflow-hidden bg-app-main rounded-2xl border border-app-border shadow-2xl">
+        <div className="flex items-center gap-3 px-5 py-4 border-b border-app-border bg-app-secondary/50 flex-shrink-0">
           <div className={`p-2 rounded-lg bg-gradient-to-br ${getTabColor()} text-white shadow-md`}>
             {getTabIcon()}
           </div>
-          <h2 className="text-sm font-bold text-gray-900 dark:text-white leading-tight uppercase tracking-wider">
+          <h2 className="text-sm font-bold text-app-text leading-tight uppercase tracking-wider">
             {feedbackTitle}
           </h2>
         </div>
 
-        <div className="flex-grow overflow-y-auto p-5 custom-scrollbar">
+        <div className="flex-grow overflow-y-auto p-5 custom-scrollbar bg-app-main/50">
           {activeTab === 'refactor' ? (
             <div className="space-y-6">
               {parsedRefactorFeedback.summary && (
-                <div className="bg-blue-50/50 dark:bg-blue-900/10 rounded-2xl border border-blue-100/50 dark:border-blue-900/20 p-5 transition-all hover:shadow-md">
-                  <div className="flex items-center gap-2 mb-3 text-blue-700 dark:text-blue-300 font-bold text-sm uppercase tracking-wider">
+                <div className="bg-app-accent-soft rounded-2xl border border-app-accent/10 p-5 transition-all hover:shadow-md">
+                  <div className="flex items-center gap-2 mb-3 text-app-accent font-bold text-sm uppercase tracking-wider">
                     <FaCircleInfo className="w-4 h-4" />
                     Refactoring Summary
                   </div>
@@ -262,9 +260,9 @@ export const CodeInteractionPanel: React.FC = React.memo(() => {
                 </div>
               )}
               {parsedRefactorFeedback.refactoredCode && (
-                <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden transition-all hover:shadow-md">
-                  <div className="flex items-center justify-between px-5 py-3 border-b border-gray-50 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
-                    <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-bold text-sm uppercase tracking-wider">
+                <div className="bg-app-tertiary rounded-2xl border border-app-border shadow-sm overflow-hidden transition-all hover:shadow-md">
+                  <div className="flex items-center justify-between px-5 py-3 border-b border-app-border bg-app-secondary/30">
+                    <div className="flex items-center gap-2 text-app-accent font-bold text-sm uppercase tracking-wider">
                       <FaCode className="w-4 h-4" />
                       Refactored Code
                     </div>
@@ -277,8 +275,8 @@ export const CodeInteractionPanel: React.FC = React.memo(() => {
                 </div>
               )}
               {!parsedRefactorFeedback.summary && !parsedRefactorFeedback.refactoredCode && (
-                <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
-                  <div className="flex items-center gap-2 mb-3 text-amber-600 dark:text-amber-400 font-bold text-sm uppercase tracking-wider">
+                <div className="bg-app-tertiary rounded-2xl border border-app-border shadow-sm p-5">
+                  <div className="flex items-center gap-2 mb-3 text-amber-500 font-bold text-sm uppercase tracking-wider">
                     <FaTriangleExclamation className="w-4 h-4" />
                     Unstructured Output
                   </div>
@@ -287,7 +285,7 @@ export const CodeInteractionPanel: React.FC = React.memo(() => {
               )}
             </div>
           ) : (
-            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5 transition-all hover:shadow-md">
+            <div className="bg-app-tertiary rounded-2xl border border-app-border shadow-sm p-5 transition-all hover:shadow-md">
               <FeedbackDisplay feedback={feedback} />
             </div>
           )}
@@ -300,8 +298,8 @@ export const CodeInteractionPanel: React.FC = React.memo(() => {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-280px)] min-h-[500px] overflow-hidden">
       {/* Input Column */}
       <div className="flex flex-col h-full overflow-hidden">
-        <div className="flex flex-col flex-grow bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-xl overflow-hidden transition-all duration-300">
-          <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-gray-50/50 dark:bg-gray-800/30 flex-shrink-0">
+        <div className="flex flex-col flex-grow bg-app-main rounded-2xl border border-app-border shadow-2xl overflow-hidden transition-all duration-300">
+          <div className="px-5 py-4 border-b border-app-border flex items-center justify-between bg-app-secondary/50 flex-shrink-0">
             <div className="flex items-center gap-3">
               <div
                 className={`p-2 rounded-lg bg-gradient-to-br ${getTabColor()} text-white shadow-md`}
@@ -309,10 +307,10 @@ export const CodeInteractionPanel: React.FC = React.memo(() => {
                 {getTabIcon()}
               </div>
               <div>
-                <h3 className="text-sm font-bold text-gray-900 dark:text-white leading-tight uppercase tracking-wider">
+                <h3 className="text-sm font-bold text-app-text leading-tight uppercase tracking-wider">
                   {activeTab}
                 </h3>
-                <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">
+                <p className="text-[10px] text-app-muted font-medium uppercase tracking-tight">
                   {getInputLabel()}
                 </p>
               </div>
@@ -320,7 +318,7 @@ export const CodeInteractionPanel: React.FC = React.memo(() => {
             {code && !isLoading && (
               <button
                 onClick={handleClearInput}
-                className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all"
+                className="p-2 text-app-muted hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all active:scale-90"
                 title="Clear Input"
               >
                 <FaEraser className="w-4 h-4" />
@@ -328,7 +326,7 @@ export const CodeInteractionPanel: React.FC = React.memo(() => {
             )}
           </div>
 
-          <div className="flex-grow p-4 relative flex flex-col overflow-hidden">
+          <div className="flex-grow p-4 relative flex flex-col overflow-hidden bg-app-main/50">
             <CodeInput
               value={code}
               onChange={onCodeChange}
@@ -339,7 +337,7 @@ export const CodeInteractionPanel: React.FC = React.memo(() => {
             />
             {!code && (
               <div className="mt-4 animate-in fade-in slide-in-from-top-2 duration-500">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2 px-1">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-app-muted mb-3 px-1">
                   Try a quick prompt
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -347,7 +345,7 @@ export const CodeInteractionPanel: React.FC = React.memo(() => {
                     <button
                       key={idx}
                       onClick={() => onCodeChange(prompt)}
-                      className="text-xs px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-900/50 hover:bg-purple-50 dark:hover:bg-purple-900/10 hover:text-purple-600 dark:hover:text-purple-400 transition-all text-left"
+                      className="text-xs px-4 py-2 rounded-xl bg-app-tertiary text-app-muted border border-app-border hover:border-app-accent/30 hover:bg-app-accent-soft hover:text-app-accent transition-all text-left font-medium active:scale-95 shadow-sm"
                     >
                       {prompt}
                     </button>
@@ -357,11 +355,11 @@ export const CodeInteractionPanel: React.FC = React.memo(() => {
             )}
           </div>
 
-          <div className="p-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50/30 dark:bg-gray-800/20 flex-shrink-0">
+          <div className="p-4 border-t border-app-border bg-app-secondary/20 flex-shrink-0">
             <button
               onClick={handleSubmitClick}
               disabled={isLoading || !isApiKeyConfigured || !code.trim()}
-              className={`w-full flex items-center justify-center gap-2 bg-gradient-to-r ${getTabColor()} hover:opacity-90 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg transition-all transform active:scale-[0.98] disabled:opacity-40 disabled:grayscale disabled:cursor-not-allowed`}
+              className={`w-full flex items-center justify-center gap-2 bg-gradient-to-r ${getTabColor()} hover:opacity-90 text-white font-black py-4 px-6 rounded-xl shadow-lg shadow-app-accent/10 transition-all transform active:scale-[0.98] disabled:opacity-40 disabled:grayscale disabled:cursor-not-allowed uppercase tracking-widest text-sm`}
             >
               {isLoading ? (
                 <div className="flex items-center gap-3">
@@ -386,26 +384,26 @@ export const CodeInteractionPanel: React.FC = React.memo(() => {
         {isLoading || feedback || error ? (
           <div className="h-full overflow-hidden">{renderFeedbackArea()}</div>
         ) : (
-          <div className="flex flex-col items-center justify-center h-full bg-gray-50/50 dark:bg-gray-900/30 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-800 p-10 text-center group transition-all duration-500 hover:border-blue-400/50 dark:hover:border-blue-500/30 hover:bg-blue-50/10 dark:hover:bg-blue-900/10">
+          <div className="flex flex-col items-center justify-center h-full bg-app-secondary/20 rounded-2xl border-2 border-dashed border-app-border p-10 text-center group transition-all duration-500 hover:border-app-accent/30 hover:bg-app-accent-soft">
             <div className="relative mb-8">
-              <div className="absolute inset-0 bg-blue-500/20 blur-3xl rounded-full scale-150 group-hover:scale-110 transition-transform duration-700" />
-              <div className="relative p-8 rounded-3xl bg-white dark:bg-gray-800 text-gray-300 dark:text-gray-700 shadow-xl group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
-                <FaTerminal className="w-14 h-14 group-hover:text-blue-500 transition-colors" />
+              <div className="absolute inset-0 bg-app-accent/20 blur-3xl rounded-full scale-150 group-hover:scale-110 transition-transform duration-700" />
+              <div className="relative p-10 rounded-[2.5rem] bg-app-tertiary text-app-muted/30 shadow-2xl group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 border border-app-border">
+                <FaTerminal className="w-16 h-16 group-hover:text-app-accent transition-colors" />
               </div>
             </div>
-            <h3 className="text-2xl font-black text-gray-800 dark:text-gray-200 mb-3 tracking-tight">
+            <h3 className="text-3xl font-black text-app-text mb-4 tracking-tighter uppercase">
               Ready for action?
             </h3>
-            <p className="text-gray-500 dark:text-gray-400 max-w-xs mx-auto text-sm leading-relaxed mb-8">
+            <p className="text-app-muted max-w-xs mx-auto text-sm leading-relaxed mb-10 font-medium">
               Enter your code on the left or choose a mode to get started with our high-performance
               AI engine.
             </p>
 
-            <div className="grid grid-cols-2 gap-3 w-full max-w-sm">
-              <div className="p-3 rounded-xl bg-white/50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700 text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+            <div className="grid grid-cols-2 gap-4 w-full max-w-sm">
+              <div className="p-4 rounded-2xl bg-app-tertiary/50 border border-app-border text-[10px] font-black uppercase tracking-[0.2em] text-app-muted/60 shadow-sm">
                 Fast Processing
               </div>
-              <div className="p-3 rounded-xl bg-white/50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700 text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+              <div className="p-4 rounded-2xl bg-app-tertiary/50 border border-app-border text-[10px] font-black uppercase tracking-[0.2em] text-app-muted/60 shadow-sm">
                 Smart Refactoring
               </div>
             </div>

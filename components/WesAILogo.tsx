@@ -108,11 +108,10 @@ export const WesAILogo: React.FC<LogoProps> = memo(({ size = 'medium', className
         y="25"
         fontFamily="system-ui, -apple-system, sans-serif"
         fontSize={fontSize}
-        fontWeight="700"
+        fontWeight="800"
         fill="url(#logo-gradient)"
         filter="url(#logo-shadow)"
-        className="dark:fill-[url(#logo-gradient-dark)] dark:filter-[url(#logo-shadow-dark)]"
-        style={{ textShadow: '0 1px 2px rgba(0,0,0,0.1)' }}
+        className="dark:fill-[url(#logo-gradient-dark)] dark:filter-[url(#logo-shadow-dark)] drop-shadow-sm tracking-tight"
       >
         WesAI
       </text>

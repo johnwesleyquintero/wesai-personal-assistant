@@ -24,20 +24,20 @@ const ToastItem: React.FC<ToastProps> = ({ toast }) => {
       case 'warning':
         return <FaTriangleExclamation className="w-5 h-5 text-amber-500" />;
       default:
-        return <FaCircleInfo className="w-5 h-5 text-blue-500" />;
+        return <FaCircleInfo className="w-5 h-5 text-app-accent" />;
     }
   };
 
   const getStyles = () => {
     switch (toast.type) {
       case 'success':
-        return 'border-green-100 dark:border-green-900/30 bg-green-50/90 dark:bg-green-900/20';
+        return 'border-green-500/20 bg-green-500/10 text-green-600 dark:text-green-400';
       case 'error':
-        return 'border-red-100 dark:border-red-900/30 bg-red-50/90 dark:bg-red-900/20';
+        return 'border-red-500/20 bg-red-500/10 text-red-600 dark:text-red-400';
       case 'warning':
-        return 'border-amber-100 dark:border-amber-900/30 bg-amber-50/90 dark:bg-amber-900/20';
+        return 'border-amber-500/20 bg-amber-500/10 text-amber-600 dark:text-amber-400';
       default:
-        return 'border-blue-100 dark:border-blue-900/30 bg-blue-50/90 dark:bg-blue-900/20';
+        return 'border-app-accent/20 bg-app-accent-soft text-app-accent';
     }
   };
 
@@ -47,10 +47,10 @@ const ToastItem: React.FC<ToastProps> = ({ toast }) => {
       role="alert"
     >
       <div className="flex-shrink-0">{getIcon()}</div>
-      <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{toast.message}</p>
+      <p className="text-sm font-bold tracking-tight">{toast.message}</p>
       <button
         onClick={() => removeToast(toast.id)}
-        className="absolute top-1/2 -translate-y-1/2 right-3 p-1 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
+        className="absolute top-1/2 -translate-y-1/2 right-3 p-1 opacity-60 hover:opacity-100 transition-opacity"
         aria-label="Close notification"
       >
         <FaXmark className="w-4 h-4" />

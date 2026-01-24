@@ -72,7 +72,7 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-[#0B0F1A] transition-colors duration-300">
+    <div className="min-h-screen flex flex-col bg-app-secondary transition-colors duration-300">
       <Header
         toggleTheme={toggleTheme}
         currentTheme={theme as Theme}

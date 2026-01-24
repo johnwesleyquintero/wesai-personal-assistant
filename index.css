@@ -14,8 +14,39 @@
 }
 
 @layer base {
+  :root {
+    --bg-main: #ffffff;
+    --bg-secondary: #f9fafb;
+    --bg-tertiary: #f3f4f6;
+    --text-main: #111827;
+    --text-muted: #6b7280;
+    --border-main: #e5e7eb;
+    --accent-main: #7c3aed;
+    --accent-soft: #ede9fe;
+  }
+
+  .dark {
+    /* VSCode Dark Matte / Dracula Hybrid */
+    --bg-main: #1e1e1e;
+    --bg-secondary: #252526;
+    --bg-tertiary: #2d2d2d;
+    --text-main: #d4d4d4;
+    --text-muted: #a1a1aa;
+    --border-main: #333333;
+    --accent-main: #bd93f9;
+    --accent-soft: rgba(189, 147, 249, 0.1);
+
+    /* Syntax Highlighting / Accent Colors */
+    --syntax-keyword: #ff79c6;
+    --syntax-string: #f1fa8c;
+    --syntax-function: #50fa7b;
+    --syntax-comment: #6272a4;
+  }
+
   body {
-    @apply bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-200 overflow-x-hidden;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    @apply transition-colors duration-200 overflow-x-hidden;
     font-family:
       system-ui,
       -apple-system,
@@ -33,10 +64,12 @@
 
 /* Custom dark mode overrides for prose in model chat bubbles */
 .dark .prose-invert code {
-  @apply bg-slate-800 text-slate-200;
+  background-color: var(--bg-tertiary);
+  color: var(--text-main);
 }
 .dark .prose-invert pre {
-  @apply bg-slate-800 text-slate-200;
+  background-color: var(--bg-tertiary);
+  color: var(--text-main);
 }
 
 /* Styles for Tailwind Typography within user chat bubble (blue background) */
@@ -91,15 +124,17 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  @apply bg-transparent;
+  background-color: transparent;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  @apply bg-gray-300 dark:bg-gray-700 rounded-full;
+  background-color: var(--text-muted);
+  border-radius: 9999px;
+  opacity: 0.5;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-400 dark:bg-gray-600;
+  background-color: var(--accent-main);
 }
 
 /* Hide scrollbar for elements with no-scrollbar class */

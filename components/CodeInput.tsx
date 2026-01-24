@@ -38,7 +38,7 @@ export const CodeInput: React.FC<CodeInputProps> = ({
   };
 
   return (
-    <div className="relative w-full h-full group bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-inner focus-within:ring-2 focus-within:ring-blue-500/20 dark:focus-within:ring-blue-400/20 focus-within:border-blue-500 dark:focus-within:border-blue-400 transition-all duration-200 ease-in-out overflow-hidden">
+    <div className="relative w-full h-full group bg-app-secondary/50 border border-app-border rounded-2xl shadow-inner focus-within:ring-2 focus-within:ring-app-accent/20 focus-within:border-app-accent transition-all duration-200 ease-in-out overflow-hidden">
       <div className="w-full h-full overflow-y-auto custom-scrollbar p-1">
         <Editor
           value={value}
@@ -48,18 +48,13 @@ export const CodeInput: React.FC<CodeInputProps> = ({
           onKeyDown={handleKeyDown}
           disabled={disabled}
           placeholder={placeholder}
-          className="font-mono text-sm min-h-full"
-          style={{
-            fontFamily: '"Fira Code", "Fira Mono", monospace',
-            fontSize: 14,
-            outline: 'none',
-          }}
+          className="font-mono text-[14px] min-h-full outline-none"
           textareaId="codeInput"
           aria-label="Code input"
         />
       </div>
       <div className="absolute bottom-3 right-4 pointer-events-none opacity-0 group-focus-within:opacity-40 transition-opacity duration-300">
-        <kbd className="px-2 py-1 text-[10px] font-sans font-semibold text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded shadow-sm">
+        <kbd className="px-2 py-1 text-[10px] font-sans font-semibold text-app-muted bg-app-main border border-app-border rounded shadow-sm">
           Ctrl + Enter
         </kbd>
       </div>
@@ -68,7 +63,7 @@ export const CodeInput: React.FC<CodeInputProps> = ({
           onClick={onClearInput}
           title="Clear code input"
           aria-label="Clear code input field"
-          className="absolute top-4 right-4 p-1.5 text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200 z-10"
+          className="absolute top-4 right-4 p-1.5 text-app-muted hover:text-red-500 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 hover:bg-red-500/10 transition-all duration-200 z-10"
         >
           <FaXmark className="w-4 h-4" />
         </button>

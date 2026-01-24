@@ -8,11 +8,7 @@ interface LoadingSpinnerProps {
 export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ className }) => {
   return (
     <div className="flex items-center justify-center">
-      <FaSpinner
-        className={
-          className || 'animate-spin -ml-1 mr-3 h-5 w-5 text-purple-600 dark:text-purple-400'
-        }
-      />
+      <FaSpinner className={className || 'animate-spin -ml-1 mr-3 h-5 w-5 text-app-accent'} />
     </div>
   );
 };

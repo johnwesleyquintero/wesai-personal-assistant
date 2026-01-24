@@ -13,13 +13,13 @@ export const Footer: React.FC<FooterProps> = memo(({ onTabChange, onOpenResource
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="w-full bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 pt-12 pb-8 px-6 transition-colors duration-300">
+    <footer className="w-full bg-app-main border-t border-app-border pt-12 pb-8 px-6 transition-colors duration-300">
       <div className="max-w-[1600px] mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
           {/* Brand Section */}
           <div className="space-y-4 col-span-1">
             <WesAILogo size="medium" />
-            <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed max-w-sm">
+            <p className="text-sm text-app-muted leading-relaxed max-w-sm">
               The ultimate professional workspace for building, deploying, and optimizing AI agents.
               Powered by Gemini.
             </p>
@@ -28,7 +28,7 @@ export const Footer: React.FC<FooterProps> = memo(({ onTabChange, onOpenResource
                 href="https://github.com/johnwesleyquintero/wesai-personal-assistant"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-xl hover:text-purple-600 dark:hover:text-purple-400 transition-all border border-transparent hover:border-purple-100 dark:hover:border-purple-900/30 shadow-sm"
+                className="p-2 bg-app-secondary text-app-muted rounded-xl hover:text-app-accent transition-all border border-transparent hover:border-app-accent/30 shadow-sm active:scale-95"
               >
                 <FaGithub className="w-5 h-5" />
               </a>
@@ -36,7 +36,7 @@ export const Footer: React.FC<FooterProps> = memo(({ onTabChange, onOpenResource
                 href="https://aistudio.google.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-xl hover:text-purple-600 dark:hover:text-purple-400 transition-all border border-transparent hover:border-purple-100 dark:hover:border-purple-900/30 shadow-sm"
+                className="p-2 bg-app-secondary text-app-muted rounded-xl hover:text-app-accent transition-all border border-transparent hover:border-app-accent/30 shadow-sm active:scale-95"
               >
                 <FaGoogle className="w-5 h-5" />
               </a>
@@ -45,14 +45,12 @@ export const Footer: React.FC<FooterProps> = memo(({ onTabChange, onOpenResource
 
           {/* Quick Links */}
           <div className="space-y-4">
-            <h4 className="text-sm font-bold uppercase tracking-widest text-gray-900 dark:text-white">
-              Workspace
-            </h4>
+            <h4 className="text-sm font-bold uppercase tracking-widest text-app-text">Workspace</h4>
             <ul className="space-y-3">
               <li>
                 <button
                   onClick={() => onTabChange?.('chat')}
-                  className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                  className="flex items-center gap-2 text-sm text-app-muted hover:text-app-accent transition-colors"
                 >
                   <FaMessage className="w-3.5 h-3.5" />
                   Chat Assistant
@@ -61,7 +59,7 @@ export const Footer: React.FC<FooterProps> = memo(({ onTabChange, onOpenResource
               <li>
                 <button
                   onClick={() => onTabChange?.('content')}
-                  className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                  className="flex items-center gap-2 text-sm text-app-muted hover:text-app-accent transition-colors"
                 >
                   <FaCode className="w-3.5 h-3.5" />
                   Code Studio
@@ -70,7 +68,7 @@ export const Footer: React.FC<FooterProps> = memo(({ onTabChange, onOpenResource
               <li>
                 <button
                   onClick={() => onTabChange?.('ai-agents')}
-                  className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                  className="flex items-center gap-2 text-sm text-app-muted hover:text-app-accent transition-colors"
                 >
                   <FaRobot className="w-3.5 h-3.5" />
                   Agent Builder
@@ -81,16 +79,14 @@ export const Footer: React.FC<FooterProps> = memo(({ onTabChange, onOpenResource
 
           {/* Resources */}
           <div className="space-y-4">
-            <h4 className="text-sm font-bold uppercase tracking-widest text-gray-900 dark:text-white">
-              Resources
-            </h4>
+            <h4 className="text-sm font-bold uppercase tracking-widest text-app-text">Resources</h4>
             <ul className="space-y-3">
               <li>
                 <a
                   href="https://ai.google.dev/gemini-api/docs"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                  className="text-sm text-app-muted hover:text-app-accent transition-colors"
                 >
                   Gemini API Docs
                 </a>
@@ -98,7 +94,7 @@ export const Footer: React.FC<FooterProps> = memo(({ onTabChange, onOpenResource
               <li>
                 <button
                   onClick={() => onOpenResources?.('getting-started')}
-                  className="text-sm text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                  className="text-sm text-app-muted hover:text-app-accent transition-colors"
                 >
                   Getting Started
                 </button>
@@ -106,7 +102,7 @@ export const Footer: React.FC<FooterProps> = memo(({ onTabChange, onOpenResource
               <li>
                 <button
                   onClick={() => onOpenResources?.('best-practices')}
-                  className="text-sm text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                  className="text-sm text-app-muted hover:text-app-accent transition-colors"
                 >
                   Best Practices
                 </button>
@@ -116,20 +112,20 @@ export const Footer: React.FC<FooterProps> = memo(({ onTabChange, onOpenResource
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 border-t border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-xs font-bold text-gray-400 dark:text-gray-500">
+        <div className="pt-8 border-t border-app-border flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-xs font-bold text-app-muted opacity-70">
             © {currentYear} WesAI. Built with precision for professional workflows.
           </p>
           <div className="flex items-center gap-6">
             <button
               onClick={() => onOpenResources?.('privacy-policy')}
-              className="text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-purple-500 transition-colors"
+              className="text-[10px] font-black uppercase tracking-widest text-app-muted hover:text-app-accent transition-colors"
             >
               Privacy Policy
             </button>
             <button
               onClick={() => onOpenResources?.('terms-of-service')}
-              className="text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-purple-500 transition-colors"
+              className="text-[10px] font-black uppercase tracking-widest text-app-muted hover:text-app-accent transition-colors"
             >
               Terms of Service
             </button>

@@ -27,8 +27,8 @@ export const ResourcesModal: React.FC<ResourcesModalProps> = memo(({ isOpen, onC
   const content = {
     'getting-started': {
       title: 'Getting Started',
-      icon: <FaRocket className="w-5 h-5 text-blue-600 dark:text-blue-400" />,
-      iconBg: 'bg-blue-100 dark:bg-blue-900/30',
+      icon: <FaRocket className="w-5 h-5 text-app-accent" />,
+      iconBg: 'bg-app-accent-soft',
       sections: [
         {
           title: 'Welcome to WesAI',
@@ -54,8 +54,8 @@ export const ResourcesModal: React.FC<ResourcesModalProps> = memo(({ isOpen, onC
     },
     'best-practices': {
       title: 'Best Practices',
-      icon: <FaLightbulb className="w-5 h-5 text-amber-600 dark:text-amber-400" />,
-      iconBg: 'bg-amber-100 dark:bg-amber-900/30',
+      icon: <FaLightbulb className="w-5 h-5 text-app-accent" />,
+      iconBg: 'bg-app-accent-soft',
       sections: [
         {
           title: 'Effective Prompting',
@@ -81,8 +81,8 @@ export const ResourcesModal: React.FC<ResourcesModalProps> = memo(({ isOpen, onC
     },
     'privacy-policy': {
       title: 'Privacy Policy',
-      icon: <FaShieldHalved className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />,
-      iconBg: 'bg-emerald-100 dark:bg-emerald-900/30',
+      icon: <FaShieldHalved className="w-5 h-5 text-app-accent" />,
+      iconBg: 'bg-app-accent-soft',
       sections: [
         {
           title: 'Data Privacy',
@@ -108,8 +108,8 @@ export const ResourcesModal: React.FC<ResourcesModalProps> = memo(({ isOpen, onC
     },
     'terms-of-service': {
       title: 'Terms of Service',
-      icon: <FaGavel className="w-5 h-5 text-purple-600 dark:text-purple-400" />,
-      iconBg: 'bg-purple-100 dark:bg-purple-900/30',
+      icon: <FaGavel className="w-5 h-5 text-app-accent" />,
+      iconBg: 'bg-app-accent-soft',
       sections: [
         {
           title: 'Usage Terms',
@@ -137,23 +137,22 @@ export const ResourcesModal: React.FC<ResourcesModalProps> = memo(({ isOpen, onC
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm dark:bg-gray-900/80 animate-in fade-in duration-300"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300"
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-2xl rounded-2xl bg-white p-0 shadow-2xl dark:bg-gray-900 flex flex-col overflow-hidden animate-in zoom-in-95 duration-300 mx-4"
-        style={{ maxHeight: '85vh' }}
+        className="relative w-full max-w-2xl rounded-2xl bg-app-main p-0 shadow-2xl border border-app-border flex flex-col overflow-hidden animate-in zoom-in-95 duration-300 mx-4 max-h-[85vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
+        <div className="flex items-center justify-between p-6 border-b border-app-border bg-app-secondary/50">
           <div className="flex items-center gap-3">
             <div className={`p-2 ${content.iconBg} rounded-lg`}>{content.icon}</div>
-            <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">{content.title}</h2>
+            <h2 className="text-xl font-bold text-app-text">{content.title}</h2>
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+            className="p-2 text-app-muted hover:text-app-text transition-colors rounded-full hover:bg-app-tertiary"
             aria-label="Close modal"
           >
             <FaXmark className="w-5 h-5" />
@@ -161,28 +160,26 @@ export const ResourcesModal: React.FC<ResourcesModalProps> = memo(({ isOpen, onC
         </div>
 
         {/* Content */}
-        <div className="flex-grow overflow-y-auto p-6 space-y-8 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-800 scrollbar-track-transparent">
+        <div className="flex-grow overflow-y-auto p-6 space-y-8 custom-scrollbar">
           {content.sections.map((section, idx) => (
             <div key={idx} className="space-y-4">
               <div className="space-y-1">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                  <FaBook className="w-4 h-4 text-purple-500" />
+                <h3 className="text-lg font-bold text-app-text flex items-center gap-2">
+                  <FaBook className="w-4 h-4 text-app-accent" />
                   {section.title}
                 </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">{section.description}</p>
+                <p className="text-sm text-app-muted">{section.description}</p>
               </div>
               <div className="grid grid-cols-1 gap-3">
                 {section.steps.map((step, sIdx) => (
                   <div
                     key={sIdx}
-                    className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 group hover:border-purple-200 dark:hover:border-purple-900/30 transition-colors"
+                    className="flex items-start gap-3 p-3 rounded-xl bg-app-secondary border border-app-border group hover:border-app-accent/30 transition-colors"
                   >
-                    <div className="mt-1 flex-shrink-0 w-5 h-5 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                      <FaCheck className="w-2.5 h-2.5 text-purple-600 dark:text-purple-400" />
+                    <div className="mt-1 flex-shrink-0 w-5 h-5 rounded-full bg-app-accent-soft flex items-center justify-center">
+                      <FaCheck className="w-2.5 h-2.5 text-app-accent" />
                     </div>
-                    <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                      {step}
-                    </p>
+                    <p className="text-sm text-app-text leading-relaxed">{step}</p>
                   </div>
                 ))}
               </div>
@@ -191,10 +188,10 @@ export const ResourcesModal: React.FC<ResourcesModalProps> = memo(({ isOpen, onC
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t border-gray-100 dark:border-gray-800 bg-gray-50/30 dark:bg-gray-800/30 flex justify-end">
+        <div className="p-6 border-t border-app-border bg-app-secondary/30 flex justify-end">
           <button
             onClick={onClose}
-            className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold rounded-xl shadow-lg shadow-purple-500/25 transition-all hover:-translate-y-0.5"
+            className="px-6 py-2 bg-app-accent hover:opacity-90 text-white text-sm font-bold rounded-xl shadow-lg shadow-app-accent/25 transition-all hover:-translate-y-0.5 active:scale-95"
           >
             Got it, thanks!
           </button>
