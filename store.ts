@@ -3,7 +3,6 @@ import type { Chat } from '@google/genai';
 import type {
   ActiveTab,
   ApiKeySource,
-  Theme,
   ChatMessage,
   SavedChatSession,
   CustomInstructionProfile,
@@ -47,7 +46,6 @@ interface AppState {
   apiKeySource: ApiKeySource;
   isLoggedIn: boolean;
   activeTab: ActiveTab;
-  theme: Theme;
   showStreamFinishNotes: boolean;
   sendOnEnter: boolean;
 
@@ -57,6 +55,7 @@ interface AppState {
   chatImage: string | null; // Added: Current image to send
   activeChatSession: Chat | null;
   copiedMessageId: string | null;
+  abortController: AbortController | null;
   chatError: string | null;
   savedChatSessions: SavedChatSession[];
   activeSavedChatSessionId: string | null;
@@ -75,7 +74,6 @@ interface AppState {
   setApiKeySource: (source: ApiKeySource) => void;
   setIsLoggedIn: (isLoggedIn: boolean) => void;
   setActiveTab: (tab: ActiveTab) => void;
-  setTheme: (theme: Theme) => void;
   setChatMessages: (messages: ChatMessage[]) => void;
   setChatInput: (input: string) => void;
   setChatImage: (image: string | null) => void; // Added
@@ -100,6 +98,7 @@ interface AppState {
   handleNewChat: () => void;
   handleRetryChat: () => Promise<void>;
   handleCopyChatMessage: (content: string, messageId: string) => void;
+  stopGeneration: () => void;
   handleTogglePreview: (messageId: string) => void;
   initializeChatSession: (systemInstruction?: string, savedChatId?: string) => Promise<void>;
   initializeSavedChatSessions: () => void;
@@ -128,11 +127,6 @@ export const useAppStore = create<AppState>((set, get) => ({
   apiKeySource: 'none',
   isLoggedIn: false, // Default to false, will be updated by App.tsx useEffect
   activeTab: 'chat',
-  theme: (() => {
-    const storedTheme = localStorage.getItem('theme') as Theme | null;
-    if (storedTheme) return storedTheme;
-    return window.matchMedia?.('(prefers-color-scheme: dark)')?.matches ? 'dark' : 'light';
-  })(),
   showStreamFinishNotes: (() => {
     const v = localStorage.getItem(LS_KEY_STREAM_NOTES);
     return v === null ? true : v === 'true';
@@ -147,6 +141,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   chatImage: null, // Initial state
   activeChatSession: null,
   copiedMessageId: null,
+  abortController: null,
   chatError: null,
   savedChatSessions: [],
   activeSavedChatSessionId: null,
@@ -170,7 +165,6 @@ export const useAppStore = create<AppState>((set, get) => ({
   setApiKeySource: (source: ApiKeySource) => set({ apiKeySource: source }),
   setIsLoggedIn: (isLoggedIn: boolean) => set({ isLoggedIn }),
   setActiveTab: (tab: ActiveTab) => set({ activeTab: tab }),
-  setTheme: (theme: Theme) => set({ theme }),
   setChatMessages: (messages: ChatMessage[]) => set({ chatMessages: messages }),
   setChatInput: (input: string) => set({ chatInput: input }),
   setChatImage: (image: string | null) => set({ chatImage: image }), // Added
@@ -233,7 +227,9 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   loadSavedChatSession: (sessionId: string) => {
-    const { savedChatSessions, initializeChatSession } = get();
+    const { savedChatSessions, initializeChatSession, isLoading } = get();
+    if (isLoading) return;
+
     const sessionToLoad = savedChatSessions.find((session) => session.id === sessionId);
 
     if (sessionToLoad) {
@@ -337,6 +333,9 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ activeSavedChatSessionId: sessionId }),
 
   initializeActiveApiKey: () => {
+    const { initializeChatSession, initializeSavedChatSessions, isLoading } = get();
+    if (isLoading) return;
+
     const storedKey = localStorage.getItem(LS_KEY_API);
     const envApiKey = getEnvVariable('VITE_GEMINI_API_KEY');
 
@@ -352,17 +351,20 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
 
     if (get().activeApiKey) {
-      get().initializeChatSession();
+      initializeChatSession();
     }
-    get().initializeSavedChatSessions();
+    initializeSavedChatSessions();
   },
 
   handleSaveApiKey: (key: string) => {
+    const { initializeChatSession, isLoading } = get();
+    if (isLoading) return;
+
     if (key.trim()) {
       localStorage.setItem(LS_KEY_API, key);
       set({ activeApiKey: key, apiKeySource: 'ui', error: null, chatError: null });
       initializeGeminiClient(key);
-      get().initializeChatSession();
+      initializeChatSession();
     }
   },
 
@@ -373,14 +375,25 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   handleLoginSuccess: () => {
+    const { initializeActiveApiKey, isLoading } = get();
+    if (isLoading) return;
+
     localStorage.setItem(LS_KEY_LOGGED_IN, 'true');
     set({ isLoggedIn: true });
-    get().initializeActiveApiKey();
+    initializeActiveApiKey();
   },
 
   handleLogout: () => {
     localStorage.removeItem(LS_KEY_LOGGED_IN);
-    set({ isLoggedIn: false, activeApiKey: null, apiKeySource: 'none' });
+    set({
+      isLoggedIn: false,
+      activeApiKey: null,
+      apiKeySource: 'none',
+      chatMessages: [],
+      activeChatSession: null,
+      activeSavedChatSessionId: null,
+      chatError: null,
+    });
     clearGeminiClient();
   },
 
@@ -401,17 +414,24 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   initializeChatSession: async (systemInstructionOverride?: string, savedChatId?: string) => {
-    const { activeChatSession, activeApiKey, savedChatSessions, activeSavedChatSessionId } = get();
+    const {
+      activeChatSession,
+      activeApiKey,
+      savedChatSessions,
+      activeSavedChatSessionId,
+      isLoading,
+    } = get();
     if (!activeApiKey) {
       set({ chatError: 'API Key is not configured. Please set your API key to use chat.' });
       return;
     }
 
-    if (activeChatSession && !savedChatId) {
+    if (isLoading || (activeChatSession && !savedChatId)) {
       return;
     }
 
-    set({ isLoading: true, chatError: null });
+    const controller = new AbortController();
+    set({ isLoading: true, chatError: null, abortController: controller });
     try {
       const activeProfile = getActiveInstructionProfile();
       const effectiveSystemInstruction =
@@ -426,6 +446,8 @@ export const useAppStore = create<AppState>((set, get) => ({
           set({ chatMessages: initialChatMessages });
         }
       }
+
+      if (controller.signal.aborted) return;
 
       let knowledgeContext = '';
       if (!activeSavedChatSessionId || (activeSavedChatSessionId && savedChatId)) {
@@ -449,14 +471,22 @@ export const useAppStore = create<AppState>((set, get) => ({
         })),
       );
 
+      if (controller.signal.aborted) return;
+
       const session = await startChatSession(effectiveSystemInstruction, history);
+      if (controller.signal.aborted) return;
+
       set({ activeChatSession: session, chatMessages: initialChatMessages });
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-      set({ chatError: `Failed to start chat session: ${errorMessage}` });
-      console.error(err);
+      if (controller.signal.aborted) {
+        // console.log('Chat initialization aborted');
+      } else {
+        const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+        set({ chatError: `Failed to start chat session: ${errorMessage}` });
+        console.error(err);
+      }
     } finally {
-      set({ isLoading: false });
+      set({ isLoading: false, abortController: null });
     }
   },
 
@@ -465,17 +495,22 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   handleSubmitCodeInteraction: async () => {
-    set({ isLoading: true, feedback: '', error: null });
-    const { activeTab, code } = get();
+    const { activeTab, code, isLoading } = get();
+    if (isLoading || !code.trim()) return;
+
+    const controller = new AbortController();
+    set({ isLoading: true, feedback: '', error: null, abortController: controller });
 
     try {
       if (activeTab === 'review') {
         const result = await reviewCodeWithGemini(code);
+        if (controller.signal.aborted) return;
         set({ feedback: result });
       } else if (activeTab === 'refactor') {
         const fullRefactorText = `## Refactoring Summary:\n\n`;
         set({ feedback: fullRefactorText });
         for await (const part of refactorCodeWithGeminiStream(code)) {
+          if (controller.signal.aborted) break;
           if (part.type === 'chunk' && part.data) {
             set((state: AppState) => ({ feedback: state.feedback + (part.data || '') }));
           } else if (part.type === 'error' && part.message) {
@@ -493,45 +528,72 @@ export const useAppStore = create<AppState>((set, get) => ({
         }
       } else if (activeTab === 'preview') {
         const result = await getReactComponentPreview(code);
+        if (controller.signal.aborted) return;
         set({ feedback: result });
       } else if (activeTab === 'generate') {
         const result = await generateCodeWithGemini(code);
+        if (controller.signal.aborted) return;
         set({ feedback: result });
       } else if (activeTab === 'content') {
         const result = await generateContentWithGemini(code);
+        if (controller.signal.aborted) return;
         set({ feedback: result });
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-      set({ error: `Error during ${activeTab}: ${errorMessage}` });
-      console.error(`Error in ${activeTab}:`, err);
+      if (controller.signal.aborted) {
+        // console.log('Code interaction aborted');
+      } else {
+        const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+        set({ error: `Error during ${activeTab}: ${errorMessage}` });
+        console.error(`Error in ${activeTab}:`, err);
+      }
     } finally {
-      set({ isLoading: false });
+      set({ isLoading: false, abortController: null });
     }
   },
 
   extractComponentCode: (markdownContent: string): string | null => {
-    // Improved regex to capture the language and content separately
-    const codeBlockRegex = /```(\w+)?\s*\n([\s\S]+?)\n```/g;
-    const matches = Array.from(markdownContent.matchAll(codeBlockRegex));
+    // 1. First try to find fully closed code blocks
+    const closedCodeBlockRegex = /```(\w+)?\s*\n([\s\S]+?)\n```/g;
+    const closedMatches = Array.from(markdownContent.matchAll(closedCodeBlockRegex));
 
-    if (matches.length === 0) return null;
+    if (closedMatches.length > 0) {
+      // Prioritize blocks that have "export default"
+      const defaultExportBlock = closedMatches.find((m) => m[2] && m[2].includes('export default'));
+      if (defaultExportBlock) return defaultExportBlock[2].trim();
 
-    // 1. Prioritize blocks that have "export default"
-    const defaultExportBlock = matches.find((m) => m[2] && m[2].includes('export default'));
-    if (defaultExportBlock) return defaultExportBlock[2].trim();
+      // Prioritize tsx/jsx blocks
+      const tsxJsxBlock = closedMatches.find((m) => {
+        const lang = (m[1] || '').toLowerCase();
+        return ['tsx', 'jsx', 'ts', 'typescript'].includes(lang);
+      });
+      if (tsxJsxBlock) return tsxJsxBlock[2].trim();
 
-    // 2. Prioritize tsx/jsx blocks
-    const tsxJsxBlock = matches.find((m) => {
-      const lang = (m[1] || '').toLowerCase();
-      return ['tsx', 'jsx', 'ts', 'typescript'].includes(lang);
-    });
-    if (tsxJsxBlock) return tsxJsxBlock[2].trim();
+      // Fallback to the first non-empty block
+      for (const match of closedMatches) {
+        if (match[2] && match[2].trim() !== '') {
+          return match[2].trim();
+        }
+      }
+    }
 
-    // 3. Fallback to the first non-empty block
-    for (const match of matches) {
-      if (match[2] && match[2].trim() !== '') {
-        return match[2].trim();
+    // 2. If no closed blocks, try to find an open block (useful for streaming)
+    // This matches ```lang followed by content until the end of the string
+    const openCodeBlockRegex = /```(\w+)?\s*\n([\s\S]+?)$/;
+    const openMatch = markdownContent.match(openCodeBlockRegex);
+
+    if (openMatch) {
+      const lang = (openMatch[1] || '').toLowerCase();
+      const content = openMatch[2];
+
+      // Only extract if it looks like code we might want to preview
+      if (
+        ['tsx', 'jsx', 'ts', 'typescript'].includes(lang) ||
+        content.includes('export default') ||
+        content.includes('import ') ||
+        content.includes('<')
+      ) {
+        return content.trim();
       }
     }
 
@@ -539,7 +601,15 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   handleChatSubmit: async () => {
-    const { chatInput, chatImage, activeChatSession, extractComponentCode: extractCode } = get();
+    const {
+      chatInput,
+      chatImage,
+      activeChatSession,
+      extractComponentCode: extractCode,
+      isLoading,
+    } = get();
+    if (isLoading || (!chatInput.trim() && !chatImage)) return;
+
     const now = Date.now();
     const userMessageId = `user-${now}`;
     const modelMessageId = `model-${now + 1}`;
@@ -558,7 +628,14 @@ export const useAppStore = create<AppState>((set, get) => ({
     }));
     const currentInput = chatInput;
     const currentImage = chatImage;
-    set({ chatInput: '', chatImage: null, isLoading: true, chatError: null });
+    const controller = new AbortController();
+    set({
+      chatInput: '',
+      chatImage: null,
+      isLoading: true,
+      chatError: null,
+      abortController: controller,
+    });
 
     set((state: AppState) => ({
       chatMessages: [
@@ -579,6 +656,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       const stream = await sendMessageToChatStream(activeChatSession, currentInput, currentImage);
       let currentModelContent = '';
       for await (const chunk of stream) {
+        if (controller.signal.aborted) break;
         const chunkText = chunk.text;
         const finishReason = chunk.candidates?.[0]?.finishReason;
         const safetyRatings = chunk.candidates?.[0]?.safetyRatings;
@@ -622,32 +700,42 @@ export const useAppStore = create<AppState>((set, get) => ({
         }
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-      set({ chatError: `Chat error: ${errorMessage}` });
-      console.error('Chat submit error:', err);
-      set((state: AppState) => ({
-        chatMessages: updateChatMessageById(state.chatMessages, modelMessageId, {
-          content: `*(Error: ${errorMessage})*`,
-          componentCode: null,
-        }),
-      }));
+      if (controller.signal.aborted) {
+        // Log locally if needed, but avoid no-console warning if possible or use allowed methods
+        // console.log('Chat generation aborted');
+      } else {
+        const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+        set({ chatError: `Chat error: ${errorMessage}` });
+        console.error('Chat submit error:', err);
+        set((state: AppState) => ({
+          chatMessages: updateChatMessageById(state.chatMessages, modelMessageId, {
+            content: `*(Error: ${errorMessage})*`,
+            componentCode: null,
+          }),
+        }));
+      }
     } finally {
-      set({ isLoading: false });
+      set({ isLoading: false, abortController: null });
     }
   },
 
   handleNewChat: () => {
+    const { initializeChatSession, isLoading } = get();
+    if (isLoading) return;
+
     set({
       chatMessages: [],
       activeChatSession: null,
       chatError: null,
       activeSavedChatSessionId: null,
     });
-    get().initializeChatSession();
+    initializeChatSession();
   },
 
   handleRetryChat: async () => {
-    const { chatMessages, activeChatSession, extractComponentCode: extractCode } = get();
+    const { chatMessages, activeChatSession, extractComponentCode: extractCode, isLoading } = get();
+    if (isLoading) return;
+
     const lastUserMessage = chatMessages.findLast((msg) => msg.role === 'user');
 
     if (!lastUserMessage) {
@@ -655,16 +743,27 @@ export const useAppStore = create<AppState>((set, get) => ({
       return;
     }
 
-    set((state: AppState) => ({
-      chatMessages: state.chatMessages.filter(
-        (msg: ChatMessage) => msg.id !== state.chatMessages[state.chatMessages.length - 1]?.id,
-      ),
-    }));
-
-    set({ isLoading: true, chatError: null });
+    // Remove the last model message if it exists
+    set((state: AppState) => {
+      const lastMsg = state.chatMessages[state.chatMessages.length - 1];
+      if (lastMsg && lastMsg.role === 'model') {
+        return {
+          chatMessages: state.chatMessages.slice(0, -1),
+        };
+      }
+      return state;
+    });
 
     const now = Date.now();
     const modelMessageId = `model-${now}`;
+    const controller = new AbortController();
+
+    set({
+      isLoading: true,
+      chatError: null,
+      abortController: controller,
+    });
+
     set((state: AppState) => ({
       chatMessages: [
         ...state.chatMessages,
@@ -684,11 +783,12 @@ export const useAppStore = create<AppState>((set, get) => ({
       const stream = await sendMessageToChatStream(
         activeChatSession,
         lastUserMessage.content,
-        null, // imageContent
+        lastUserMessage.imageContent, // Pass the original image content if any
         true, // useFallback
       );
       let currentModelContent = '';
       for await (const chunk of stream) {
+        if (controller.signal.aborted) break;
         const chunkText = chunk.text;
         const finishReason = chunk.candidates?.[0]?.finishReason;
         const safetyRatings = chunk.candidates?.[0]?.safetyRatings;
@@ -732,17 +832,21 @@ export const useAppStore = create<AppState>((set, get) => ({
         }
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-      set({ chatError: `Retry chat error: ${errorMessage}` });
-      console.error('Retry chat submit error:', err);
-      set((state: AppState) => ({
-        chatMessages: updateChatMessageById(state.chatMessages, modelMessageId, {
-          content: `*(Error: ${errorMessage})*`,
-          componentCode: null,
-        }),
-      }));
+      if (controller.signal.aborted) {
+        // console.log('Retry chat generation aborted');
+      } else {
+        const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+        set({ chatError: `Retry chat error: ${errorMessage}` });
+        console.error('Retry chat submit error:', err);
+        set((state: AppState) => ({
+          chatMessages: updateChatMessageById(state.chatMessages, modelMessageId, {
+            content: `*(Error: ${errorMessage})*`,
+            componentCode: null,
+          }),
+        }));
+      }
     } finally {
-      set({ isLoading: false });
+      set({ isLoading: false, abortController: null });
     }
   },
 
@@ -757,6 +861,14 @@ export const useAppStore = create<AppState>((set, get) => ({
         console.error('Failed to copy chat message: ', err);
         set({ chatError: 'Failed to copy message to clipboard.' });
       });
+  },
+
+  stopGeneration: () => {
+    const { abortController } = get();
+    if (abortController) {
+      abortController.abort();
+      set({ abortController: null, isLoading: false });
+    }
   },
 
   handleTogglePreview: (messageId: string) => {

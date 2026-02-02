@@ -7,7 +7,10 @@
  * If the input is not a data URL, it assumes it's raw base64 data and defaults to image/jpeg.
  */
 export const parseBase64 = (base64String: string): { mimeType: string; data: string } => {
-  const match = base64String.match(/^data:(image\/[a-zA-Z]+);base64,(.+)$/);
+  if (!base64String) {
+    return { mimeType: 'image/jpeg', data: '' };
+  }
+  const match = base64String.match(/^data:([^;]+);base64,(.+)$/);
   if (match) {
     return { mimeType: match[1], data: match[2] };
   }

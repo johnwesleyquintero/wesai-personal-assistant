@@ -13,16 +13,15 @@ export function generateKnowledgeContext(sessions: SavedChatSession[]): string {
   }
 
   const contextParts: string[] = [];
-  const MAX_CONTEXT_LENGTH = 1500; // Define a reasonable maximum length for the context string
+  const MAX_CONTEXT_LENGTH = 4000; // Increased context length for better historical awareness
 
   // Sort sessions by timestamp (newest first) to prioritize more recent information
   const sortedSessions = [...sessions].sort((a, b) => b.timestamp - a.timestamp);
 
   for (const session of sortedSessions) {
-    // For each session, take a few recent messages to include in the context
-    // We'll take up to the last 4 messages, alternating user/model if possible
+    // For each session, take up to 6 recent messages to include in the context
     const recentMessages: ChatMessage[] = [];
-    for (let i = session.messages.length - 1; i >= 0 && recentMessages.length < 4; i--) {
+    for (let i = session.messages.length - 1; i >= 0 && recentMessages.length < 6; i--) {
       recentMessages.unshift(session.messages[i]);
     }
 

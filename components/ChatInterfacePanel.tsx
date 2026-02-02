@@ -15,15 +15,11 @@ import { useChatLogic } from '../hooks/useChatLogic.ts';
 import { useIsMobile } from '../hooks/useMediaQuery.ts';
 import { ChatMessageItem } from './ChatMessageItem.tsx';
 import { SavedSessionsList } from './SavedSessionsList.tsx';
+import { toast } from '../utils/toast.ts';
 import type { ChatMessage } from '../types.ts';
 
-const LoadingSpinner = () => (
-  <div className="flex space-x-1">
-    <div className="w-1.5 h-1.5 bg-current rounded-full animate-bounce [animation-delay:-0.3s]" />
-    <div className="w-1.5 h-1.5 bg-current rounded-full animate-bounce [animation-delay:-0.15s]" />
-    <div className="w-1.5 h-1.5 bg-current rounded-full animate-bounce" />
-  </div>
-);
+const MAX_IMAGE_SIZE = 4 * 1024 * 1024; // 4MB
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];
 
 const TextSkeleton = ({ lines = 3 }: { lines?: number }) => (
   <div className="space-y-2 animate-pulse w-full">
@@ -45,13 +41,17 @@ export const ChatInterfacePanel: React.FC = memo(() => {
     activeChatSession,
     activeApiKey,
     activeSavedChatSessionId,
+    copiedMessageId,
     isLoading,
     handleChatInputChange: onChatInputChange,
     handleClearChatInput: onClearChatInput,
     handleChatSubmit: onChatSubmit,
     setChatImage: onChatImageChange,
     handleNewChat: onClearChat,
+    handleCopyChatMessage: onCopyChatMessage,
     handleTogglePreview: onTogglePreview,
+    handleRetryChat: onRetryChat,
+    stopGeneration,
     sendOnEnter,
     savedChatSessions,
     saveChatSession: onSaveChatSession,
@@ -72,30 +72,62 @@ export const ChatInterfacePanel: React.FC = memo(() => {
   const [exportFormat, setExportFormat] = useState<'markdown' | 'json' | 'txt'>('markdown');
   const [saveName, setSaveName] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const [isConversationCopied, setIsConversationCopied] = useState(false);
+
+  const [showScrollBottom, setShowScrollBottom] = useState(false);
 
   const isMobile = useIsMobile();
   const chatMessagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesAreaRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const scrollToBottom = useCallback(() => {
-    chatMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  const scrollToBottom = useCallback((behavior: ScrollBehavior = 'smooth') => {
+    chatMessagesEndRef.current?.scrollIntoView({ behavior });
+  }, []);
+
+  const handleScroll = useCallback(() => {
+    if (!messagesAreaRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = messagesAreaRef.current;
+    const isAtBottom = scrollHeight - scrollTop - clientHeight < 100;
+    setShowScrollBottom(!isAtBottom);
   }, []);
 
   useEffect(() => {
     scrollToBottom();
   }, [chatMessages, isLoading, scrollToBottom]);
 
+  // Find the last user message ID to pass to ChatMessageItem
+  const lastUserMessageId = useMemo(() => {
+    const userMessages = chatMessages.filter((m) => m.role === 'user');
+    return userMessages.length > 0 ? userMessages[userMessages.length - 1].id : null;
+  }, [chatMessages]);
+
+  const validateImage = (file: File): boolean => {
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      toast.error(
+        'Invalid image type',
+        `Supported types: ${ALLOWED_IMAGE_TYPES.map((t) => t.split('/')[1]).join(', ')}`,
+      );
+      return false;
+    }
+    if (file.size > MAX_IMAGE_SIZE) {
+      toast.error('Image too large', 'Maximum size is 4MB');
+      return false;
+    }
+    return true;
+  };
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
+    if (file && validateImage(file)) {
       const reader = new FileReader();
       reader.onloadend = () => {
         onChatImageChange(reader.result as string);
       };
       reader.readAsDataURL(file);
     }
+    // Reset input value so same file can be selected again
+    e.target.value = '';
   };
 
   const handlePaste = (e: React.ClipboardEvent) => {
@@ -103,7 +135,7 @@ export const ChatInterfacePanel: React.FC = memo(() => {
     for (let i = 0; i < items.length; i++) {
       if (items[i].type.indexOf('image') !== -1) {
         const blob = items[i].getAsFile();
-        if (blob) {
+        if (blob && validateImage(blob)) {
           const reader = new FileReader();
           reader.onloadend = () => {
             onChatImageChange(reader.result as string);
@@ -112,12 +144,6 @@ export const ChatInterfacePanel: React.FC = memo(() => {
         }
       }
     }
-  };
-
-  const onCopyChatMessage = (content: string, messageId: string) => {
-    navigator.clipboard.writeText(content);
-    setCopiedMessageId(messageId);
-    setTimeout(() => setCopiedMessageId(null), 2000);
   };
 
   const handleCopyConversation = () => {
@@ -315,7 +341,11 @@ export const ChatInterfacePanel: React.FC = memo(() => {
       </header>
 
       {/* Messages Area */}
-      <div className="flex-grow overflow-y-auto p-4 space-y-6 custom-scrollbar bg-app-main/50">
+      <div
+        ref={messagesAreaRef}
+        onScroll={handleScroll}
+        className="flex-grow overflow-y-auto p-4 space-y-6 custom-scrollbar bg-app-main/50 relative"
+      >
         {chatMessages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center max-w-sm mx-auto animate-in fade-in zoom-in-95 duration-700">
             <div className="relative mb-8">
@@ -332,17 +362,25 @@ export const ChatInterfacePanel: React.FC = memo(() => {
               building something amazing.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-2">
-              {['Build a React button', 'Explain recursion', 'Create a login form'].map(
-                (hint: string) => (
-                  <button
-                    key={hint}
-                    onClick={() => onChatInputChange(hint)}
-                    className="px-4 py-2 bg-app-tertiary hover:bg-app-border text-app-text text-xs font-bold rounded-xl transition-all border border-app-border hover:border-app-accent/30 active:scale-95"
-                  >
-                    {hint}
-                  </button>
-                ),
-              )}
+              {[
+                { label: 'Build a React button', hint: 'Build a modern React button component' },
+                {
+                  label: 'Explain recursion',
+                  hint: 'Explain the concept of recursion with examples',
+                },
+                {
+                  label: 'Create a login form',
+                  hint: 'Create a responsive login form with Tailwind CSS',
+                },
+              ].map((item) => (
+                <button
+                  key={item.label}
+                  onClick={() => onChatInputChange(item.hint)}
+                  className="px-4 py-2 bg-app-tertiary hover:bg-app-border text-app-text text-xs font-bold rounded-xl transition-all border border-app-border hover:border-app-accent/30 active:scale-95"
+                >
+                  {item.label}
+                </button>
+              ))}
             </div>
           </div>
         ) : searchTerm.trim() && filteredMessages.length === 0 ? (
@@ -368,6 +406,8 @@ export const ChatInterfacePanel: React.FC = memo(() => {
               copiedMessageId={copiedMessageId}
               onTogglePreview={onTogglePreview}
               onCopyChatMessage={onCopyChatMessage}
+              onRetryChat={onRetryChat}
+              isLastUserMessage={msg.id === lastUserMessageId}
             />
           ))
         )}
@@ -384,6 +424,16 @@ export const ChatInterfacePanel: React.FC = memo(() => {
               <TextSkeleton lines={3} />
             </div>
           </div>
+        )}
+
+        {showScrollBottom && (
+          <button
+            onClick={() => scrollToBottom()}
+            className="fixed bottom-32 right-8 p-3 bg-app-accent text-white rounded-full shadow-2xl shadow-app-accent/40 hover:scale-110 active:scale-95 transition-all z-20 animate-in fade-in zoom-in"
+            title="Scroll to bottom"
+          >
+            <FaPlus className="w-4 h-4 rotate-180" />
+          </button>
         )}
 
         <div ref={chatMessagesEndRef} />
@@ -476,26 +526,30 @@ export const ChatInterfacePanel: React.FC = memo(() => {
                 </button>
               )}
 
-              <button
-                type="submit"
-                disabled={
-                  isLoading ||
-                  !isApiKeyConfigured ||
-                  !isChatSessionActive ||
-                  (!chatInput.trim() && !chatImage)
-                }
-                className={`${isMobile ? 'p-2.5' : 'p-3'} rounded-xl transition-all flex items-center justify-center ${
-                  (!chatInput.trim() && !chatImage) || isLoading
-                    ? 'bg-app-tertiary text-app-muted'
-                    : 'bg-app-accent text-white shadow-lg shadow-app-accent/30 hover:opacity-90 active:scale-95'
-                }`}
-              >
-                {isLoading ? (
-                  <LoadingSpinner />
-                ) : (
+              {isLoading ? (
+                <button
+                  type="button"
+                  onClick={stopGeneration}
+                  className={`${isMobile ? 'p-2.5' : 'p-3'} bg-red-500 text-white rounded-xl shadow-lg shadow-red-500/30 hover:bg-red-600 transition-all animate-pulse active:scale-95 flex items-center justify-center`}
+                  title="Stop generation"
+                >
+                  <FaXmark className={`${isMobile ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  disabled={
+                    !isApiKeyConfigured || !isChatSessionActive || (!chatInput.trim() && !chatImage)
+                  }
+                  className={`${isMobile ? 'p-2.5' : 'p-3'} rounded-xl transition-all flex items-center justify-center ${
+                    !chatInput.trim() && !chatImage
+                      ? 'bg-app-tertiary text-app-muted'
+                      : 'bg-app-accent text-white shadow-lg shadow-app-accent/30 hover:opacity-90 active:scale-95'
+                  }`}
+                >
                   <FaPaperPlane className={`${isMobile ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />
-                )}
-              </button>
+                </button>
+              )}
             </div>
           </div>
           <p className="mt-2 text-[10px] text-center text-app-muted font-medium uppercase tracking-widest">

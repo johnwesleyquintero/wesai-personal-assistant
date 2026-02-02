@@ -258,16 +258,16 @@ export const ReactPreviewRenderer: React.FC<ReactPreviewRendererProps> = ({
       message = caughtError.message;
       stack = caughtError.stack ?? null;
       debugCode = caughtError.transpiledCode ?? null;
-      message = `Execution Error in Sandbox: ${message}`;
+      message = `Sandbox Error: ${message}`;
     } else if (caughtError instanceof Error) {
       message = caughtError.message;
       stack = caughtError.stack;
       debugCode = transpiledCodeForDebug; // Use parent's transpiled code for main thread errors
       // Check if it's likely a transpilation error based on message
-      if (message.includes('Babel')) {
+      if (message.includes('Babel') || message.includes('Worker')) {
         message = `Transpilation Error: ${message}`;
       } else {
-        message = `Execution Error: ${message}`;
+        message = `Runtime Error: ${message}`;
       }
     } else if (typeof caughtError === 'string') {
       message = caughtError;
@@ -281,27 +281,87 @@ export const ReactPreviewRenderer: React.FC<ReactPreviewRendererProps> = ({
     }
 
     return (
-      <div className="p-3 text-sm text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/40 rounded border border-red-300 dark:border-red-600">
-        <strong className="font-semibold">Component Preview Error:</strong>
-        <pre className="mt-1 text-xs whitespace-pre-wrap">{message}</pre>
+      <div className="p-4 text-sm text-red-600 dark:text-red-400 bg-red-50/50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800/50 backdrop-blur-sm animate-in fade-in slide-in-from-top-2 duration-300">
+        <div className="flex items-start gap-3">
+          <div className="mt-0.5 p-1.5 bg-red-100 dark:bg-red-900/40 rounded-lg text-red-600 dark:text-red-400">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+          </div>
+          <div className="flex-1 min-w-0">
+            <h4 className="font-bold text-red-700 dark:text-red-300 mb-1">Preview Error</h4>
+            <p className="font-mono text-[11px] leading-relaxed break-words opacity-90">
+              {message}
+            </p>
+          </div>
+        </div>
+
         {stack && (
-          <details className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-            <summary>Stack Trace</summary>
-            <pre className="mt-1 whitespace-pre-wrap break-all">{stack}</pre>
+          <details className="mt-3 group">
+            <summary className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-red-500/70 hover:text-red-500 cursor-pointer select-none transition-colors">
+              <span className="group-open:rotate-90 transition-transform">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="10"
+                  height="10"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </span>
+              View Stack Trace
+            </summary>
+            <div className="mt-2 p-2 bg-red-100/30 dark:bg-black/30 rounded-lg border border-red-200/50 dark:border-red-800/30">
+              <pre className="text-[10px] font-mono leading-tight whitespace-pre-wrap break-all opacity-80 max-h-40 overflow-auto custom-scrollbar">
+                {stack}
+              </pre>
+            </div>
           </details>
         )}
+
         {(debugCode || transpiledCodeForDebug) && (
-          <details className="mt-3 pt-3 border-t border-red-300 dark:border-red-600">
-            <summary className="font-semibold">Transpiled Code (for debug)</summary>
-            <pre className="mt-1 text-xs whitespace-pre-wrap break-all bg-red-50 dark:bg-red-900/20 p-2 rounded">
-              {debugCode || transpiledCodeForDebug}
-            </pre>
+          <details className="mt-2 group">
+            <summary className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-red-500/70 hover:text-red-500 cursor-pointer select-none transition-colors">
+              <span className="group-open:rotate-90 transition-transform">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="10"
+                  height="10"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </span>
+              View Debug Code
+            </summary>
+            <div className="mt-2 p-2 bg-red-100/30 dark:bg-black/30 rounded-lg border border-red-200/50 dark:border-red-800/30">
+              <pre className="text-[10px] font-mono leading-tight whitespace-pre-wrap break-all opacity-80 max-h-60 overflow-auto custom-scrollbar">
+                {debugCode || transpiledCodeForDebug}
+              </pre>
+            </div>
           </details>
-        )}
-        {!stack && !(debugCode || transpiledCodeForDebug) && (
-          <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-            Check the browser console for more details.
-          </p>
         )}
       </div>
     );

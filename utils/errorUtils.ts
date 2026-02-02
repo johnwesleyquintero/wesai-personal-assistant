@@ -41,6 +41,7 @@ export const classifyError = (error: unknown): ErrorClassification => {
     message.includes('rate') ||
     message.includes('429') ||
     message.includes('busy') ||
+    message.includes('quota') ||
     message.includes('503');
 
   const isAuthIssue =

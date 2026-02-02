@@ -18,6 +18,7 @@ export const useChatLogic = () => {
   const handleRetryChat = useAppStore((state) => state.handleRetryChat);
   const handleCopyChatMessage = useAppStore((state) => state.handleCopyChatMessage);
   const handleTogglePreview = useAppStore((state) => state.handleTogglePreview);
+  const stopGeneration = useAppStore((state) => state.stopGeneration);
   const sendOnEnter = useAppStore((state) => state.sendOnEnter);
   const savedChatSessions = useAppStore((state) => state.savedChatSessions);
   const initializeSavedChatSessions = useAppStore((state) => state.initializeSavedChatSessions);
@@ -47,6 +48,7 @@ export const useChatLogic = () => {
     handleRetryChat,
     handleCopyChatMessage,
     handleTogglePreview,
+    stopGeneration,
     sendOnEnter,
     savedChatSessions,
     initializeSavedChatSessions,

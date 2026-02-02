@@ -370,6 +370,9 @@ export const sendMessageToChatStream = async (
     const parts: Part[] = [{ text: message }];
     if (imageContent) {
       const { mimeType, data } = parseBase64(imageContent);
+      if (!mimeType.startsWith('image/')) {
+        throw new Error(`Unsupported media type: ${mimeType}`);
+      }
       parts.push({
         inlineData: {
           mimeType,

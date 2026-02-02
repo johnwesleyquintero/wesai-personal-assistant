@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { FaCode, FaEye, FaDownload, FaCopy, FaCheck } from 'react-icons/fa6';
+import { FaCode, FaEye, FaDownload, FaCopy, FaCheck, FaRotateRight } from 'react-icons/fa6';
 import { ReactPreviewRenderer } from './ReactPreviewRenderer.tsx';
 import { markdownComponents } from './MarkdownCodeRenderer.tsx';
 import type { ChatMessage } from '../types.ts';
@@ -12,10 +12,19 @@ interface ChatMessageItemProps {
   copiedMessageId: string | null;
   onTogglePreview: (messageId: string) => void;
   onCopyChatMessage: (content: string, messageId: string) => void;
+  onRetryChat?: () => void;
+  isLastUserMessage?: boolean;
 }
 
 export const ChatMessageItem: React.FC<ChatMessageItemProps> = memo(
-  ({ msg, copiedMessageId, onTogglePreview, onCopyChatMessage }) => {
+  ({
+    msg,
+    copiedMessageId,
+    onTogglePreview,
+    onCopyChatMessage,
+    onRetryChat,
+    isLastUserMessage,
+  }) => {
     const isUser = msg.role === 'user';
 
     return (
@@ -47,6 +56,19 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = memo(
               : 'bg-app-secondary text-app-text shadow-sm border border-app-border rounded-tl-none hover:shadow-md'
           }`}
         >
+          {/* Action Buttons for User Messages */}
+          {isUser && isLastUserMessage && onRetryChat && (
+            <div className="absolute top-2 right-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                onClick={onRetryChat}
+                title="Retry response"
+                className="p-2 bg-app-tertiary/90 backdrop-blur-sm text-app-muted hover:text-app-accent rounded-xl shadow-sm border border-app-border transition-all active:scale-95"
+              >
+                <FaRotateRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+
           {msg.role === 'model' && msg.componentCode && (
             <div className="flex items-center gap-1.5 mb-3 p-1.5 bg-app-tertiary/50 rounded-2xl border border-app-border w-fit ml-auto">
               <button
