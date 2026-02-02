@@ -2,16 +2,7 @@ import type { ReactNode } from 'react';
 import React, { useState, useEffect, useId, useRef } from 'react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-
-// Declare `Worker` for TypeScript without needing a separate .d.ts file if targeting older TS versions
-// Declare `Worker` for TypeScript without needing a separate .d.ts file if targeting older TS versions
-// If you are targeting ES6/ES2015 lib in tsconfig, Worker might already be declared.
-// Otherwise, you might need to declare it explicitly for the global scope if not using 'webworker' lib.
-// declare global {
-//   interface Window {
-//     Worker: typeof Worker;
-//   }
-// }
+import BabelWorker from '../babel-worker.ts?worker';
 
 // Simple Error Boundary component to catch rendering errors within the preview
 class PreviewErrorBoundary extends React.Component<
@@ -145,10 +136,9 @@ export const ReactPreviewRenderer: React.FC<ReactPreviewRendererProps> = ({
       return;
     }
 
-    // Create a new Web Worker instance
-    // It's important to use a bundler-friendly way to reference the worker file,
-    // or ensure 'babel-worker.ts' is directly accessible as 'babel-worker.js' at runtime.
-    const worker = new Worker('babel-worker.ts');
+    // Create a new Web Worker instance using Vite's ?worker import.
+    // This ensures Vite transpiles and bundles the worker correctly.
+    const worker = new BabelWorker();
 
     worker.onmessage = (event: MessageEvent<BabelWorkerResponse>) => {
       const { type, transpiledCode, error } = event.data;
@@ -418,7 +408,7 @@ export const ReactPreviewRenderer: React.FC<ReactPreviewRendererProps> = ({
         />
         <iframe
           ref={iframeRef}
-          src="./preview-iframe.html"
+          src="/preview-iframe.html"
           title="React Code Preview Sandbox"
           className="w-full h-full border-none hidden"
           sandbox="allow-scripts allow-forms allow-modals allow-popups allow-presentation allow-same-origin"

@@ -8,13 +8,18 @@ interface BabelStandalone {
 }
 
 // Import Babel standalone library into the worker's global scope
-declare function importScripts(...urls: string[]): void;
-importScripts('https://unpkg.com/@babel/standalone/babel.min.js');
+try {
+  // @ts-ignore
+  importScripts('https://unpkg.com/@babel/standalone/babel.min.js');
+} catch (e) {
+  console.error('Worker: Failed to load Babel standalone via importScripts', e);
+}
 
 // This is the main message handler for the Web Worker
 self.onmessage = (event: MessageEvent) => {
   // Babel should now be available globally after importScripts
-  const Babel = (self as unknown as { Babel: BabelStandalone }).Babel;
+  // @ts-ignore
+  const Babel = self.Babel;
   // The check for Babel's presence might still be good for robustness,
   // though importScripts should ensure it's loaded.
   if (!Babel) {
